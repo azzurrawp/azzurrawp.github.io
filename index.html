@@ -230,7 +230,7 @@ function publish(manual){
   var pay={matches:DB.matches.filter(function(m){return m.log.length||m.sent}),at:Date.now()},H={Authorization:'Bearer '+DB.gh,Accept:'application/vnd.github+json'};
   encrypt(pay,DB.pin).then(function(enc){
     return fetch(API+'?t='+Date.now(),{headers:H,cache:'no-store'}).then(function(r){return r.status==404?{}:r.json()}).then(function(cur){
-      var body={message:'Statistiche aggiornate '+new Date().toLocaleString('it-IT'),content:btoa(JSON.stringify(enc))};if(cur.sha)body.sha=cur.sha;
+      var who={name:'Azzurra WP',email:'azzurrawp@users.noreply.github.com'},body={message:'Statistiche aggiornate '+new Date().toLocaleString('it-IT'),content:btoa(JSON.stringify(enc)),author:who,committer:who};if(cur.sha)body.sha=cur.sha;
       return fetch(API,{method:'PUT',headers:H,body:JSON.stringify(body)})})
   }).then(function(r){busy=false;if(!r.ok)throw r.status;
     DB.matches.forEach(function(m){if((m.log.length||m.sent)&&!m.remote)m.sent=stamp[m.id]});persist();if(home.style.display!='none')renderHome();toast('Statistiche pubblicate ✓')})
