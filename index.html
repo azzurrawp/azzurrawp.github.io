@@ -98,6 +98,10 @@ body.ro #g .nm input,body.ro #opp{pointer-events:none}
 body.ro #rob{display:inline-block}
 #home2{background:#455a64!important;font-size:22px!important}
 #top{gap:6px!important}#top button{padding:0 10px!important}#last{flex:1 1 0;min-width:0}#top input{width:110px}
+body.pend-g #g .c:not([data-f="g"]),body.pend-gu #g .c:not([data-f="gu"]){opacity:.25}
+body.pend-g #g .c[data-f="g"],body.pend-gu #g .c[data-f="gu"]{box-shadow:inset 0 0 0 3px #ffd600;background:#fffde7!important}
+#g .c.pend{background:#ffd600!important;opacity:1!important}
+body.pend-g #last,body.pend-gu #last{color:#ffd600;font-weight:700;opacity:1}
 </style>
 </head>
 <body>
@@ -201,7 +205,10 @@ function syncDistinte(ask){if(!window.crypto||!crypto.subtle)return Promise.reso
   return fetch('distinte.enc?t='+Date.now(),{cache:'no-store'}).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(o){
     if(!DB.pin){if(!ask)return;var p=prompt('Codice squadra (si inserisce una sola volta):');if(!p)return;DB.pin=p.trim()}
     if(DB.encv===o.data&&!ask)return;
-    return decrypt(o,DB.pin).then(function(d){var r=merge(d.matches||[]);DB.encv=o.data;persist();renderHome();fetchStats();publish(false);
+    return decrypt(o,DB.pin).then(function(d){
+      DB.rdone=DB.rdone||{};(d.resets||[]).forEach(function(x){var m=byId(x.id),k=x.id+'@'+x.at;if(!m||DB.rdone[k])return;DB.rdone[k]=1;
+        if((m.upd||0)<x.at&&m.log.length){F.concat(['x']).forEach(function(f){m[f]=z()});m.og=0;m.ogu=0;m.log=[];m.per=1;m.done=false;m.upd=Date.now();if(S&&S.id==m.id)all()}});
+      var r=merge(d.matches||[]);DB.encv=o.data;persist();renderHome();fetchStats();publish(false);
       if(r[0]||ask)toast('Distinte aggiornate: '+r[0]+' nuove, '+r[1]+' controllate')},
       function(){DB.pin='';persist();toast('Codice squadra errato');if(ask)setTimeout(function(){syncDistinte(true)},800)})
   }).catch(function(){})}
@@ -370,28 +377,47 @@ function fb(f,i,sign){beep(f,sign);
   if(f!='x'){var rw=[document.getElementById('n'+i),document.getElementById('m'+i)];F.forEach(function(k){if(k!=f)rw.push(document.getElementById(k+i))});
    rw.forEach(function(x){x.classList.add('rowfl')});setTimeout(function(){rw.forEach(function(x){x.classList.remove('rowfl')})},250)}
   if(f!='x'){if(lastRow)lastRow.classList.remove('last');lastRow=document.getElementById('n'+i);lastRow.classList.add('last')}}
+// assist -> gol: l'assist resta "in attesa" finché non si tocca il marcatore (stesso tipo, giocatore diverso)
+var PEND=null,GOALOF={a:'g',au:'gu'};
+function pendUI(){var b=document.body;b.classList.remove('pend-g','pend-gu');[].forEach.call(document.querySelectorAll('#g .pend'),function(x){x.classList.remove('pend')});
+  var u=document.getElementById('undo');
+  if(PEND){b.classList.add('pend-'+GOALOF[PEND.f]);document.getElementById(PEND.f+PEND.i).classList.add('pend');u.textContent='✕ Annulla assist';
+    document.getElementById('last').textContent='Assist di '+nm(PEND.i)+(PEND.f=='au'?' (uomo +)':'')+': tocca chi ha segnato in '+(PEND.f=='au'?'GOL uomo +':'GOL')}
+  else u.textContent='↶ Annulla'}
+function nm(i){return (i+1)+' '+(S.names[i]||'')}
+function rec(f,i,link){if(f=='og'||f=='ogu')S[f]++;else{S[f][i]++;cell(f,i)}var e=[f,i,S.per,Date.now()];if(link)e.push(link);S.log.push(e)}
 function add(f,i){if(S.done)return;
+  if(PEND){
+    if(f!==GOALOF[PEND.f]){toast('Prima tocca il marcatore in '+(PEND.f=='au'?'GOL uomo +':'GOL')+' (oppure Annulla assist)');beep('e',-1);return}
+    if(i===PEND.i){toast('Il marcatore deve essere diverso da chi ha fatto l\'assist');beep('e',-1);return}
+    var L=Date.now();rec(PEND.f,PEND.i,L);rec(f,i,L);var pa=PEND;PEND=null;pendUI();totals();save();fb(f,i,1);
+    document.getElementById('last').textContent='✓ Gol di '+nm(i)+' · assist '+nm(pa.i)+' · '+S.per+'T';return}
+  if(f=='a'||f=='au'){if(S.e[i]>=3){toast('Calotta '+(i+1)+': è fuori per 3 falli');return}
+    PEND={f:f,i:i};beep('a',1);pendUI();return}
   if((f=='e'||f=='x')&&S[f][i]>=3){beep('e',-1);toast((f=='x'?'Avversario cal. ':'Calotta ')+(i+1)+': già 3 falli personali, è fuori');return}
-  if(f=='og'||f=='ogu')S[f]++;else{S[f][i]++;cell(f,i)}
-  S.log.push([f,i,S.per,Date.now()]);if(S.e[i]==3&&f=='e')toast('Calotta '+(i+1)+' – 3 falli personali: fuori');
+  rec(f,i);if(S.e[i]==3&&f=='e')toast('Calotta '+(i+1)+' – 3 falli personali: fuori');
   totals();save();fb(f,i,1)}
-function remove(f,i){if(S.done)return;
-  for(var k=S.log.length-1;k>=0;k--){var e=S.log[k];if(e[0]==f&&e[1]==i){S.log.splice(k,1);break}}
-  if(f=='og'||f=='ogu')S[f]=Math.max(0,S[f]-1);else{S[f][i]=Math.max(0,S[f][i]-1);cell(f,i)}
-  totals();save();fb(f,i,-1)}
+function unrec(k){var e=S.log[k];S.log.splice(k,1);var f=e[0],i=e[1];if(f=='og'||f=='ogu')S[f]=Math.max(0,S[f]-1);else{S[f][i]=Math.max(0,S[f][i]-1);cell(f,i)}return e}
+function remove(f,i){if(S.done||PEND)return;var k;
+  for(k=S.log.length-1;k>=0;k--){var e=S.log[k];if(e[0]==f&&e[1]==i)break}
+  if(k<0){if(f=='og'||f=='ogu'){if(S[f]>0)S[f]--}else if(S[f][i]>0){S[f][i]--;cell(f,i)}totals();save();fb(f,i,-1);return}
+  var e=unrec(k),extra='';
+  if(e[4]){for(var j=S.log.length-1;j>=0;j--){if(S.log[j][4]===e[4]){
+    if(f=='g'||f=='gu'){var a=unrec(j);extra=' e assist '+nm(a[1])}else{S.log[j].length=4}break}}}
+  totals();save();fb(f,i,-1);if(extra)setTimeout(function(){toast('Tolto il gol'+extra)},50)}
 var lastPen=0;
 ['pointermove','pointerdown'].forEach(function(t){document.addEventListener(t,function(e){if(e.pointerType=='pen')lastPen=Date.now()},true)});
 function palm(e){return e.pointerType=='touch'&&Date.now()-lastPen<1500}
 var lp=null,lpDone=false;
-g.addEventListener('pointerdown',function(ev){var c=ev.target.closest('.c');if(!c||palm(ev)||S.done)return;lpDone=false;
+g.addEventListener('pointerdown',function(ev){var c=ev.target.closest('.c');if(!c||palm(ev)||S.done||PEND)return;lpDone=false;
   lp=setTimeout(function(){lpDone=true;var f=c.dataset.f,i=+c.dataset.i;if(S[f][i]>0){remove(f,i);toast('−1 '+LBL[f]+' cal. '+(i+1))}},600)});
 function cancel(){clearTimeout(lp)}
 g.addEventListener('pointerleave',cancel);g.addEventListener('pointercancel',cancel);
 g.addEventListener('pointerup',function(ev){cancel();var c=ev.target.closest('.c');if(!c||lpDone||palm(ev))return;add(c.dataset.f,+c.dataset.i)});
 g.addEventListener('contextmenu',function(e){e.preventDefault()});
-document.querySelector('.og').addEventListener('click',function(e){var b=e.target.closest('button');if(b)add(b.dataset.og=='p'?'og':'ogu',-1)});
-var pers=document.querySelectorAll('.per');for(var j=0;j<pers.length;j++)pers[j].addEventListener('click',function(){var np=+this.dataset.p;if(np>S.per&&S.log.length)backup('fine'+S.per+'T');S.per=np;totals();save()});
-document.getElementById('undo').addEventListener('click',function(){var e=S.log[S.log.length-1];if(!e){toast('Niente da annullare');return}
+document.querySelector('.og').addEventListener('click',function(e){var b=e.target.closest('button');if(b&&PEND){toast('Prima tocca il marcatore (oppure Annulla assist)');return}if(b)add(b.dataset.og=='p'?'og':'ogu',-1)});
+var pers=document.querySelectorAll('.per');for(var j=0;j<pers.length;j++)pers[j].addEventListener('click',function(){if(PEND){toast('Prima tocca il marcatore (oppure Annulla assist)');return}var np=+this.dataset.p;if(np>S.per&&S.log.length)backup('fine'+S.per+'T');S.per=np;totals();save()});
+document.getElementById('undo').addEventListener('click',function(){if(PEND){PEND=null;pendUI();document.getElementById('last').textContent='Assist annullato';return}var e=S.log[S.log.length-1];if(!e){toast('Niente da annullare');return}
   remove(e[0],e[1]);toast('Annullato: '+LBL[e[0]]+(e[1]>=0?' cal. '+(e[1]+1):''))});
 
 // ---------- schermo intero ----------
@@ -456,12 +482,12 @@ function showSeason(){var ms=DB.matches.filter(function(m){return m.log.length})
   document.getElementById('sbody').innerHTML=h;document.getElementById('season').style.display='flex'}
 document.getElementById('sclose').addEventListener('click',function(){document.getElementById('season').style.display='none'});
 document.getElementById('sbody').addEventListener('click',function(e){var c=e.target.closest('[data-live]');if(c){document.getElementById('season').style.display='none';openMatch(c.dataset.live)}});
-function showHome(){S=null;liveDot();document.getElementById('ov').style.display='none';renderHome();home.style.display='flex';publish(false)}
+function showHome(){if(PEND){PEND=null;pendUI()}S=null;liveDot();document.getElementById('ov').style.display='none';renderHome();home.style.display='flex';publish(false)}
 document.getElementById('home2').addEventListener('click',showHome);
 document.getElementById('hxls').addEventListener('click',function(){if(!DB.matches.some(function(m){return m.log.length})){toast('Nessuna statistica ancora registrata');return}exportExcel()});
 document.getElementById('hset').addEventListener('click',function(){
   var c=prompt('IMPOSTAZIONI\n\nCodice di pubblicazione (solo per chi registra le partite).\nLascia vuoto per disattivare la pubblicazione su questo dispositivo.',DB.gh?'(attivo – scrivi un nuovo codice per cambiarlo)':'');
-  if(c===null)return;c=c.trim();if(c.indexOf('(attivo')==0)return;DB.gh=c||'';persist();renderHome();updSave();toast(c?'Pubblicazione attivata':'Pubblicazione disattivata');if(c)publish(true)});
+  if(c===null)return;c=c.trim();if(c.indexOf('(attivo')==0)return;DB.gh=c||'';if(c)DB.matches.forEach(function(m){if(m.remote){m.remote=false;m.sent=m.upd}});persist();renderHome();updSave();toast(c?'Pubblicazione attivata':'Pubblicazione disattivata');if(c)publish(true)});
 document.getElementById('hstat').addEventListener('click',showSeason);
 var instEv=null;window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();instEv=e;if(!APP)document.getElementById('hinst').style.display=''});
 document.getElementById('hinst').addEventListener('click',function(){if(!instEv)return;instEv.prompt();instEv.userChoice.then(function(){instEv=null;document.getElementById('hinst').style.display='none'})});
@@ -535,7 +561,7 @@ function csv(){var r=['Calotta;Nome;Gol;Gol UP;Assist;Assist UP;Espulsioni;Espul
 var ov=document.getElementById('ov'),txt=document.getElementById('txt');
 function setMode(md){smode=md;txt.value=summary();document.getElementById('sb1').style.background=md=='b'?'#0b3d91':'#90a4ae';document.getElementById('sb2').style.background=md=='f'?'#0b3d91':'#90a4ae'}
 document.getElementById('sb1').addEventListener('click',function(){setMode('b')});document.getElementById('sb2').addEventListener('click',function(){setMode('f')});
-document.getElementById('sum').addEventListener('click',function(){setMode(smode);document.getElementById('end').style.display=(S.done||(S.remote&&!DB.gh))?'none':'';document.getElementById('rst').style.display=(S.remote&&!DB.gh)||!S.log.length?'none':'';document.getElementById('send').style.display=DB.gh?'':'none';ov.style.display='flex'});
+document.getElementById('sum').addEventListener('click',function(){if(PEND){toast('Prima tocca il marcatore (oppure Annulla assist)');return}setMode(smode);document.getElementById('end').style.display=(S.done||(S.remote&&!DB.gh))?'none':'';document.getElementById('rst').style.display=(S.remote&&!DB.gh)||!S.log.length?'none':'';document.getElementById('send').style.display=DB.gh?'':'none';ov.style.display='flex'});
 document.getElementById('close').addEventListener('click',function(){ov.style.display='none'});
 document.getElementById('copy').addEventListener('click',function(){
   function fb2(){txt.removeAttribute('readonly');txt.select();try{document.execCommand('copy');toast('Copiato')}catch(e){toast('Seleziona e copia a mano')}txt.setAttribute('readonly','')}
