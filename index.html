@@ -44,7 +44,7 @@ body{display:flex;flex-direction:column;touch-action:manipulation}
 #g .tot{background:#dfe7f1;font-weight:800;font-size:clamp(15px,3.2vh,24px);border-top:2px solid #0b3d91}
 #g .out{background:#ffcdd2!important;color:#b71c1c}
 #g .dim{opacity:.45}
-#g .dim input{text-decoration:line-through}
+#g .dim input,#g .n.dim{text-decoration:line-through;text-decoration-thickness:2px}
 #g .last{box-shadow:inset 4px 0 0 #ffd600}
 #ov{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center}
 #ov .box{background:#fff;padding:14px;border-radius:10px;width:min(700px,94vw);max-height:92vh;display:flex;flex-direction:column;gap:10px}
@@ -349,7 +349,7 @@ H+=d('h hn','Cal.')+d('h hn','Giocatore')+d('h hg gl','GOL')+d('h hu','GOL<br>uo
 for(var i=0;i<N;i++){var zb=i%2?' z':'';
   H+=d('n'+zb,i+1,' id="n'+i+'"')+d('nm'+zb,'<input data-i="'+i+'" maxlength="16">',' id="m'+i+'"');
   F.forEach(function(f){H+=d('c '+GC[f]+zb,'',' data-f="'+f+'" data-i="'+i+'" id="'+f+i+'"')});
-  H+=d('sep')+d('n'+zb,i+1,' style="color:#6a1b9a"')+d('c cx'+zb,'',' data-f="x" data-i="'+i+'" id="x'+i+'"');
+  H+=d('sep')+d('n'+zb,i+1,' style="color:#6a1b9a" id="nx'+i+'"')+d('c cx'+zb,'',' data-f="x" data-i="'+i+'" id="x'+i+'"');
 }
 H+=d('tot','Tot')+d('tot','');F.forEach(function(f){H+=d('tot '+GC[f].replace('up',''),'',' id="t'+f+'"')});H+=d('sep')+d('tot','')+d('tot cx','',' id="tx"');
 g.innerHTML=H;
@@ -359,7 +359,7 @@ var oppIn=document.getElementById('opp');oppIn.addEventListener('change',functio
 
 function marks(v,f){if(!v)return '';if((f=='e'||f=='x')&&v<=3)return new Array(v+1).join('X ');return v}
 function cell(f,i){var el=document.getElementById(f+i),v=S[f][i];el.textContent=marks(v,f);
-  if(f=='e'||f=='x'){el.classList.toggle('out',v>=3);if(f=='e'){var o=v>=3;document.getElementById('n'+i).classList.toggle('dim',o);document.getElementById('m'+i).classList.toggle('dim',o);['g','gu','a','au'].forEach(function(k){document.getElementById(k+i).classList.toggle('dim',o)})}}}
+  if(f=='e'||f=='x'){el.classList.toggle('out',v>=3);if(f=='e'){var o=v>=3;document.getElementById('n'+i).classList.toggle('dim',o);document.getElementById('m'+i).classList.toggle('dim',o);['g','gu','a','au'].forEach(function(k){document.getElementById(k+i).classList.toggle('dim',o)})}else document.getElementById('nx'+i).classList.toggle('dim',v>=3)}}
 function totals(){F.forEach(function(f){document.getElementById('t'+f).textContent=sum(S[f])});document.getElementById('tx').textContent=sum(S.x);
   document.getElementById('sA').textContent=sum(S.g)+sum(S.gu);document.getElementById('sB').textContent=S.og+S.ogu;
   var b=document.querySelectorAll('.per');for(var j=0;j<b.length;j++)b[j].classList.toggle('on',+b[j].dataset.p==S.per)}
