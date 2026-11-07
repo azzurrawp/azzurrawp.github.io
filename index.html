@@ -403,8 +403,8 @@ function remove(f,i){if(S.done||PEND)return;var k;
   if(k<0){if(f=='og'||f=='ogu'){if(S[f]>0)S[f]--}else if(S[f][i]>0){S[f][i]--;cell(f,i)}totals();save();fb(f,i,-1);return}
   var e=unrec(k),extra='';
   if(e[4]){for(var j=S.log.length-1;j>=0;j--){if(S.log[j][4]===e[4]){
-    if(f=='g'||f=='gu'){var a=unrec(j);extra=' e assist '+nm(a[1])}else{S.log[j].length=4}break}}}
-  totals();save();fb(f,i,-1);if(extra)setTimeout(function(){toast('Tolto il gol'+extra)},50)}
+    var a=unrec(j);extra=(f=='g'||f=='gu')?'Tolti il gol di '+nm(i)+' e l\'assist di '+nm(a[1]):'Tolti l\'assist di '+nm(i)+' e il gol di '+nm(a[1]);break}}}
+  totals();save();fb(f,i,-1);if(extra)setTimeout(function(){toast(extra)},50)}
 var lastPen=0;
 ['pointermove','pointerdown'].forEach(function(t){document.addEventListener(t,function(e){if(e.pointerType=='pen')lastPen=Date.now()},true)});
 function palm(e){return e.pointerType=='touch'&&Date.now()-lastPen<1500}
