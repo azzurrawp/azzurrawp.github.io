@@ -7,7 +7,11 @@
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#0b3d91">
 <link rel="icon" href="icon-192.png">
-<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-mask-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Azzurra WP">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
 html,body{height:100%;height:100dvh;overflow:hidden;background:#fff;color:#102a43;font-family:system-ui,Roboto,sans-serif}
@@ -208,7 +212,12 @@ function merge(list){var n=0,u=0;list.forEach(function(m){if(!m)return;var ex=m.
   if(!ex.log.length&&m.names)ex.names=blank({names:m.names}).names;
   if(m.log&&m.log.length&&!ex.log.length){F.concat(['x','og','ogu','log','per','done']).forEach(function(k){if(m[k]!==undefined)ex[k]=m[k]})}
   u++});persist();return [n,u]}
-try{var km=location.hash.match(/k=([0-9A-Za-z]+)/);if(km){if(DB.pin!==km[1]){DB.pin=km[1];DB.encv='';DB.statv=''}persist();history.replaceState(null,'',location.pathname)}}catch(e){}
+// iPhone/iPad: l'app aggiunta alla Home non condivide i dati con Safari e parte dall'indirizzo salvato:
+// lasciamo il codice nell'indirizzo e togliamo il manifest, così l'icona salva il link completo
+var IOS=/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+try{var km=location.hash.match(/k=([0-9A-Za-z]+)/);if(km){if(DB.pin!==km[1]){DB.pin=km[1];DB.encv='';DB.statv=''}persist();
+  if(IOS){var ml=document.querySelector('link[rel="manifest"]');if(ml)ml.parentNode.removeChild(ml);history.replaceState(null,'',location.pathname+'#k='+km[1])}
+  else history.replaceState(null,'',location.pathname)}}catch(e){}
 try{var hm=location.hash.match(/d=([^&]+)/);if(hm){var r=merge(JSON.parse(decodeURIComponent(hm[1])).matches||[]);
   history.replaceState(null,'',location.pathname);setTimeout(function(){toast('Distinte caricate: '+r[0]+' nuove, '+r[1]+' aggiornate')},300)}}catch(e){}
 persist();
