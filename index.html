@@ -143,7 +143,7 @@ body.pend-g #last,body.pend-gu #last{color:#ffd600;font-weight:700;opacity:1}
     <button class="btn" id="hstat" style="background:#6a1b9a">📊 Statistiche stagione</button>
     <button class="btn" id="hxls" style="background:#0f7b3f">📤 Esporta Excel</button>
     <span style="flex:1"></span>
-    <button class="btn" id="hexit2" style="background:#c62828;font-size:20px;padding:12px 26px">⏻ Esci</button>
+    <button class="btn" id="hexit2" style="background:#c62828;font-size:20px;padding:12px 26px"><svg width="20" height="20" viewBox="0 0 24 24" style="vertical-align:-4px;margin-right:6px" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 3v9"/><path d="M6.3 6.8a8 8 0 1 0 11.4 0"/></svg>Esci</button>
   </footer>
 </div>
 <div id="season" style="position:fixed;inset:0;background:#eef2f8;z-index:9;display:none;flex-direction:column">
@@ -428,18 +428,21 @@ g.addEventListener('pointerup',function(ev){cancel();var c=ev.target.closest('.c
 g.addEventListener('contextmenu',function(e){e.preventDefault()});
 document.querySelector('.og').addEventListener('click',function(e){var b=e.target.closest('button');if(b&&PEND){toast('Prima tocca il marcatore (oppure Annulla assist)');return}if(b)add(b.dataset.og=='p'?'og':'ogu',-1)});
 var pers=document.querySelectorAll('.per');for(var j=0;j<pers.length;j++)pers[j].addEventListener('click',function(){if(PEND){toast('Prima tocca il marcatore (oppure Annulla assist)');return}var np=+this.dataset.p;if(np===S.per)return;askPeriod(np)});
-function askPeriod(np){var cur=S.per,box=document.getElementById('pconf'),warn='';
+var bigYes=null;
+function askBig(o){document.getElementById('pcq').textContent=o.q;document.getElementById('pcsub').textContent=o.sub||'';
+  var w=document.getElementById('pcw');w.textContent=o.warn||'';w.style.display=o.warn?'':'none';
+  var y=document.getElementById('pcyes');y.textContent=o.yes;y.style.background=o.color||'#2e7d32';bigYes=o.onYes;bigNo=o.onNo||null;
+  document.getElementById('pconf').style.display='flex'}
+var bigNo=null;
+function askPeriod(np){var cur=S.per,warn='';
   if(np<cur)warn='⚠ Stai tornando indietro: le prossime azioni saranno registrate nel '+np+'° tempo.';
   else if(np>cur+1)warn='⚠ Attenzione: stai saltando '+(np-cur==2?'il '+(cur+1)+'° tempo':'dal '+(cur+1)+'° al '+(np-1)+'° tempo')+'.';
-  document.getElementById('pcq').textContent=(np<cur?'Tornare al ':'Passare al ')+np+'° tempo?';
-  document.getElementById('pcw').textContent=warn;document.getElementById('pcw').style.display=warn?'':'none';
-  document.getElementById('pcsub').textContent='Ora stai registrando nel '+cur+'° tempo.';
-  document.getElementById('pcyes').textContent='Sì, '+(np<cur?'torna al ':'passa al ')+np+'° tempo';
-  document.getElementById('pcyes').style.background=np<cur?'#c62828':'#2e7d32';
-  box.style.display='flex';box.dataset.np=np}
-document.getElementById('pcno').addEventListener('click',function(){document.getElementById('pconf').style.display='none';toast('Resti nel '+S.per+'° tempo')});
-document.getElementById('pcyes').addEventListener('click',function(){var box=document.getElementById('pconf'),np=+box.dataset.np;box.style.display='none';
-  if(np>S.per&&S.log.length)backup('fine'+S.per+'T');S.per=np;totals();save();document.getElementById('last').textContent='Ora registri nel '+np+'° tempo'});
+  askBig({q:(np<cur?'Tornare al ':'Passare al ')+np+'° tempo?',sub:'Ora stai registrando nel '+cur+'° tempo.',warn:warn,
+    yes:'Sì, '+(np<cur?'torna al ':'passa al ')+np+'° tempo',color:np<cur?'#c62828':'#2e7d32',
+    onYes:function(){if(np>S.per&&S.log.length)backup('fine'+S.per+'T');S.per=np;totals();save();document.getElementById('last').textContent='Ora registri nel '+np+'° tempo'},
+    onNo:function(){toast('Resti nel '+S.per+'° tempo')}})}
+document.getElementById('pcno').addEventListener('click',function(){document.getElementById('pconf').style.display='none';var f=bigNo;bigYes=bigNo=null;if(f)f()});
+document.getElementById('pcyes').addEventListener('click',function(){document.getElementById('pconf').style.display='none';var f=bigYes;bigYes=bigNo=null;if(f)f()});
 document.getElementById('undo').addEventListener('click',function(){if(PEND){PEND=null;pendUI();document.getElementById('last').textContent='Assist annullato';return}var e=S.log[S.log.length-1];if(!e){toast('Niente da annullare');return}
   remove(e[0],e[1]);toast('Annullato: '+LBL[e[0]]+(e[1]>=0?' cal. '+(e[1]+1):''))});
 
@@ -596,8 +599,10 @@ function resetMatch(m){
   if(!confirm('Conferma di nuovo: l\'azzeramento non si può annullare.\n(Prima scarico comunque una copia di sicurezza in Download.)'))return false;
   if(m.log.length)backup('prima_di_azzerare',m);F.concat(['x']).forEach(function(f){m[f]=z()});m.og=0;m.ogu=0;m.log=[];m.per=1;m.done=false;m.upd=Date.now();persist();publish(false);if(DB.gh){var keep=S;S=m;liveKick(true);S=keep}toast('Partita azzerata');return true}
 document.getElementById('rst').addEventListener('click',function(){if(!resetMatch(S))return;document.body.classList.remove('ro');all();ov.style.display='none';document.getElementById('last').textContent='Partita azzerata'});
-document.getElementById('end').addEventListener('click',function(){if(!confirm('Terminare la partita? Resterà consultabile in sola lettura.'))return;
-  S.done=true;save();backup('finale');showHome()});
+document.getElementById('end').addEventListener('click',function(){var sc=score(S);document.getElementById('ov').style.display='none';
+  askBig({q:'Terminare la partita?',sub:hdr(S)+' · dopo si potrà solo consultare (riapribile con ✎ Modifica).',warn:S.per<4?'⚠ Sei ancora nel '+S.per+'° tempo.':'',
+    yes:'Sì, termina la partita',color:'#c62828',onYes:function(){
+  S.done=true;save();backup('finale');showHome()},onNo:function(){toast('La partita continua')}})});
 
 // Indietro: torna all'elenco, non chiude l'app
 var bye=document.getElementById('bye'),leaving=false;
