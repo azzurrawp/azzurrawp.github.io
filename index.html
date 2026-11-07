@@ -94,6 +94,7 @@ body.ro .og,body.ro .per,body.ro #undo{display:none}
 body.ro #g .nm input,body.ro #opp{pointer-events:none}
 #kpi{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin:4px 0 6px}.kp{background:#fff;border-radius:12px;padding:12px 14px;box-shadow:0 1px 4px rgba(0,0,0,.1);border-top:5px solid #0b3d91}.kp b{display:block;font-size:30px;color:#0b3d91;line-height:1.1}.kp span{font-size:14px;color:#546e7a}.kp small{display:block;font-size:13px;color:#78909c;margin-top:2px}.kp.g{border-top-color:#2e7d32}.kp.g b{color:#1b5e20}.kp.r{border-top-color:#c62828}.kp.r b{color:#b71c1c}.kp.o{border-top-color:#e65100}.kp.o b{color:#e65100}.kp.y{border-top-color:#f9a825}
 #stab{width:100%;border-collapse:collapse;background:#fff;border-radius:10px;overflow:hidden;font-size:18px}#stab th{background:#0b3d91;color:#fff;padding:10px 8px;font-size:15px}#stab td{padding:9px 8px;text-align:center;border-bottom:1px solid #e3e8ef}#stab td:first-child{text-align:left;font-weight:700}#stab tr:nth-child(even) td{background:#f3f6fa}#sbody h2{font-size:18px;color:#0b3d91;margin:18px 0 8px}
+.mi{text-align:left;font-size:19px!important;padding:14px 16px!important}
 #rob{display:none;background:#2e7d32!important}
 body.ro #rob{display:inline-block}
 #home2{background:#455a64!important;font-size:22px!important}
@@ -138,10 +139,7 @@ body.pend-g #last,body.pend-gu #last{color:#ffd600;font-weight:700;opacity:1}
   <div id="list"></div>
   <footer>
     <button class="btn" id="hinst" style="background:#ffd600;color:#000;display:none">📲 Installa l'app</button>
-    <button class="btn" id="hnew">+ Nuova partita</button>
-    <button class="btn" id="himp" style="background:#2e7d32">Carica distinta o copia (file)</button>
-    <button class="btn" id="hstat" style="background:#6a1b9a">📊 Statistiche stagione</button>
-    <button class="btn" id="hxls" style="background:#0f7b3f">📤 Esporta Excel</button>
+    <button class="btn" id="hstat" style="background:#6a1b9a;font-size:20px;padding:12px 22px">📊 Statistiche stagione</button>
     <span style="flex:1"></span>
     <button class="btn" id="hexit2" style="background:#c62828;font-size:20px;padding:12px 26px"><svg width="20" height="20" viewBox="0 0 24 24" style="vertical-align:-4px;margin-right:6px" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 3v9"/><path d="M6.3 6.8a8 8 0 1 0 11.4 0"/></svg>Esci</button>
   </footer>
@@ -168,6 +166,15 @@ body.pend-g #last,body.pend-gu #last{color:#ffd600;font-weight:700;opacity:1}
       <button id="pcno" class="btn" style="flex:1;background:#90a4ae;font-size:22px;padding:18px">No</button>
       <button id="pcyes" class="btn" style="flex:1.6;font-size:22px;padding:18px"></button>
     </div>
+  </div>
+</div>
+<div id="menu" style="position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:22;display:none;align-items:flex-start;justify-content:flex-end">
+  <div style="background:#fff;margin:70px 14px 0 0;border-radius:14px;padding:10px;width:min(380px,92vw);display:flex;flex-direction:column;gap:8px;box-shadow:0 8px 30px rgba(0,0,0,.3)">
+    <button class="btn mi" id="hnew">➕ Nuova partita</button>
+    <button class="btn mi" id="himp" style="background:#2e7d32">📂 Ripristina copia (file)</button>
+    <button class="btn mi" id="hxls" style="background:#0f7b3f">📤 Esporta Excel</button>
+    <button class="btn mi" id="mtok" style="background:#455a64">🔑 Codice di pubblicazione</button>
+    <button class="btn mi" id="mclose" style="background:#90a4ae">Chiudi</button>
   </div>
 </div>
 <div id="msg"></div>
@@ -511,7 +518,11 @@ document.getElementById('sbody').addEventListener('click',function(e){var c=e.ta
 function showHome(){if(PEND){PEND=null;pendUI()}S=null;liveDot();document.getElementById('ov').style.display='none';renderHome();home.style.display='flex';publish(false)}
 document.getElementById('home2').addEventListener('click',showHome);
 document.getElementById('hxls').addEventListener('click',function(){if(!DB.matches.some(function(m){return m.log.length})){toast('Nessuna statistica ancora registrata');return}exportExcel()});
-document.getElementById('hset').addEventListener('click',function(){
+var menu=document.getElementById('menu');
+document.getElementById('hset').addEventListener('click',function(){menu.style.display='flex'});
+document.getElementById('mclose').addEventListener('click',function(){menu.style.display='none'});
+menu.addEventListener('click',function(e){if(e.target===menu||e.target.closest('.mi'))menu.style.display='none'},true);
+document.getElementById('mtok').addEventListener('click',function(){
   var c=prompt('IMPOSTAZIONI\n\nCodice di pubblicazione (solo per chi registra le partite).\nLascia vuoto per disattivare la pubblicazione su questo dispositivo.',DB.gh?'(attivo – scrivi un nuovo codice per cambiarlo)':'');
   if(c===null)return;c=c.trim();if(c.indexOf('(attivo')==0)return;DB.gh=c||'';if(c)DB.matches.forEach(function(m){if(m.remote){m.remote=false;m.sent=m.upd}});persist();renderHome();updSave();toast(c?'Pubblicazione attivata':'Pubblicazione disattivata');if(c)publish(true)});
 document.getElementById('hstat').addEventListener('click',showSeason);
