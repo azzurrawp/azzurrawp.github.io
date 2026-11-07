@@ -581,12 +581,13 @@ var bye=document.getElementById('bye'),leaving=false;
 function saveNow(){if(S)S.upd=S.upd||Date.now();persist()}
 document.addEventListener('visibilitychange',function(){if(document.visibilityState=='hidden')saveNow()});
 window.addEventListener('pagehide',saveNow);
-function exitApp(){saveNow();document.getElementById('ov').style.display='none';document.getElementById('season').style.display='none';bye.style.display='flex';leaving=true;
-  try{window.close()}catch(e){}}
+function exitApp(){saveNow();document.getElementById('ov').style.display='none';document.getElementById('season').style.display='none';bye.style.display='flex';
+  try{window.close()}catch(e){}
+  if(!leaving){leaving=true;try{if(history.state&&history.state.g)history.back()}catch(e){}}}
 document.getElementById('hexit2').addEventListener('click',exitApp);
 document.getElementById('byeback').addEventListener('click',function(){bye.style.display='none';leaving=false;try{history.pushState({g:1},'',location.href)}catch(e){}});
 try{history.pushState({g:1},'',location.href);window.addEventListener('popstate',function(){
-  if(leaving){saveNow();return}                                   // secondo Indietro: l'app si chiude
+  if(leaving){saveNow();bye.style.display='flex';return}                                   // secondo Indietro: l'app si chiude
   if(document.getElementById('season').style.display=='flex'){document.getElementById('season').style.display='none';history.pushState({g:1},'',location.href);return}
   if(home.style.display=='none'){showHome();history.pushState({g:1},'',location.href);return}
   exitApp()})}catch(e){}
