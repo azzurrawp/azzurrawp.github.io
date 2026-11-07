@@ -159,6 +159,17 @@ body.pend-g #last,body.pend-gu #last{color:#ffd600;font-weight:700;opacity:1}
   <div style="font-size:clamp(18px,3.2vh,28px);font-weight:700;color:#0b3d91">Azzurra WP Stat</div>
   <div id="splmsg" style="font-size:clamp(14px,2.4vh,20px);color:#607d8b">Caricamento distinte…</div>
 </div>
+<div id="pconf" style="position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:25;display:none;align-items:center;justify-content:center">
+  <div style="background:#fff;border-radius:16px;padding:26px 30px;width:min(560px,92vw);text-align:center;box-shadow:0 8px 30px rgba(0,0,0,.3)">
+    <div id="pcq" style="font-size:30px;font-weight:800;color:#0b3d91"></div>
+    <div id="pcsub" style="font-size:17px;color:#546e7a;margin-top:8px"></div>
+    <div id="pcw" style="font-size:18px;font-weight:700;color:#b71c1c;margin-top:12px"></div>
+    <div style="display:flex;gap:14px;margin-top:22px">
+      <button id="pcno" class="btn" style="flex:1;background:#90a4ae;font-size:22px;padding:18px">No</button>
+      <button id="pcyes" class="btn" style="flex:1.6;font-size:22px;padding:18px"></button>
+    </div>
+  </div>
+</div>
 <div id="msg"></div>
 <input type="file" id="imp" accept=".json,application/json" style="display:none">
 <script>
@@ -416,7 +427,19 @@ g.addEventListener('pointerleave',cancel);g.addEventListener('pointercancel',can
 g.addEventListener('pointerup',function(ev){cancel();var c=ev.target.closest('.c');if(!c||lpDone||palm(ev))return;add(c.dataset.f,+c.dataset.i)});
 g.addEventListener('contextmenu',function(e){e.preventDefault()});
 document.querySelector('.og').addEventListener('click',function(e){var b=e.target.closest('button');if(b&&PEND){toast('Prima tocca il marcatore (oppure Annulla assist)');return}if(b)add(b.dataset.og=='p'?'og':'ogu',-1)});
-var pers=document.querySelectorAll('.per');for(var j=0;j<pers.length;j++)pers[j].addEventListener('click',function(){if(PEND){toast('Prima tocca il marcatore (oppure Annulla assist)');return}var np=+this.dataset.p;if(np>S.per&&S.log.length)backup('fine'+S.per+'T');S.per=np;totals();save()});
+var pers=document.querySelectorAll('.per');for(var j=0;j<pers.length;j++)pers[j].addEventListener('click',function(){if(PEND){toast('Prima tocca il marcatore (oppure Annulla assist)');return}var np=+this.dataset.p;if(np===S.per)return;askPeriod(np)});
+function askPeriod(np){var cur=S.per,box=document.getElementById('pconf'),warn='';
+  if(np<cur)warn='⚠ Stai tornando indietro: le prossime azioni saranno registrate nel '+np+'° tempo.';
+  else if(np>cur+1)warn='⚠ Attenzione: stai saltando '+(np-cur==2?'il '+(cur+1)+'° tempo':'dal '+(cur+1)+'° al '+(np-1)+'° tempo')+'.';
+  document.getElementById('pcq').textContent=(np<cur?'Tornare al ':'Passare al ')+np+'° tempo?';
+  document.getElementById('pcw').textContent=warn;document.getElementById('pcw').style.display=warn?'':'none';
+  document.getElementById('pcsub').textContent='Ora stai registrando nel '+cur+'° tempo.';
+  document.getElementById('pcyes').textContent='Sì, '+(np<cur?'torna al ':'passa al ')+np+'° tempo';
+  document.getElementById('pcyes').style.background=np<cur?'#c62828':'#2e7d32';
+  box.style.display='flex';box.dataset.np=np}
+document.getElementById('pcno').addEventListener('click',function(){document.getElementById('pconf').style.display='none';toast('Resti nel '+S.per+'° tempo')});
+document.getElementById('pcyes').addEventListener('click',function(){var box=document.getElementById('pconf'),np=+box.dataset.np;box.style.display='none';
+  if(np>S.per&&S.log.length)backup('fine'+S.per+'T');S.per=np;totals();save();document.getElementById('last').textContent='Ora registri nel '+np+'° tempo'});
 document.getElementById('undo').addEventListener('click',function(){if(PEND){PEND=null;pendUI();document.getElementById('last').textContent='Assist annullato';return}var e=S.log[S.log.length-1];if(!e){toast('Niente da annullare');return}
   remove(e[0],e[1]);toast('Annullato: '+LBL[e[0]]+(e[1]>=0?' cal. '+(e[1]+1):''))});
 
