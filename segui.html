@@ -105,6 +105,7 @@ body.ro #g .nm input,body.ro #opp{pointer-events:none}
 #rot .rph{transform-box:fill-box;transform-origin:center;animation:rotp 2.6s ease-in-out infinite}@keyframes rotp{0%,20%{transform:rotate(0)}50%,85%{transform:rotate(90deg)}100%{transform:rotate(0)}}
 #rot b{font-size:24px;line-height:1.3}#rot span{font-size:17px;opacity:.9;line-height:1.4}#rot button{margin-top:8px;font-size:17px;padding:12px 22px;border:2px solid #fff;border-radius:10px;background:transparent;color:#fff}
 .dlr{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0 0 10px}.dlr span{font-size:15px;color:#546e7a;font-weight:600}.dlr button{border:0;border-radius:18px;padding:9px 14px;font-size:15px;background:#fff;color:#0b3d91;font-weight:700;box-shadow:0 1px 3px rgba(0,0,0,.15)}
+.cA{color:#0b3d91}.cB{color:#e65100}.card .cA,.dt .cA,#stab .cA,#dtabs .cA{color:#0b3d91}#dtabs button.on .cA{color:#bbdefb}#dtabs button.on .cB{color:#ffcc80}#top .sc small,#sA{color:#90caf9}#sB{color:#ffb74d}#opp{color:#ffcc80!important}
 .pill{color:#fff;border-radius:16px;padding:6px 14px;font-weight:700;font-size:16px}
 #stab{width:100%;border-collapse:collapse;background:#fff;border-radius:10px;overflow:hidden;font-size:18px}#stab th{background:#0b3d91;color:#fff;padding:10px 8px;font-size:15px}#stab td{padding:9px 8px;text-align:center;border-bottom:1px solid #e3e8ef}#stab td:first-child{text-align:left;font-weight:700}#stab tr:nth-child(even) td{background:#f3f6fa}#sbody h2{font-size:18px;color:#0b3d91;margin:18px 0 8px}
 .mi{text-align:left;font-size:19px!important;padding:14px 16px!important}
@@ -141,7 +142,6 @@ body.pend-g #last,body.pend-gu #last{color:#ffd600;font-weight:700;opacity:1}
   <textarea id="txt" readonly></textarea>
   <div class="row">
     <button class="btn" id="copy">Copia testo</button>
-    <button class="btn" id="csv">Scarica CSV</button>
     <button class="btn" id="bak" style="background:#2e7d32">Salva copia</button>
     <button class="btn" id="refb" style="background:#00838f">📄 Referto</button>
     <button class="btn" id="send" style="background:#6a1b9a">☁ Pubblica</button>
@@ -156,13 +156,13 @@ body.pend-g #last,body.pend-gu #last{color:#ffd600;font-weight:700;opacity:1}
   <div id="list"></div>
   <footer>
     <button class="btn" id="hinst" style="background:#ffd600;color:#000;display:none">📲 Installa l'app</button>
-    <button class="btn" id="hstat" style="background:#6a1b9a;font-size:20px;padding:12px 22px">📊 Statistiche stagione</button>
+    <button class="btn" id="hstat" style="background:#6a1b9a;font-size:20px;padding:12px 22px">📊 Statistiche</button>
     <span style="flex:1"></span>
     <button class="btn" id="hexit2" style="background:#c62828;font-size:20px;padding:12px 26px"><svg width="20" height="20" viewBox="0 0 24 24" style="vertical-align:-4px;margin-right:6px" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 3v9"/><path d="M6.3 6.8a8 8 0 1 0 11.4 0"/></svg>Esci</button>
   </footer>
 </div>
 <div id="season" style="position:fixed;inset:0;background:#eef2f8;z-index:9;display:none;flex-direction:column">
-  <header style="background:#0b3d91;color:#fff;padding:12px 18px;display:flex;align-items:center;gap:12px"><h1 style="font-size:22px;flex:1">📊 Statistiche stagione</h1><button class="btn" id="sclose" style="background:#455a64">Chiudi</button></header>
+  <header style="background:#0b3d91;color:#fff;padding:12px 18px;display:flex;align-items:center;gap:12px"><h1 style="font-size:22px;flex:1">📊 Statistiche stagione e partite</h1><button class="btn" id="sclose" style="background:#455a64">Chiudi</button></header>
   <div id="sbody" style="flex:1;overflow:auto;padding:14px 18px"></div>
 </div>
 <div id="bye" style="position:fixed;inset:0;background:#0b3d91;color:#fff;z-index:20;display:none;flex-direction:column;align-items:center;justify-content:center;gap:18px;text-align:center;padding:20px">
@@ -189,7 +189,6 @@ body.pend-g #last,body.pend-gu #last{color:#ffd600;font-weight:700;opacity:1}
   <div style="background:#fff;margin:70px 14px 0 0;border-radius:14px;padding:10px;width:min(380px,92vw);display:flex;flex-direction:column;gap:8px;box-shadow:0 8px 30px rgba(0,0,0,.3)">
     <button class="btn mi" id="hnew">➕ Nuova partita</button>
     <button class="btn mi" id="himp" style="background:#2e7d32">📂 Ripristina copia (file)</button>
-    <button class="btn mi" id="hxls" style="background:#0f7b3f">📤 Esporta Excel</button>
     <button class="btn mi" id="mtok" style="background:#455a64">🔑 Codice di pubblicazione</button>
     <button class="btn mi" id="mclose" style="background:#90a4ae">Chiudi</button>
     <div id="appv" style="text-align:center;color:#78909c;font-size:14px;margin-top:4px"></div>
@@ -520,11 +519,13 @@ function score(m){return [sum(m.g)+sum(m.gu),m.og+m.ogu]}
 // ordine sempre Azzurra prima (noi – loro); casa/trasferta indicata a parte con 🏠/🚌
 function title(m){return 'AZZURRA – '+(m.opp||'?')}
 function res(m){var s=score(m);return s[0]+' – '+s[1]}
+function resH(m){var s=score(m);return '<span class="cA">'+s[0]+'</span> – <span class="cB">'+s[1]+'</span>'}
+function titleH(m){return '<span class="cA">AZZURRA</span> – <span class="cB">'+esc(m.opp||'?')+'</span>'}
 function renderHome(){document.getElementById('hnew').style.display=DB.gh||!DB.matches.some(function(m){return m.remote})?'':'none';var ms=DB.matches.slice().sort(function(a,b){return (isLive(b)?1:0)-(isLive(a)?1:0)||(a.date+a.time).localeCompare(b.date+b.time)});
   if(!ms.length){listEl.innerHTML='<div id="empty">Nessuna partita.<br>Apri il link della distinta oppure tocca "+ Nuova partita".</div>';return}
-  listEl.innerHTML=ms.map(function(m){var lv=isLive(m)&&!DB.gh,cls=lv?'run live':m.done?'done':(m.log.length?'run':''),st=lv?'🔴 IN DIRETTA · '+m.per+'T<b>'+res(m)+'</b>':m.done?'Conclusa<b>'+res(m)+'</b>':(m.log.length?'In corso · '+m.per+'T<b>'+res(m)+'</b>':'Da giocare');
+  listEl.innerHTML=ms.map(function(m){var lv=isLive(m)&&!DB.gh,cls=lv?'run live':m.done?'done':(m.log.length?'run':''),st=lv?'🔴 IN DIRETTA · '+m.per+'T<b>'+resH(m)+'</b>':m.done?'Conclusa<b>'+resH(m)+'</b>':(m.log.length?'In corso · '+m.per+'T<b>'+resH(m)+'</b>':'Da giocare');
     return '<div class="card '+cls+'" data-id="'+esc(m.id)+'"><div class="when"><b>'+esc(m.gio||'Partita')+'</b>'+esc(fdate(m))+(m.time?' · '+esc(m.time):'')+'<span class="where">'+where(m)+'</span></div>'+
-      '<div class="match">'+esc(title(m))+'<small>'+esc(m.place||'')+(m.log.length&&DB.gh&&!m.remote?(pending(m)?' · ☁ da pubblicare':' · ☁ pubblicata ✓'):'')+'</small></div><div class="st">'+st+'</div>'+(DB.gh&&!m.done?(m.log.length?'<button class="del" data-rst="'+esc(m.id)+'" title="Azzera">↺</button>':'')+'<button class="del" data-del="'+esc(m.id)+'">🗑</button>':'')+'</div>'}).join('')}
+      '<div class="match">'+titleH(m)+'<small>'+esc(m.place||'')+(m.log.length&&DB.gh&&!m.remote?(pending(m)?' · ☁ da pubblicare':' · ☁ pubblicata ✓'):'')+'</small></div><div class="st">'+st+'</div>'+(DB.gh&&!m.done?(m.log.length?'<button class="del" data-rst="'+esc(m.id)+'" title="Azzera">↺</button>':'')+'<button class="del" data-del="'+esc(m.id)+'">🗑</button>':'')+'</div>'}).join('')}
 listEl.addEventListener('click',function(e){var rs=e.target.closest('[data-rst]');if(rs){if(resetMatch(byId(rs.dataset.rst)))renderHome();return}
   var del=e.target.closest('[data-del]');
   if(del){var m=byId(del.dataset.del);if(!confirm('Eliminare la partita "'+title(m)+'"?'+(m.log.length?' Prima ne scarico una copia.':'')))return;
@@ -569,8 +570,8 @@ function ptable(rows,all,TA){return '<div class="tw"><table id="stab"><tr><th>Gi
   rows.map(function(t){return '<tr><td>'+esc(t.n)+'</td>'+(all?'<td>'+t.p+'</td>':'')+'<td><b>'+t.g+'</b></td><td>'+(t.g+t.a?pct(t.g+t.a,TA):'–')+'</td><td>'+t.gu+'</td><td>'+t.gr+'</td><td><b>'+t.a+'</b></td><td>'+t.au+'</td><td>'+t.e+'</td></tr>'}).join('')+'</table></div>'}
 function matchDash(m){var o=mstat(m),k=analyze(m),O=m.opp||'Avversario',diff=o.A-o.B,w=0,l=0,x=0;o.P.forEach(function(q){if(q.a>q.b)w++;else if(q.a<q.b)l++;else x++});
   var es=m.done?(diff>0?'Vittoria':diff<0?'Sconfitta':'Pareggio'):'In corso',ec=m.done?(diff>0?'#2e7d32':diff<0?'#c62828':'#546e7a'):'#e65100';
-  var h='<div class="dhead"><div><div class="dt">'+esc(title(m))+' <b>'+res(m)+'</b></div><div class="ds">'+esc((m.gio?m.gio+' · ':'')+fdate(m)+(m.place?' · '+m.place:''))+'</div></div><span class="where" style="font-size:16px;padding:6px 14px">'+where(m)+'</span><span class="pill" style="background:'+ec+'">'+es+(m.done&&diff?' ('+sgn(diff)+')':'')+'</span>'+
-    (m.ref?'<button class="btn" data-ref="'+esc(m.id)+'" style="background:#00838f">📄 Referto</button>':'')+'</div>'+
+  var h='<div class="dhead"><div><div class="dt">'+titleH(m)+' <b>'+resH(m)+'</b></div><div class="ds">'+esc((m.gio?m.gio+' · ':'')+fdate(m)+(m.place?' · '+m.place:''))+'</div></div><span class="where" style="font-size:16px;padding:6px 14px">'+where(m)+'</span><span class="pill" style="background:'+ec+'">'+es+(m.done&&diff?' ('+sgn(diff)+')':'')+'</span>'+
+    (m.ref?'<button class="btn" data-ref="'+esc(m.id)+'" style="background:#00838f">📄 Vedi referto</button>':'')+'</div>'+
     '<div class="dlr"><span>Scarica:</span><button data-dl="m:'+esc(m.id)+':pdf">📥 PDF partita</button>'+(m.ref?'<button data-dl="m:'+esc(m.id)+':ref">📥 Referto (JPG)</button>':'')+'<button data-dl="m:'+esc(m.id)+':xls">📥 Excel</button></div>';
   h+='<div id="kpi">'+KP('wide',parz(m,o.P),'Parziali (Azzurra – '+esc(O)+')','Tempi: '+w+' vinti ('+pct(w,4)+') · '+x+' pari · '+l+' persi')+
     KP('g',o.A,'Gol fatti',o.ga+" d'azione ("+pct(o.ga,o.A)+') · '+o.gu+' in sup. ('+pct(o.gu,o.A)+') · '+o.gr+' su rigore ('+pct(o.gr,o.A)+')')+KP('r',o.B,'Gol subiti',o.oa+" d'azione ("+pct(o.oa,o.B)+') · '+o.ou+' in inf. ('+pct(o.ou,o.B)+') · '+o.or+' su rigore ('+pct(o.or,o.B)+')')+
@@ -594,14 +595,14 @@ function seasonDash(ms){var T={},o=[];
   ms.forEach(function(m){var s=mstat(m);if(m.done){if(s.A>s.B)W++;else if(s.A<s.B)L++;else P++}['A','B','gu','ou','gr','or','ast','ea','eb'].forEach(function(f){S[f]+=s[f]});s.P.forEach(function(q,i){S.P[i].a+=q.a;S.P[i].b+=q.b})});
   var HM={c:0,t:0,cw:0,tw:0};ms.forEach(function(m){var s=score(m);if(m.home){HM.c++;if(m.done&&s[0]>s[1])HM.cw++}else{HM.t++;if(m.done&&s[0]>s[1])HM.tw++}});
   var nd=ms.length||1,top=rows[0],ta=rows.slice().sort(function(a,b){return b.a-a.a||b.g-a.g})[0],lv=ms.filter(isLive)[0];
-  var h=(lv?'<div class="card run live" data-live="'+esc(lv.id)+'" style="margin-bottom:12px"><div class="match">🔴 '+esc(title(lv))+'<small>In diretta · '+lv.per+'° tempo · '+where(lv)+' · tocca per seguire la partita</small></div><div class="st"><b>'+res(lv)+'</b></div></div>':'')+
+  var h=(lv?'<div class="card run live" data-live="'+esc(lv.id)+'" style="margin-bottom:12px"><div class="match">🔴 '+titleH(lv)+'<small>In diretta · '+lv.per+'° tempo · '+where(lv)+' · tocca per seguire la partita</small></div><div class="st"><b>'+resH(lv)+'</b></div></div>':'')+
    '<div class="dlr"><span>Scarica:</span><button data-dl="s:pdf">📥 PDF stagione</button><button data-dl="s:xls">📥 Excel stagione</button></div>'+
    '<div id="kpi">'+KP('',ms.length,'Partite',(W+P+L)?W+' V ('+pct(W,W+P+L)+') · '+P+' N · '+L+' P':'')+KP('',HM.c+' / '+HM.t,'In casa / in trasferta',(HM.cw+HM.tw)?'vinte: '+HM.cw+' in casa · '+HM.tw+' fuori':'')+KP('g',S.A,'Gol fatti','media '+(S.A/nd).toFixed(1))+KP('r',S.B,'Gol subiti','media '+(S.B/nd).toFixed(1))+
    KP(S.A-S.B>=0?'g':'r',sgn(S.A-S.B),'Differenza reti','')+KP('o',S.gu+' / '+S.ou,'Gol in superiorità','fatti / subiti · '+pct(S.gu,S.A)+' / '+pct(S.ou,S.B)+' dei gol')+KP('y',S.gr+' / '+S.or,'Gol su rigore','fatti / subiti · '+pct(S.gr,S.A)+' / '+pct(S.or,S.B)+' dei gol')+
    KP('',Math.min(S.ast,S.A)+' / '+S.A,'Gol con assist',pct(Math.min(S.ast,S.A),S.A)+' dei gol')+KP('',S.ea+' / '+S.eb,'Espulsioni','Azzurra / avversari')+
    (top&&top.g?KP('y',top.g,'Capocannoniere',esc(clean(top.n))+' · '+pct(top.g,S.A)+' dei gol'):'')+(ta&&ta.a?KP('y',ta.a,'Più assist',esc(clean(ta.n))+' · '+pct(ta.a,S.ast)+' degli assist'):'')+'</div>';
   h+='<h2>Giocatori ('+ms.length+(ms.length==1?' partita':' partite')+')</h2>'+ptable(rows,true,S.A)+'<div class="pnote">% G+A = partecipazione ai gol: (gol + assist del giocatore) ÷ gol della squadra.</div>';
-  h+='<h2>Partite</h2><div class="tw"><table id="stab"><tr><th>Partita</th><th>Dove</th><th>Data</th><th>Risultato</th><th>Stato</th><th></th></tr>'+ms.map(function(m){return '<tr data-dsel="'+esc(m.id)+'" style="cursor:pointer"><td>'+esc(title(m))+'</td><td style="white-space:nowrap">'+where(m)+'</td><td>'+esc(fdate(m))+'</td><td><b>'+res(m)+'</b></td><td>'+(m.done?'Conclusa':'In corso')+'</td><td>'+(m.ref?'<button class="btn" data-ref="'+esc(m.id)+'" style="background:#00838f;padding:6px 12px;font-size:16px">📄 Referto</button> ':'')+'<span style="color:#0b3d91;font-weight:700">Cruscotto ›</span></td></tr>'}).join('')+'</table></div>';
+  h+='<h2>Partite</h2><div class="tw"><table id="stab"><tr><th>Partita</th><th>Dove</th><th>Data</th><th>Risultato</th><th>Stato</th><th></th></tr>'+ms.map(function(m){return '<tr data-dsel="'+esc(m.id)+'" style="cursor:pointer"><td>'+titleH(m)+'</td><td style="white-space:nowrap">'+where(m)+'</td><td>'+esc(fdate(m))+'</td><td><b>'+resH(m)+'</b></td><td>'+(m.done?'Conclusa':'In corso')+'</td><td>'+(m.ref?'<button class="btn" data-ref="'+esc(m.id)+'" style="background:#00838f;padding:6px 12px;font-size:16px">📄 Vedi referto</button> ':'')+'<span style="color:#0b3d91;font-weight:700">Cruscotto ›</span></td></tr>'}).join('')+'</table></div>';
   return h}
 // ---------- PDF generato sul telefono (senza librerie): statistiche partita/stagione + referto ----------
 var HW=[278,278,355,556,556,889,667,191,333,333,389,584,278,333,278,278,556,556,556,556,556,556,556,556,556,556,278,278,584,584,584,556,1015,667,667,722,722,667,611,778,722,278,500,667,556,833,722,778,667,778,722,667,611,722,667,944,667,667,611,278,278,278,469,556,333,556,556,500,556,556,278,556,556,222,222,500,222,833,556,556,556,556,333,500,278,556,500,722,500,500,500,334,260,334,584],
@@ -665,6 +666,7 @@ function pKpis(P,y,K,cols){var W=(P.p.w-56-(cols-1)*8)/cols,H=58;K.forEach(funct
   P.rect(x,yy,W,H,'#ffffff','#cfd8dc',.6);P.rect(x,yy,W,3.5,k[0]||PC.blu);var vs=tw(k[1],16,true)>W-14?Math.max(10,Math.floor(16*(W-14)/tw(k[1],16,true))):16;P.text(x+8,yy+22,fit(k[1],vs,true,W-14),vs,true,k[0]||PC.blu);
   P.text(x+8,yy+34,fit(k[2],8.5,false,W-14),8.5,false,'#37474f');wrap(k[3]||'',7,false,W-14).slice(0,2).forEach(function(l,j){P.text(x+8,yy+44+j*8.5,l,7,false,PC.gy)})});
   return y+Math.ceil(K.length/cols)*(H+8)}
+function pParts(P,x,y,parts,sz){parts.forEach(function(q){P.text(x,y,q[0],sz,true,q[1]);x+=tw(q[0],sz,true)})}
 function pH2(P,y,t){P.text(28,y,t,11,true,PC.blu);return y+8}
 function pBars(P,x,y,w,h,Pp,la,lb){var mx=1;Pp.forEach(function(q){mx=Math.max(mx,q.a,q.b)});var gw=w/4,bw=Math.min(22,gw/3),base=y+h-22;
   P.line(x,base,x+w,base,'#b0bec5',.6);
@@ -687,7 +689,7 @@ function pTable(P,y,head,rows,ws,al){var x0=28,W=P.p.w-56,tot=ws.reduce(function
 function matchPDF(m){var P=new PDF(),o=mstat(m),k=analyze(m),O=m.opp||'Avversario',diff=o.A-o.B,w=0,l=0,x=0;o.P.forEach(function(q){if(q.a>q.b)w++;else if(q.a<q.b)l++;else x++});
   P.page();pHead(P,'Statistiche partita');
   var es=m.done?(diff>0?'Vittoria':diff<0?'Sconfitta':'Pareggio')+(diff?' ('+(diff>0?'+':'')+diff+')':''):'In corso';
-  P.text(28,84,'AZZURRA – '+O+'   '+o.A+' – '+o.B,20,true,PC.blu);
+  pParts(P,28,84,[['AZZURRA',PC.blu],[' – ','#455a64'],[O,'#e65100'],['   '+o.A,PC.blu],[' – ','#455a64'],[String(o.B),'#e65100']],20);
   P.text(28,100,[m.gio,fdate(m)+(m.time?' · '+m.time:''),m.place,m.home?'In casa':'In trasferta',es].filter(Boolean).join(' · '),9,false,PC.gy);
   var top=Object.keys(o.pl).map(function(n){return o.pl[n]}).sort(function(a,b){return b.g-a.g})[0];
   var y=pKpis(P,112,[
@@ -712,7 +714,7 @@ function matchPDF(m){var P=new PDF(),o=mstat(m),k=analyze(m),O=m.opp||'Avversari
   P.text(28,y+4,'% G+A = partecipazione ai gol: (gol + assist del giocatore) ÷ gol della squadra.',7,false,PC.gy);pFoot(P);
   if(!m.ref)return Promise.resolve(P.out());
   return getRef(m).then(jpegInfo).then(function(im){P.page(im.w>im.h);pHead(P,'Referto');var p=P.p,mw=p.w-40,mh=p.h-100,s=Math.min(mw/im.w,mh/im.h);
-    P.text(28,62,'AZZURRA – '+(m.opp||'')+'  '+score(m)[0]+' – '+score(m)[1]+' · '+[m.gio,fdate(m),m.home?'In casa':'In trasferta'].filter(Boolean).join(' · '),9,true,PC.blu);mh-=14;s=Math.min(mw/im.w,mh/im.h);P.image(im.b,im.w,im.h,(p.w-im.w*s)/2,70,im.w*s,im.h*s);pFoot(P);return P.out()},function(){return P.out()})}
+    pParts(P,28,62,[['AZZURRA',PC.blu],[' – ','#455a64'],[m.opp||'','#e65100'],['  '+score(m)[0],PC.blu],[' – ','#455a64'],[score(m)[1]+'','#e65100'],['  · '+[m.gio,fdate(m),m.home?'In casa':'In trasferta'].filter(Boolean).join(' · '),PC.gy]],9);mh-=14;s=Math.min(mw/im.w,mh/im.h);P.image(im.b,im.w,im.h,(p.w-im.w*s)/2,70,im.w*s,im.h*s);pFoot(P);return P.out()},function(){return P.out()})}
 function seasonPDF(){var ms=DB.matches.filter(function(m){return m.log.length}).sort(function(a,b){return (a.date+a.time).localeCompare(b.date+b.time)}),P=new PDF();
   P.page();pHead(P,'Statistiche stagione '+season());P.text(28,84,'AZZURRA U16 · Stagione '+season(),20,true,PC.blu);P.text(28,100,ms.length+(ms.length==1?' partita':' partite')+' registrate · dati al '+new Date().toLocaleDateString('it-IT'),9,false,PC.gy);
   var T={},o=[],W=0,Pa=0,L=0,S={A:0,B:0,gu:0,ou:0,gr:0,or:0,ast:0,ea:0,eb:0},HM={c:0,t:0,cw:0,tw:0};
@@ -743,7 +745,7 @@ function seasonOpen(){return document.getElementById('season').style.display=='f
 var autoDone={};function viewAuto(){if(!VIEW||S)return;DB.matches.forEach(function(m){if(isLive(m)&&!autoDone[m.id]){autoDone[m.id]=1;openMatch(m.id)}})}
 function showSeason(keep){setTimeout(rotCheck,0);var ms=DB.matches.filter(function(m){return m.log.length}).sort(function(a,b){return (a.date+a.time).localeCompare(b.date+b.time)});
   if(DSEL!='season'&&!ms.some(function(m){return m.id==DSEL}))DSEL='season';
-  var tabs='<div id="dtabs"><button data-dsel="season" class="'+(DSEL=='season'?'on':'')+'">Stagione</button>'+ms.map(function(m){var d=(m.date||'').split('-');return '<button data-dsel="'+esc(m.id)+'" class="'+(DSEL==m.id?'on':'')+'">'+(m.home?'🏠 ':'🚌 ')+(d.length==3?d[2]+'/'+d[1]+' ':'')+'vs '+esc(m.opp||'?')+' <b>'+res(m)+'</b></button>'}).join('')+'</div>';
+  var tabs='<div id="dtabs"><button data-dsel="season" class="'+(DSEL=='season'?'on':'')+'">Stagione</button>'+ms.map(function(m){var d=(m.date||'').split('-');return '<button data-dsel="'+esc(m.id)+'" class="'+(DSEL==m.id?'on':'')+'">'+(m.home?'🏠 ':'🚌 ')+(d.length==3?d[2]+'/'+d[1]+' ':'')+'vs <span class="cB">'+esc(m.opp||'?')+'</span> <b>'+resH(m)+'</b></button>'}).join('')+'</div>';
   var h=!ms.length?'<div id="empty">Nessuna statistica ancora registrata.</div>':tabs+(DSEL=='season'?seasonDash(ms):matchDash(byId(DSEL)));
   var sb=document.getElementById('sbody'),st=sb.scrollTop;sb.innerHTML=h;sb.scrollTop=keep?st:0;document.getElementById('season').style.display='flex'}
 document.getElementById('sclose').addEventListener('click',function(){document.getElementById('season').style.display='none'});
@@ -763,7 +765,6 @@ document.getElementById('refz').addEventListener('click',function(){var v=docume
 function showHome(){setTimeout(rotCheck,0);if(VIEW){S=null;document.getElementById('ov').style.display='none';home.style.display='none';showSeason();return}if(PEND){PEND=null;pendUI()}S=null;if(swReload){location.reload();return}liveDot();document.getElementById('ov').style.display='none';renderHome();home.style.display='flex';publish(false)}
 document.getElementById('home2').addEventListener('click',function(){if(VIEW&&history.state&&history.state.v){history.back();return}showHome()});
 if(VIEW){var sh=document.querySelector('#season h1');if(sh)sh.textContent='📊 Azzurra U16 · Statistiche';document.title='Azzurra U16 · Statistiche'}
-document.getElementById('hxls').addEventListener('click',function(){if(!DB.matches.some(function(m){return m.log.length})){toast('Nessuna statistica ancora registrata');return}exportExcel()});
 var menu=document.getElementById('menu');
 document.getElementById('hset').addEventListener('click',function(){menu.style.display='flex'});
 document.getElementById('mclose').addEventListener('click',function(){menu.style.display='none'});
@@ -798,7 +799,7 @@ function hdr(m){var O=m.opp||'Avversario',s=score(m);return 'Azzurra '+s[0]+' - 
 function parz(m,P){return P.map(function(x){return x.a+'-'+x.b}).join(' / ')}
 function players(m){var r=[];for(var i=0;i<N;i++)r.push({i:i,n:clean(m.names[i])||('Calotta '+(i+1)),g:m.g[i]+m.gu[i],gu:m.gu[i],a:m.a[i]+m.au[i],au:m.au[i],e:m.e[i]});return r}
 function summaryShort(m){var k=analyze(m),pl=players(m),t=[];
-  t.push(hdr(m)+(m.gio?' ('+m.gio+')':''));
+  var sA=score(m);t.push('Azzurra '+sA[0]+' - '+sA[1]+' '+(m.opp||'Avversario')+' · '+(m.gio?m.gio+' · ':'')+(m.home?'in casa':'in trasferta'));
   t.push('Parziali: '+parz(m,k.P));
   t.push('Gol in superiorità: Azzurra '+k.gu+' · '+(m.opp||'avversari')+' '+k.ogu);
   var sc=pl.filter(function(p){return p.g}).sort(function(a,b){return b.g-a.g||a.i-b.i}).map(function(p){return p.n+(p.g>1?' '+p.g:'')});
@@ -818,12 +819,12 @@ function summaryFull(m){var k=analyze(m),pl=players(m),t=[],O=m.opp||'avversari'
     if(k.run.n>=2)t.push('Miglior parziale '+(k.run.t=='A'?'Azzurra':O)+': '+k.run.n+'-0'+(k.run.p==k.run.e?' nel '+k.run.p+'° tempo':' tra '+k.run.p+'° e '+k.run.e+'° tempo'));
     t.push('Situazioni di parità: '+k.ties+' · Cambi di vantaggio: '+k.chg)}
   t.push('');t.push('ATTACCO');
-  t.push('Gol '+k.A+': '+k.ga+" d'azione, "+k.gu+' in superiorità'+(k.A?' ('+pct(k.gu,k.A)+' dei gol)':''));
+  var ms_=mstat(m);t.push('Gol '+k.A+': '+ms_.ga+" d'azione, "+ms_.gu+' in superiorità, '+ms_.gr+' su rigore'+(k.A?' ('+pct(ms_.gu,k.A)+' in sup., '+pct(ms_.gr,k.A)+' su rigore)':''));
   t.push('Gol con assist: '+Math.min(k.ast,k.A)+' su '+k.A+(k.A?' ('+pct(Math.min(k.ast,k.A),k.A)+')':''));
   t.push('Marcatori diversi: '+pl.filter(function(p){return p.g}).length);
   t.push('');t.push('DIFESA');
-  t.push('Gol subiti '+k.B+': '+k.oga+" d'azione, "+k.ogu+' in inferiorità'+(k.B?' ('+pct(k.ogu,k.B)+' dei gol subiti)':''));
-  t.push('Bilancio in superiorità: '+(k.gu-k.ogu>0?'+':'')+(k.gu-k.ogu)+" · bilancio d'azione: "+(k.ga-k.oga>0?'+':'')+(k.ga-k.oga));
+  t.push('Gol subiti '+k.B+': '+ms_.oa+" d'azione, "+ms_.ou+' in inferiorità, '+ms_.or+' su rigore'+(k.B?' ('+pct(ms_.ou,k.B)+' in inf., '+pct(ms_.or,k.B)+' su rigore)':''));
+  var bl=function(n){return (n>0?'+':'')+n};t.push('Bilancio in superiorità: '+bl(ms_.gu-ms_.ou)+" · d'azione: "+bl(ms_.ga-ms_.oa)+' · su rigore: '+bl(ms_.gr-ms_.or));
   var sc=pl.filter(function(p){return p.g||p.a}).sort(function(a,b){return (b.g+b.a)-(a.g+a.a)||b.g-a.g||a.i-b.i});
   if(sc.length){t.push('');t.push('CONTRIBUTO OFFENSIVO (gol + assist)');
     sc.forEach(function(p){var x=[];if(p.g)x.push(p.g+' gol'+(p.gu?' ('+p.gu+' in sup.)':''));if(p.a)x.push(p.a+' assist'+(p.au?' ('+p.au+' in sup.)':''));t.push((p.i+1)+' '+p.n+': '+x.join(', '))})}
@@ -849,7 +850,6 @@ document.getElementById('close').addEventListener('click',function(){ov.style.di
 document.getElementById('copy').addEventListener('click',function(){
   function fb2(){txt.removeAttribute('readonly');txt.select();try{document.execCommand('copy');toast('Copiato')}catch(e){toast('Seleziona e copia a mano')}txt.setAttribute('readonly','')}
   try{navigator.clipboard.writeText(txt.value).then(function(){toast('Copiato')},fb2)}catch(e){fb2()}});
-document.getElementById('csv').addEventListener('click',function(){dl(fname()+'.csv',csv(),'text/csv')});
 document.getElementById('send').addEventListener('click',function(){publish(true)});
 function resetMatch(m){
   if(!confirm('AZZERARE la partita "'+title(m)+'"?\n\nVerranno cancellati gol, assist, espulsioni e tempi. I nomi restano.'))return false;
@@ -887,7 +887,7 @@ fetchStats();livePoll();viewAuto();
 window.addEventListener('online',function(){syncDistinte(false);livePoll()});
 document.addEventListener('visibilitychange',function(){if(document.visibilityState=='visible')livePoll()});
 // aggiornamenti: controlla a ogni riapertura; la nuova versione si carica da sola quando si è nell'elenco partite (mai durante la registrazione)
-var APPV=49,swReg=null,swReload=false;document.getElementById('appv').textContent='Versione '+APPV;
+var APPV=51,swReg=null,swReload=false;document.getElementById('appv').textContent='Versione '+APPV;
 if('serviceWorker' in navigator&&!VIEW){var hadCtrl=!!navigator.serviceWorker.controller;
   navigator.serviceWorker.register('sw.js').then(function(r){swReg=r}).catch(function(){});
   document.addEventListener('visibilitychange',function(){if(!document.hidden&&swReg)swReg.update().catch(function(){})});
