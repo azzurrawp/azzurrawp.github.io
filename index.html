@@ -416,7 +416,16 @@ function pendUI(){var b=document.body;b.classList.remove('pend-g','pend-gu');[].
   else u.textContent='↶ Annulla'}
 function nm(i){return (i+1)+' '+(S.names[i]||'')}
 function rec(f,i,link){if(f=='og'||f=='ogu')S[f]++;else{S[f][i]++;cell(f,i)}var e=[f,i,S.per,Date.now()];if(link)e.push(link);S.log.push(e)}
-function add(f,i){if(S.done)return;
+// due gol a meno di 15 secondi: quasi sempre un tocco sbagliato, si chiede conferma
+var CLOSE_S=window.CLOSE_S!=null?window.CLOSE_S:15,GOALS={g:1,gu:1,og:1,ogu:1},GLBL={g:'GOL',gu:'GOL uomo +',og:'gol avversario',ogu:'gol avversario uomo +'};
+function goalDesc(f,i){return (f=='og'||f=='ogu')?GLBL[f]:GLBL[f]+' di '+nm(i)}
+function tooClose(f,i){if(!GOALS[f])return false;for(var k=S.log.length-1;k>=0;k--){var e=S.log[k];if(!GOALS[e[0]])continue;
+  var d=Math.round((Date.now()-e[3])/1000);if(d>=CLOSE_S)return false;beep('e',-1);
+  askBig({q:'Gol a '+d+' second'+(d==1?'o':'i')+' dal precedente: confermi?',sub:'Gol precedente: '+goalDesc(e[0],e[1])+'. Ora stai registrando: '+goalDesc(f,i)+'.',
+    warn:'Due gol così vicini di solito sono un tocco sbagliato.',yes:'Sì, registra',color:'#e65100',
+    onYes:function(){add(f,i,true)},onNo:function(){toast(PEND?'Gol non registrato: tocca il marcatore giusto':'Gol non registrato')}});return true}return false}
+function add(f,i,ok){if(S.done)return;
+  if(!ok&&(!PEND||f===GOALOF[PEND.f]&&i!==PEND.i)&&tooClose(f,i))return;
   if(PEND){
     if(f!==GOALOF[PEND.f]){toast('Prima tocca il marcatore in '+(PEND.f=='au'?'GOL uomo +':'GOL')+' (oppure Annulla assist)');beep('e',-1);return}
     if(i===PEND.i){toast('Il marcatore deve essere diverso da chi ha fatto l\'assist');beep('e',-1);return}
