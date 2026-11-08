@@ -182,6 +182,7 @@ body.pend-g #last,body.pend-gu #last{color:#ffd600;font-weight:700;opacity:1}
     <button class="btn mi" id="hxls" style="background:#0f7b3f">📤 Esporta Excel</button>
     <button class="btn mi" id="mtok" style="background:#455a64">🔑 Codice di pubblicazione</button>
     <button class="btn mi" id="mclose" style="background:#90a4ae">Chiudi</button>
+    <div id="appv" style="text-align:center;color:#78909c;font-size:14px;margin-top:4px"></div>
   </div>
 </div>
 <div id="msg"></div>
@@ -548,7 +549,7 @@ function showRef(m){if(!m||!m.ref)return;var v=document.getElementById('refv'),i
 document.getElementById('refb').addEventListener('click',function(){showRef(S)});
 document.getElementById('refc').addEventListener('click',function(){document.getElementById('refv').style.display='none'});
 document.getElementById('refz').addEventListener('click',function(){var v=document.getElementById('refv');v.classList.toggle('z');this.textContent=v.classList.contains('z')?'🔍 Adatta':'🔍 Ingrandisci'});
-function showHome(){if(PEND){PEND=null;pendUI()}S=null;liveDot();document.getElementById('ov').style.display='none';renderHome();home.style.display='flex';publish(false)}
+function showHome(){if(PEND){PEND=null;pendUI()}S=null;if(swReload){location.reload();return}liveDot();document.getElementById('ov').style.display='none';renderHome();home.style.display='flex';publish(false)}
 document.getElementById('home2').addEventListener('click',showHome);
 document.getElementById('hxls').addEventListener('click',function(){if(!DB.matches.some(function(m){return m.log.length})){toast('Nessuna statistica ancora registrata');return}exportExcel()});
 var menu=document.getElementById('menu');
@@ -672,8 +673,13 @@ showHome();
 fetchStats();livePoll();
 window.addEventListener('online',function(){syncDistinte(false);livePoll()});
 document.addEventListener('visibilitychange',function(){if(document.visibilityState=='visible')livePoll()});
+// aggiornamenti: controlla a ogni riapertura; la nuova versione si carica da sola quando si è nell'elenco partite (mai durante la registrazione)
+var APPV=39,swReg=null,swReload=false;document.getElementById('appv').textContent='Versione '+APPV;
+if('serviceWorker' in navigator){var hadCtrl=!!navigator.serviceWorker.controller;
+  navigator.serviceWorker.register('sw.js').then(function(r){swReg=r}).catch(function(){});
+  document.addEventListener('visibilitychange',function(){if(!document.hidden&&swReg)swReg.update().catch(function(){})});
+  navigator.serviceWorker.addEventListener('controllerchange',function(){if(!hadCtrl){hadCtrl=true;return}if(!S&&!PEND)location.reload();else swReload=true})}
 })();
-if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(function(){})}
 </script>
 </body>
 </html>
