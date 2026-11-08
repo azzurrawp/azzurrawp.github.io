@@ -100,7 +100,11 @@ body.ro #g .nm input,body.ro #opp{pointer-events:none}
 #g .n.dim .cap{background-image:linear-gradient(to top right,transparent 45%,#c62828 45%,#c62828 55%,transparent 55%)}
 .sc small i{display:block;font-style:normal;font-size:11px;opacity:.9;letter-spacing:.3px}
 .where{display:inline-block;border-radius:12px;padding:3px 10px;font-size:14px;font-weight:700;background:#e3ecfa;color:#0b3d91;margin-left:6px;white-space:nowrap}
-.pnote{font-size:14px;color:#546e7a;margin-top:6px}.pill{color:#fff;border-radius:16px;padding:6px 14px;font-weight:700;font-size:16px}
+.pnote{font-size:14px;color:#546e7a;margin-top:6px}@media (max-height:520px){.cap{width:32px;height:16px;font-size:15px;border-radius:16px 16px 6px 6px;border-width:1.5px;box-shadow:none}.cap:before,.cap:after{width:5px;height:5px;bottom:-1px;border-width:1px}.cap:before{left:-3px}.cap:after{right:-3px}}
+#rot{position:fixed;inset:0;z-index:40;background:rgba(11,61,145,.96);color:#fff;display:none;flex-direction:column;align-items:center;justify-content:center;gap:22px;text-align:center;padding:28px}
+#rot .rph{transform-box:fill-box;transform-origin:center;animation:rotp 2.6s ease-in-out infinite}@keyframes rotp{0%,20%{transform:rotate(0)}50%,85%{transform:rotate(-90deg)}100%{transform:rotate(0)}}
+#rot b{font-size:24px;line-height:1.3}#rot span{font-size:17px;opacity:.9;line-height:1.4}#rot button{margin-top:8px;font-size:17px;padding:12px 22px;border:2px solid #fff;border-radius:10px;background:transparent;color:#fff}
+.pill{color:#fff;border-radius:16px;padding:6px 14px;font-weight:700;font-size:16px}
 #stab{width:100%;border-collapse:collapse;background:#fff;border-radius:10px;overflow:hidden;font-size:18px}#stab th{background:#0b3d91;color:#fff;padding:10px 8px;font-size:15px}#stab td{padding:9px 8px;text-align:center;border-bottom:1px solid #e3e8ef}#stab td:first-child{text-align:left;font-weight:700}#stab tr:nth-child(even) td{background:#f3f6fa}#sbody h2{font-size:18px;color:#0b3d91;margin:18px 0 8px}
 .mi{text-align:left;font-size:19px!important;padding:14px 16px!important}
 #rob{display:none;background:#2e7d32!important}
@@ -129,6 +133,7 @@ body.pend-g #last,body.pend-gu #last{color:#ffd600;font-weight:700;opacity:1}
   <button id="fs">⛶</button>
 </div>
 <div id="g"></div>
+<div id="rot"><svg class="ri" viewBox="0 0 140 140" width="150" height="150" aria-hidden="true"><path d="M30 108 A52 52 0 0 1 22 52" fill="none" stroke="#ffd600" stroke-width="6" stroke-linecap="round"/><path d="M12 60 L22 44 L32 60" fill="none" stroke="#ffd600" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><g class="rph"><rect x="46" y="22" width="48" height="96" rx="9" fill="#fff"/><rect x="51" y="32" width="38" height="72" rx="3" fill="#1565c0"/><rect x="62" y="26" width="16" height="3" rx="1.5" fill="#90a4ae"/><circle cx="70" cy="111" r="3.5" fill="#90a4ae"/></g></svg><b>Gira il telefono in orizzontale</b><span>Così vedi tutta la griglia della partita, con nomi e colonne interi.</span><button id="rotok">Continua in verticale</button></div>
 <div id="refv"><div class="rb"><span id="reft">Referto</span><button id="refz">🔍 Ingrandisci</button><button id="refc">Chiudi</button></div><div class="ri"><img id="refi" alt="Referto"></div></div>
 <div id="ov"><div class="box">
   <div class="row"><button class="btn" id="sb1" style="background:#0b3d91">Breve (WhatsApp)</button><button class="btn" id="sb2" style="background:#90a4ae">Analisi completa</button></div>
@@ -404,7 +409,9 @@ function totals(){F.forEach(function(f){document.getElementById('t'+f).textConte
 // calotte: chi gioca in casa ha la calotta bianca, chi è in trasferta quella blu; portieri (1 e 13) rossa
 function capCls(i,ours){return (i==0||i==12)?'cap r':((ours?S.home:!S.home)?'cap w':'cap b')}
 function where(m){return m.home?'🏠 In casa':'🚌 In trasferta'}
-function all(){var sl=document.getElementById('swh');if(sl)sl.textContent=S.home?'🏠 IN CASA':'🚌 IN TRASFERTA';for(var i=0;i<N;i++){document.getElementById('cp'+i).className=capCls(i,true);document.getElementById('cpx'+i).className=capCls(i,false);F.forEach(function(f){cell(f,i)});cell('x',i);inputs[i].value=S.names[i]||''}oppIn.value=S.opp||'';totals()}
+var rotOk=false;function rotCheck(){var el=document.getElementById('rot');if(!el)return;var need=!!S&&home.style.display=='none'&&document.getElementById('season').style.display!='flex'&&!rotOk&&innerHeight>innerWidth&&innerWidth<700;el.style.display=need?'flex':'none'}
+window.addEventListener('resize',rotCheck);window.addEventListener('orientationchange',function(){setTimeout(rotCheck,300)});
+function all(){setTimeout(rotCheck,0);var sl=document.getElementById('swh');if(sl)sl.textContent=S.home?'🏠 IN CASA':'🚌 IN TRASFERTA';for(var i=0;i<N;i++){document.getElementById('cp'+i).className=capCls(i,true);document.getElementById('cpx'+i).className=capCls(i,false);F.forEach(function(f){cell(f,i)});cell('x',i);inputs[i].value=S.names[i]||''}oppIn.value=S.opp||'';totals()}
 
 var lastRow=null;
 var AC=null,TONE={g:[880,1320],gu:[880,1320],og:[440,330],ogu:[440,330],a:[660,990],au:[660,990],e:[300,0],x:[300,0]};
@@ -540,12 +547,12 @@ function mstat(m){var o={A:0,B:0,ga:0,gu:0,gr:0,oa:0,ou:0,or:0,P:[],pl:{},ast:0,
   return o}
 var KP=function(c,v,l,sub){return '<div class="kp '+c+'"><b>'+v+'</b><span>'+l+'</span>'+(sub?'<small>'+sub+'</small>':'')+'</div>'};
 function sgn(n){return (n>0?'+':'')+n}
-function barsSVG(P,la,lb){var W=560,H=210,mx=1;P.forEach(function(q){mx=Math.max(mx,q.a,q.b)});var gw=W/4,bw=38,s='';
+function barsSVG(P,la,lb){var W=560,H=210,mx=1;/* */P.forEach(function(q){mx=Math.max(mx,q.a,q.b)});var gw=W/4,bw=38,s='';
   P.forEach(function(q,k){var x=k*gw+gw/2,ha=q.a/mx*130,hb=q.b/mx*130;
     s+='<rect x="'+(x-bw-3)+'" y="'+(160-ha)+'" width="'+bw+'" height="'+ha+'" rx="4" fill="#0b3d91"/><text x="'+(x-bw/2-3)+'" y="'+(154-ha)+'" text-anchor="middle" font-size="17" font-weight="700" fill="#0b3d91">'+q.a+'</text>'+
        '<rect x="'+(x+3)+'" y="'+(160-hb)+'" width="'+bw+'" height="'+hb+'" rx="4" fill="#ef6c00"/><text x="'+(x+3+bw/2)+'" y="'+(154-hb)+'" text-anchor="middle" font-size="17" font-weight="700" fill="#e65100">'+q.b+'</text>'+
        '<text x="'+x+'" y="185" text-anchor="middle" font-size="16" fill="#37474f">'+(k+1)+'° tempo</text>'});
-  return '<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;max-width:640px"><line x1="0" y1="160" x2="'+W+'" y2="160" stroke="#b0bec5"/>'+s+
+  return '<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;max-width:760px"><line x1="0" y1="160" x2="'+W+'" y2="160" stroke="#b0bec5"/>'+s+
     '<rect x="150" y="196" width="12" height="12" fill="#0b3d91"/><text x="168" y="207" font-size="14" fill="#37474f">'+la+'</text><rect x="330" y="196" width="12" height="12" fill="#ef6c00"/><text x="348" y="207" font-size="14" fill="#37474f">'+lb+'</text></svg>'}
 function trendSVG(m,lb,per,sc){var ev=m.log.filter(function(e){return (e[0]=='g'||e[0]=='gu'||e[0]=='og'||e[0]=='ogu')&&(!per||e[2]==per)});if(!ev.length&&!per)return '';
   var W=per?300:620,H=per?150:220,n=Math.max(ev.length,1),d=0,pts=[[0,0]],mx=sc?sc[0]:1,mn=sc?sc[1]:-1,seps=[];ev.forEach(function(e,k){d+=(e[0]=='g'||e[0]=='gu')?1:-1;pts.push([k+1,d]);mx=Math.max(mx,d);mn=Math.min(mn,d);if(k&&e[2]!=ev[k-1][2]&&!per)seps.push([k+.5,e[2]])});
@@ -597,7 +604,7 @@ function seasonDash(ms){var T={},o=[];
   return h}
 function seasonOpen(){return document.getElementById('season').style.display=='flex'}
 var autoDone={};function viewAuto(){if(!VIEW||S)return;DB.matches.forEach(function(m){if(isLive(m)&&!autoDone[m.id]){autoDone[m.id]=1;openMatch(m.id)}})}
-function showSeason(keep){var ms=DB.matches.filter(function(m){return m.log.length}).sort(function(a,b){return (a.date+a.time).localeCompare(b.date+b.time)});
+function showSeason(keep){setTimeout(rotCheck,0);var ms=DB.matches.filter(function(m){return m.log.length}).sort(function(a,b){return (a.date+a.time).localeCompare(b.date+b.time)});
   if(DSEL!='season'&&!ms.some(function(m){return m.id==DSEL}))DSEL='season';
   var tabs='<div id="dtabs"><button data-dsel="season" class="'+(DSEL=='season'?'on':'')+'">Stagione</button>'+ms.map(function(m){var d=(m.date||'').split('-');return '<button data-dsel="'+esc(m.id)+'" class="'+(DSEL==m.id?'on':'')+'">'+(m.home?'🏠 ':'🚌 ')+(d.length==3?d[2]+'/'+d[1]+' ':'')+esc(m.opp||'?')+' <b>'+res(m)+'</b></button>'}).join('')+'</div>';
   var h=!ms.length?'<div id="empty">Nessuna statistica ancora registrata.</div>':tabs+(DSEL=='season'?seasonDash(ms):matchDash(byId(DSEL)));
@@ -613,9 +620,10 @@ function showRef(m){if(!m||!m.ref)return;var v=document.getElementById('refv'),i
     .then(function(o){return decrypt(o,DB.pin)}).then(function(d){try{localStorage.setItem(K,d.img)}catch(e){}open(d.img)})
     .catch(function(){toast('Referto non disponibile: serve internet la prima volta')})}
 document.getElementById('refb').addEventListener('click',function(){showRef(S)});
+document.getElementById('rotok').addEventListener('click',function(){rotOk=true;rotCheck()});
 document.getElementById('refc').addEventListener('click',function(){document.getElementById('refv').style.display='none'});
 document.getElementById('refz').addEventListener('click',function(){var v=document.getElementById('refv');v.classList.toggle('z');this.textContent=v.classList.contains('z')?'🔍 Adatta':'🔍 Ingrandisci'});
-function showHome(){if(VIEW){S=null;document.getElementById('ov').style.display='none';home.style.display='none';showSeason();return}if(PEND){PEND=null;pendUI()}S=null;if(swReload){location.reload();return}liveDot();document.getElementById('ov').style.display='none';renderHome();home.style.display='flex';publish(false)}
+function showHome(){setTimeout(rotCheck,0);if(VIEW){S=null;document.getElementById('ov').style.display='none';home.style.display='none';showSeason();return}if(PEND){PEND=null;pendUI()}S=null;if(swReload){location.reload();return}liveDot();document.getElementById('ov').style.display='none';renderHome();home.style.display='flex';publish(false)}
 document.getElementById('home2').addEventListener('click',function(){if(VIEW&&history.state&&history.state.v){history.back();return}showHome()});
 if(VIEW){var sh=document.querySelector('#season h1');if(sh)sh.textContent='📊 Azzurra U16 · Statistiche';document.title='Azzurra U16 · Statistiche'}
 document.getElementById('hxls').addEventListener('click',function(){if(!DB.matches.some(function(m){return m.log.length})){toast('Nessuna statistica ancora registrata');return}exportExcel()});
@@ -742,7 +750,7 @@ fetchStats();livePoll();viewAuto();
 window.addEventListener('online',function(){syncDistinte(false);livePoll()});
 document.addEventListener('visibilitychange',function(){if(document.visibilityState=='visible')livePoll()});
 // aggiornamenti: controlla a ogni riapertura; la nuova versione si carica da sola quando si è nell'elenco partite (mai durante la registrazione)
-var APPV=44,swReg=null,swReload=false;document.getElementById('appv').textContent='Versione '+APPV;
+var APPV=46,swReg=null,swReload=false;document.getElementById('appv').textContent='Versione '+APPV;
 if('serviceWorker' in navigator&&!VIEW){var hadCtrl=!!navigator.serviceWorker.controller;
   navigator.serviceWorker.register('sw.js').then(function(r){swReg=r}).catch(function(){});
   document.addEventListener('visibilitychange',function(){if(!document.hidden&&swReg)swReg.update().catch(function(){})});
