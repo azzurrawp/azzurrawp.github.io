@@ -102,7 +102,7 @@ body.ro #g .nm input,body.ro #opp{pointer-events:none}
 .where{display:inline-block;border-radius:12px;padding:3px 10px;font-size:14px;font-weight:700;background:#e3ecfa;color:#0b3d91;margin-left:6px;white-space:nowrap}
 .pnote{font-size:14px;color:#546e7a;margin-top:6px}@media (max-height:520px){.cap{width:32px;height:16px;font-size:15px;border-radius:16px 16px 6px 6px;border-width:1.5px;box-shadow:none}.cap:before,.cap:after{width:5px;height:5px;bottom:-1px;border-width:1px}.cap:before{left:-3px}.cap:after{right:-3px}}
 #rot{position:fixed;inset:0;z-index:40;background:rgba(11,61,145,.96);color:#fff;display:none;flex-direction:column;align-items:center;justify-content:center;gap:22px;text-align:center;padding:28px}
-#rot .rph{transform-box:fill-box;transform-origin:center;animation:rotp 2.6s ease-in-out infinite}@keyframes rotp{0%,20%{transform:rotate(0)}50%,85%{transform:rotate(-90deg)}100%{transform:rotate(0)}}
+#rot .rph{transform-box:fill-box;transform-origin:center;animation:rotp 2.6s ease-in-out infinite}@keyframes rotp{0%,20%{transform:rotate(0)}50%,85%{transform:rotate(90deg)}100%{transform:rotate(0)}}
 #rot b{font-size:24px;line-height:1.3}#rot span{font-size:17px;opacity:.9;line-height:1.4}#rot button{margin-top:8px;font-size:17px;padding:12px 22px;border:2px solid #fff;border-radius:10px;background:transparent;color:#fff}
 .pill{color:#fff;border-radius:16px;padding:6px 14px;font-weight:700;font-size:16px}
 #stab{width:100%;border-collapse:collapse;background:#fff;border-radius:10px;overflow:hidden;font-size:18px}#stab th{background:#0b3d91;color:#fff;padding:10px 8px;font-size:15px}#stab td{padding:9px 8px;text-align:center;border-bottom:1px solid #e3e8ef}#stab td:first-child{text-align:left;font-weight:700}#stab tr:nth-child(even) td{background:#f3f6fa}#sbody h2{font-size:18px;color:#0b3d91;margin:18px 0 8px}
@@ -133,7 +133,7 @@ body.pend-g #last,body.pend-gu #last{color:#ffd600;font-weight:700;opacity:1}
   <button id="fs">⛶</button>
 </div>
 <div id="g"></div>
-<div id="rot"><svg class="ri" viewBox="0 0 140 140" width="150" height="150" aria-hidden="true"><path d="M30 108 A52 52 0 0 1 22 52" fill="none" stroke="#ffd600" stroke-width="6" stroke-linecap="round"/><path d="M12 60 L22 44 L32 60" fill="none" stroke="#ffd600" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><g class="rph"><rect x="46" y="22" width="48" height="96" rx="9" fill="#fff"/><rect x="51" y="32" width="38" height="72" rx="3" fill="#1565c0"/><rect x="62" y="26" width="16" height="3" rx="1.5" fill="#90a4ae"/><circle cx="70" cy="111" r="3.5" fill="#90a4ae"/></g></svg><b>Gira il telefono in orizzontale</b><span>Così vedi tutta la griglia della partita, con nomi e colonne interi.</span><button id="rotok">Continua in verticale</button></div>
+<div id="rot"><svg class="ri" viewBox="0 0 160 150" width="170" height="160" aria-hidden="true"><path d="M86 14 A62 62 0 0 1 146 70" fill="none" stroke="#ffd600" stroke-width="6" stroke-linecap="round"/><path d="M134 62 L146 76 L156 60" fill="none" stroke="#ffd600" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><g class="rph"><rect x="46" y="30" width="48" height="96" rx="9" fill="#fff"/><rect x="51" y="40" width="38" height="72" rx="3" fill="#1565c0"/><rect x="62" y="34" width="16" height="3" rx="1.5" fill="#90a4ae"/><circle cx="70" cy="119" r="3.5" fill="#90a4ae"/></g></svg><b>Gira il telefono in orizzontale</b><span>Così vedi tutta la griglia della partita, con nomi e colonne interi.</span><button id="rotok">Continua in verticale</button></div>
 <div id="refv"><div class="rb"><span id="reft">Referto</span><button id="refz">🔍 Ingrandisci</button><button id="refc">Chiudi</button></div><div class="ri"><img id="refi" alt="Referto"></div></div>
 <div id="ov"><div class="box">
   <div class="row"><button class="btn" id="sb1" style="background:#0b3d91">Breve (WhatsApp)</button><button class="btn" id="sb2" style="background:#90a4ae">Analisi completa</button></div>
@@ -750,7 +750,7 @@ fetchStats();livePoll();viewAuto();
 window.addEventListener('online',function(){syncDistinte(false);livePoll()});
 document.addEventListener('visibilitychange',function(){if(document.visibilityState=='visible')livePoll()});
 // aggiornamenti: controlla a ogni riapertura; la nuova versione si carica da sola quando si è nell'elenco partite (mai durante la registrazione)
-var APPV=46,swReg=null,swReload=false;document.getElementById('appv').textContent='Versione '+APPV;
+var APPV=47,swReg=null,swReload=false;document.getElementById('appv').textContent='Versione '+APPV;
 if('serviceWorker' in navigator&&!VIEW){var hadCtrl=!!navigator.serviceWorker.controller;
   navigator.serviceWorker.register('sw.js').then(function(r){swReg=r}).catch(function(){});
   document.addEventListener('visibilitychange',function(){if(!document.hidden&&swReg)swReg.update().catch(function(){})});
