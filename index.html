@@ -262,8 +262,8 @@ function syncDistinte(ask){if(!window.crypto||!crypto.subtle)return Promise.reso
 // ---------- statistiche condivise: pubblicazione cifrata su GitHub (solo con internet) ----------
 function pending(m){return !m.remote&&(m.log.length||m.sent)&&(m.upd||0)>(m.sent||0)}
 function rowsOf(m){var s=score(m),O=m.opp||'',P=[],Gi=[],E=[],ps=[];
-  for(var p=1;p<=4;p++){var a=0,b=0;m.log.forEach(function(e){if(e[2]!=p)return;if(e[0]=='g'||e[0]=='gu')a++;if(e[0]=='og'||e[0]=='ogu')b++});ps.push(m.home?a+'-'+b:b+'-'+a)}
-  P.push([m.id,m.gio||'',m.date||'',m.time||'',m.home?'Casa':'Trasferta',O,m.place||'',s[0],s[1],m.home?'Azzurra '+s[0]+'-'+s[1]+' '+O:O+' '+s[1]+'-'+s[0]+' Azzurra',ps.join(' / '),sum(m.gu),m.ogu,sum(m.e),sum(m.x),m.done?'Conclusa':'In corso',new Date(m.upd||Date.now()).toLocaleString('it-IT')]);
+  for(var p=1;p<=4;p++){var a=0,b=0;m.log.forEach(function(e){if(e[2]!=p)return;if(e[0]=='g'||e[0]=='gu')a++;if(e[0]=='og'||e[0]=='ogu')b++});ps.push(a+'-'+b)}
+  P.push([m.id,m.gio||'',m.date||'',m.time||'',m.home?'Casa':'Trasferta',O,m.place||'',s[0],s[1],'Azzurra '+s[0]+'-'+s[1]+' '+O,ps.join(' / '),sum(m.gu),m.ogu,sum(m.e),sum(m.x),m.done?'Conclusa':'In corso',new Date(m.upd||Date.now()).toLocaleString('it-IT')]);
   for(var i=0;i<N;i++)if(m.names[i]||m.g[i]||m.gu[i]||m.a[i]||m.au[i]||m.e[i])Gi.push([m.id,m.date||'',O,i+1,m.names[i]||('Calotta '+(i+1)),m.g[i]+m.gu[i],m.gu[i],m.a[i]+m.au[i],m.au[i],m.e[i]]);
   m.log.forEach(function(e){var c=e[1]>=0?e[1]+1:'';E.push([m.id,m.date||'',O,e[2]+'T',new Date(e[3]).toLocaleTimeString('it-IT'),LBL[e[0]],c,(e[0]=='x'||e[0]=='og'||e[0]=='ogu')?'':(m.names[e[1]]||'')])});
   return {Partite:P,Giocatori:Gi,Eventi:E}}
@@ -522,8 +522,9 @@ imp.addEventListener('change',function(){var f=imp.files[0];if(!f)return;var r=n
 var home=document.getElementById('home'),listEl=document.getElementById('list');
 function fdate(m){try{return new Date(m.date+'T12:00').toLocaleDateString('it-IT',{weekday:'short',day:'numeric',month:'short'})}catch(e){return m.date}}
 function score(m){return [sum(m.g)+sum(m.gu),m.og+m.ogu]}
-function title(m){return m.home?'AZZURRA – '+(m.opp||'?'):(m.opp||'?')+' – AZZURRA'}
-function res(m){var s=score(m);return m.home?s[0]+' – '+s[1]:s[1]+' – '+s[0]}
+// ordine sempre Azzurra prima (noi – loro); casa/trasferta indicata a parte con 🏠/🚌
+function title(m){return 'AZZURRA – '+(m.opp||'?')}
+function res(m){var s=score(m);return s[0]+' – '+s[1]}
 function renderHome(){document.getElementById('hnew').style.display=DB.gh||!DB.matches.some(function(m){return m.remote})?'':'none';var ms=DB.matches.slice().sort(function(a,b){return (isLive(b)?1:0)-(isLive(a)?1:0)||(a.date+a.time).localeCompare(b.date+b.time)});
   if(!ms.length){listEl.innerHTML='<div id="empty">Nessuna partita.<br>Apri il link della distinta oppure tocca "+ Nuova partita".</div>';return}
   listEl.innerHTML=ms.map(function(m){var lv=isLive(m)&&!DB.gh,cls=lv?'run live':m.done?'done':(m.log.length?'run':''),st=lv?'🔴 IN DIRETTA · '+m.per+'T<b>'+res(m)+'</b>':m.done?'Conclusa<b>'+res(m)+'</b>':(m.log.length?'In corso · '+m.per+'T<b>'+res(m)+'</b>':'Da giocare');
@@ -575,7 +576,7 @@ function matchDash(m){var o=mstat(m),k=analyze(m),O=m.opp||'Avversario',diff=o.A
   var es=m.done?(diff>0?'Vittoria':diff<0?'Sconfitta':'Pareggio'):'In corso',ec=m.done?(diff>0?'#2e7d32':diff<0?'#c62828':'#546e7a'):'#e65100';
   var h='<div class="dhead"><div><div class="dt">'+esc(title(m))+' <b>'+res(m)+'</b></div><div class="ds">'+esc((m.gio?m.gio+' · ':'')+fdate(m)+(m.place?' · '+m.place:''))+'</div></div><span class="where" style="font-size:16px;padding:6px 14px">'+where(m)+'</span><span class="pill" style="background:'+ec+'">'+es+(m.done&&diff?' ('+sgn(diff)+')':'')+'</span>'+
     (m.ref?'<button class="btn" data-ref="'+esc(m.id)+'" style="background:#00838f">📄 Referto</button>':'')+'</div>';
-  h+='<div id="kpi">'+KP('wide',parz(m,o.P),'Parziali ('+esc(m.home?'Azzurra in casa – '+O:O+' in casa – Azzurra')+')','Tempi: '+w+' vinti ('+pct(w,4)+') · '+x+' pari · '+l+' persi')+
+  h+='<div id="kpi">'+KP('wide',parz(m,o.P),'Parziali (Azzurra – '+esc(O)+')','Tempi: '+w+' vinti ('+pct(w,4)+') · '+x+' pari · '+l+' persi')+
     KP('g',o.A,'Gol fatti',o.ga+" d'azione ("+pct(o.ga,o.A)+') · '+o.gu+' in sup. ('+pct(o.gu,o.A)+') · '+o.gr+' su rigore ('+pct(o.gr,o.A)+')')+KP('r',o.B,'Gol subiti',o.oa+" d'azione ("+pct(o.oa,o.B)+') · '+o.ou+' in inf. ('+pct(o.ou,o.B)+') · '+o.or+' su rigore ('+pct(o.or,o.B)+')')+
     KP('o',o.gu+' / '+o.ou,'Gol in superiorità','fatti / subiti · '+pct(o.gu,o.A)+' / '+pct(o.ou,o.B)+' dei gol')+KP('y',o.gr+' / '+o.or,'Gol su rigore','fatti / subiti · '+pct(o.gr,o.A)+' / '+pct(o.or,o.B)+' dei gol')+
     KP('',Math.min(o.ast,o.A)+' / '+o.A,'Gol con assist',pct(Math.min(o.ast,o.A),o.A)+' dei gol')+KP('',Object.keys(o.pl).filter(function(n){return o.pl[n].g}).length,'Marcatori diversi',(function(){var t=Object.keys(o.pl).map(function(n){return o.pl[n]}).sort(function(a,b){return b.g-a.g})[0];return t&&t.g?'il migliore '+esc(clean(t.n))+': '+pct(t.g,o.A)+' dei gol':''})())+
@@ -609,7 +610,7 @@ function seasonOpen(){return document.getElementById('season').style.display=='f
 var autoDone={};function viewAuto(){if(!VIEW||S)return;DB.matches.forEach(function(m){if(isLive(m)&&!autoDone[m.id]){autoDone[m.id]=1;openMatch(m.id)}})}
 function showSeason(keep){setTimeout(rotCheck,0);var ms=DB.matches.filter(function(m){return m.log.length}).sort(function(a,b){return (a.date+a.time).localeCompare(b.date+b.time)});
   if(DSEL!='season'&&!ms.some(function(m){return m.id==DSEL}))DSEL='season';
-  var tabs='<div id="dtabs"><button data-dsel="season" class="'+(DSEL=='season'?'on':'')+'">Stagione</button>'+ms.map(function(m){var d=(m.date||'').split('-');return '<button data-dsel="'+esc(m.id)+'" class="'+(DSEL==m.id?'on':'')+'">'+(m.home?'🏠 ':'🚌 ')+(d.length==3?d[2]+'/'+d[1]+' ':'')+esc(m.opp||'?')+' <b>'+res(m)+'</b></button>'}).join('')+'</div>';
+  var tabs='<div id="dtabs"><button data-dsel="season" class="'+(DSEL=='season'?'on':'')+'">Stagione</button>'+ms.map(function(m){var d=(m.date||'').split('-');return '<button data-dsel="'+esc(m.id)+'" class="'+(DSEL==m.id?'on':'')+'">'+(m.home?'🏠 ':'🚌 ')+(d.length==3?d[2]+'/'+d[1]+' ':'')+'vs '+esc(m.opp||'?')+' <b>'+res(m)+'</b></button>'}).join('')+'</div>';
   var h=!ms.length?'<div id="empty">Nessuna statistica ancora registrata.</div>':tabs+(DSEL=='season'?seasonDash(ms):matchDash(byId(DSEL)));
   var sb=document.getElementById('sbody'),st=sb.scrollTop;sb.innerHTML=h;sb.scrollTop=keep?st:0;document.getElementById('season').style.display='flex'}
 document.getElementById('sclose').addEventListener('click',function(){document.getElementById('season').style.display='none'});
@@ -660,8 +661,8 @@ function analyze(m){var s=score(m),A=s[0],B=s[1],P=[],run={t:null,n:0,best:{t:nu
     maxL=Math.max(maxL,d);maxD=Math.min(maxD,d);var nl=d>0?1:d<0?-1:0;if(nl==0)ties++;if(nl!=0&&lead!=0&&nl!=lead)chg++;if(nl!=0){if(firstLead===null)firstLead=nl;lead=nl}});
   return {A:A,B:B,P:P,maxL:maxL,maxD:-maxD,ties:ties,chg:chg,run:run.best,
     gu:sum(m.gu),ga:sum(m.g),snA:sum(m.x),ogu:m.ogu,oga:m.og,snB:sum(m.e),ast:sum(m.a)+sum(m.au)}}
-function hdr(m){var O=m.opp||'Avversario',s=score(m);return m.home?'Azzurra '+s[0]+' - '+s[1]+' '+O:O+' '+s[1]+' - '+s[0]+' Azzurra'}
-function parz(m,P){return P.map(function(x){return m.home?x.a+'-'+x.b:x.b+'-'+x.a}).join(' / ')}
+function hdr(m){var O=m.opp||'Avversario',s=score(m);return 'Azzurra '+s[0]+' - '+s[1]+' '+O+(m.home?' (in casa)':' (in trasferta)')}
+function parz(m,P){return P.map(function(x){return x.a+'-'+x.b}).join(' / ')}
 function players(m){var r=[];for(var i=0;i<N;i++)r.push({i:i,n:clean(m.names[i])||('Calotta '+(i+1)),g:m.g[i]+m.gu[i],gu:m.gu[i],a:m.a[i]+m.au[i],au:m.au[i],e:m.e[i]});return r}
 function summaryShort(m){var k=analyze(m),pl=players(m),t=[];
   t.push(hdr(m)+(m.gio?' ('+m.gio+')':''));
@@ -753,7 +754,7 @@ fetchStats();livePoll();viewAuto();
 window.addEventListener('online',function(){syncDistinte(false);livePoll()});
 document.addEventListener('visibilitychange',function(){if(document.visibilityState=='visible')livePoll()});
 // aggiornamenti: controlla a ogni riapertura; la nuova versione si carica da sola quando si è nell'elenco partite (mai durante la registrazione)
-var APPV=47,swReg=null,swReload=false;document.getElementById('appv').textContent='Versione '+APPV;
+var APPV=48,swReg=null,swReload=false;document.getElementById('appv').textContent='Versione '+APPV;
 if('serviceWorker' in navigator&&!VIEW){var hadCtrl=!!navigator.serviceWorker.controller;
   navigator.serviceWorker.register('sw.js').then(function(r){swReg=r}).catch(function(){});
   document.addEventListener('visibilitychange',function(){if(!document.hidden&&swReg)swReg.update().catch(function(){})});

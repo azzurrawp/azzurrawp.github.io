@@ -19,12 +19,12 @@ N = 15
 def score(m): return sum(m['g'])+sum(m['gu']), m['og']+m['ogu']
 def res(m):
     a, c = score(m); o_ = m.get('opp', '')
-    return f"Azzurra {a}-{c} {o_}" if m.get('home') else f"{o_} {c}-{a} Azzurra"
+    return f"Azzurra {a}-{c} {o_}"   # sempre Azzurra prima; casa/trasferta in colonna a parte
 def parz(m):
     r = []
     for p in range(1, 5):
         a = sum(1 for e in m['log'] if e[2] == p and e[0] in ('g', 'gu')); c = sum(1 for e in m['log'] if e[2] == p and e[0] in ('og', 'ogu'))
-        r.append(f"{a}-{c}" if m.get('home') else f"{c}-{a}")
+        r.append(f"{a}-{c}")
     return ' / '.join(r)
 H_P = ['Giornata','Data','Ora','Casa/Trasferta','Avversario','Piscina','Risultato','Parziali','Gol Azzurra','Gol avversari','Gol Azzurra in sup.','Gol avv. in sup.','Espulsioni Azzurra','Espulsioni avv.','Stato']
 H_G = ['Calotta','Giocatore','Gol','di cui in sup.','Assist','di cui in sup.','Espulsioni']
