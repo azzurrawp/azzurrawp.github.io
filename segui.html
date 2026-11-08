@@ -100,7 +100,7 @@ body.ro #g .nm input,body.ro #opp{pointer-events:none}
 #g .n.dim .cap{background-image:linear-gradient(to top right,transparent 45%,#c62828 45%,#c62828 55%,transparent 55%)}
 .sc small i{display:block;font-style:normal;font-size:11px;opacity:.9;letter-spacing:.3px}
 .where{display:inline-block;border-radius:12px;padding:3px 10px;font-size:14px;font-weight:700;background:#e3ecfa;color:#0b3d91;margin-left:6px;white-space:nowrap}
-.pill{color:#fff;border-radius:16px;padding:6px 14px;font-weight:700;font-size:16px}
+.pnote{font-size:14px;color:#546e7a;margin-top:6px}.pill{color:#fff;border-radius:16px;padding:6px 14px;font-weight:700;font-size:16px}
 #stab{width:100%;border-collapse:collapse;background:#fff;border-radius:10px;overflow:hidden;font-size:18px}#stab th{background:#0b3d91;color:#fff;padding:10px 8px;font-size:15px}#stab td{padding:9px 8px;text-align:center;border-bottom:1px solid #e3e8ef}#stab td:first-child{text-align:left;font-weight:700}#stab tr:nth-child(even) td{background:#f3f6fa}#sbody h2{font-size:18px;color:#0b3d91;margin:18px 0 8px}
 .mi{text-align:left;font-size:19px!important;padding:14px 16px!important}
 #rob{display:none;background:#2e7d32!important}
@@ -559,8 +559,8 @@ function trendSVG(m,lb,per,sc){var ev=m.log.filter(function(e){return (e[0]=='g'
   s+='<text x="26" y="'+(Y(mx)+5)+'" text-anchor="end" font-size="13" fill="#0b3d91">'+sgn(mx)+'</text><text x="26" y="'+(Y(0)+5)+'" text-anchor="end" font-size="13" fill="#546e7a">0</text><text x="26" y="'+(Y(mn)+5)+'" text-anchor="end" font-size="13" fill="#e65100">'+mn+'</text>';
   if(per)return s+'</svg>';
   return s+'</svg><div style="font-size:14px;color:#546e7a">Sopra la linea: Azzurra in vantaggio · sotto: '+esc(lb)+' in vantaggio. Ogni gradino è un gol.</div>'}
-function ptable(rows,all,TA){return '<div class="tw"><table id="stab"><tr><th>Giocatore</th>'+(all?'<th>Partite</th>':'')+'<th>Gol</th><th>% gol squadra</th><th>in sup.</th><th>su rig.</th><th>Assist</th><th>in sup.</th><th>Espuls.</th></tr>'+
-  rows.map(function(t){return '<tr><td>'+esc(t.n)+'</td>'+(all?'<td>'+t.p+'</td>':'')+'<td><b>'+t.g+'</b></td><td>'+(t.g?pct(t.g,TA):'–')+'</td><td>'+t.gu+'</td><td>'+t.gr+'</td><td><b>'+t.a+'</b></td><td>'+t.au+'</td><td>'+t.e+'</td></tr>'}).join('')+'</table></div>'}
+function ptable(rows,all,TA){return '<div class="tw"><table id="stab"><tr><th>Giocatore</th>'+(all?'<th>Partite</th>':'')+'<th>Gol</th><th title="(gol + assist) ÷ gol della squadra">% G+A</th><th>in sup.</th><th>su rig.</th><th>Assist</th><th>in sup.</th><th>Espuls.</th></tr>'+
+  rows.map(function(t){return '<tr><td>'+esc(t.n)+'</td>'+(all?'<td>'+t.p+'</td>':'')+'<td><b>'+t.g+'</b></td><td>'+(t.g+t.a?pct(t.g+t.a,TA):'–')+'</td><td>'+t.gu+'</td><td>'+t.gr+'</td><td><b>'+t.a+'</b></td><td>'+t.au+'</td><td>'+t.e+'</td></tr>'}).join('')+'</table></div>'}
 function matchDash(m){var o=mstat(m),k=analyze(m),O=m.opp||'Avversario',diff=o.A-o.B,w=0,l=0,x=0;o.P.forEach(function(q){if(q.a>q.b)w++;else if(q.a<q.b)l++;else x++});
   var es=m.done?(diff>0?'Vittoria':diff<0?'Sconfitta':'Pareggio'):'In corso',ec=m.done?(diff>0?'#2e7d32':diff<0?'#c62828':'#546e7a'):'#e65100';
   var h='<div class="dhead"><div><div class="dt">'+esc(title(m))+' <b>'+res(m)+'</b></div><div class="ds">'+esc((m.gio?m.gio+' · ':'')+fdate(m)+(m.place?' · '+m.place:''))+'</div></div><span class="where" style="font-size:16px;padding:6px 14px">'+where(m)+'</span><span class="pill" style="background:'+ec+'">'+es+(m.done&&diff?' ('+sgn(diff)+')':'')+'</span>'+
@@ -577,7 +577,7 @@ function matchDash(m){var o=mstat(m),k=analyze(m),O=m.opp||'Avversario',diff=o.A
   h+='<h2>Andamento tempo per tempo</h2><div class="dper">'+[1,2,3,4].map(function(p){var q=o.P[p-1],df=q.a-q.b;
     return '<div class="dpc"><div class="dpt">'+p+'° tempo <b style="color:'+(df>0?'#2e7d32':df<0?'#c62828':'#546e7a')+'">Azzurra '+q.a+' – '+q.b+' '+esc(O)+'</b></div>'+(q.a+q.b?trendSVG(m,O,p,sc):'<div style="color:#78909c;padding:30px 0;text-align:center">Nessun gol</div>')+'</div>'}).join('')+'</div><div style="font-size:14px;color:#546e7a">Ogni tempo parte da 0: sopra la linea Azzurra avanti nel parziale del tempo, sotto '+esc(O)+' avanti.</div>';
   var rows=Object.keys(o.pl).map(function(n){return o.pl[n]}).filter(function(t){return t.g||t.a||t.e}).sort(function(a,b){return b.g-a.g||b.a-a.a||a.i-b.i});
-  h+='<h2>Giocatori</h2>'+(rows.length?ptable(rows,false,o.A):'<div id="empty">Nessun dato per i giocatori.</div>');
+  h+='<h2>Giocatori</h2>'+(rows.length?ptable(rows,false,o.A)+'<div class="pnote">% G+A = partecipazione ai gol: (gol + assist del giocatore) ÷ gol della squadra.</div>':'<div id="empty">Nessun dato per i giocatori.</div>');
   return h}
 function seasonDash(ms){var T={},o=[];
   ms.forEach(function(m){var s=mstat(m);Object.keys(s.pl).forEach(function(n){var q=s.pl[n];if(!T[n]){T[n]={n:n,p:0,g:0,gu:0,gr:0,a:0,au:0,e:0};o.push(n)}var t=T[n];['g','gu','gr','a','au','e'].forEach(function(f){t[f]+=q[f]})});
@@ -592,7 +592,7 @@ function seasonDash(ms){var T={},o=[];
    KP(S.A-S.B>=0?'g':'r',sgn(S.A-S.B),'Differenza reti','')+KP('o',S.gu+' / '+S.ou,'Gol in superiorità','fatti / subiti · '+pct(S.gu,S.A)+' / '+pct(S.ou,S.B)+' dei gol')+KP('y',S.gr+' / '+S.or,'Gol su rigore','fatti / subiti · '+pct(S.gr,S.A)+' / '+pct(S.or,S.B)+' dei gol')+
    KP('',Math.min(S.ast,S.A)+' / '+S.A,'Gol con assist',pct(Math.min(S.ast,S.A),S.A)+' dei gol')+KP('',S.ea+' / '+S.eb,'Espulsioni','Azzurra / avversari')+
    (top&&top.g?KP('y',top.g,'Capocannoniere',esc(clean(top.n))+' · '+pct(top.g,S.A)+' dei gol'):'')+(ta&&ta.a?KP('y',ta.a,'Più assist',esc(clean(ta.n))+' · '+pct(ta.a,S.ast)+' degli assist'):'')+'</div>';
-  h+='<h2>Giocatori ('+ms.length+(ms.length==1?' partita':' partite')+')</h2>'+ptable(rows,true,S.A);
+  h+='<h2>Giocatori ('+ms.length+(ms.length==1?' partita':' partite')+')</h2>'+ptable(rows,true,S.A)+'<div class="pnote">% G+A = partecipazione ai gol: (gol + assist del giocatore) ÷ gol della squadra.</div>';
   h+='<h2>Partite</h2><div class="tw"><table id="stab"><tr><th>Partita</th><th>Dove</th><th>Data</th><th>Risultato</th><th>Stato</th><th></th></tr>'+ms.map(function(m){return '<tr data-dsel="'+esc(m.id)+'" style="cursor:pointer"><td>'+esc(title(m))+'</td><td style="white-space:nowrap">'+where(m)+'</td><td>'+esc(fdate(m))+'</td><td><b>'+res(m)+'</b></td><td>'+(m.done?'Conclusa':'In corso')+'</td><td>'+(m.ref?'<button class="btn" data-ref="'+esc(m.id)+'" style="background:#00838f;padding:6px 12px;font-size:16px">📄 Referto</button> ':'')+'<span style="color:#0b3d91;font-weight:700">Cruscotto ›</span></td></tr>'}).join('')+'</table></div>';
   return h}
 function seasonOpen(){return document.getElementById('season').style.display=='flex'}
@@ -742,7 +742,7 @@ fetchStats();livePoll();viewAuto();
 window.addEventListener('online',function(){syncDistinte(false);livePoll()});
 document.addEventListener('visibilitychange',function(){if(document.visibilityState=='visible')livePoll()});
 // aggiornamenti: controlla a ogni riapertura; la nuova versione si carica da sola quando si è nell'elenco partite (mai durante la registrazione)
-var APPV=42,swReg=null,swReload=false;document.getElementById('appv').textContent='Versione '+APPV;
+var APPV=43,swReg=null,swReload=false;document.getElementById('appv').textContent='Versione '+APPV;
 if('serviceWorker' in navigator&&!VIEW){var hadCtrl=!!navigator.serviceWorker.controller;
   navigator.serviceWorker.register('sw.js').then(function(r){swReg=r}).catch(function(){});
   document.addEventListener('visibilitychange',function(){if(!document.hidden&&swReg)swReg.update().catch(function(){})});
