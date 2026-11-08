@@ -1,4 +1,4 @@
-const C='azzurrawp-v57';const F=['./','index.html','manifest.webmanifest','icon-192.png','icon-512.png','icon-mask-192.png','icon-mask-512.png'];
+const C='azzurrawp-v58';const F=['./','index.html','manifest.webmanifest','icon-192.png','icon-512.png','icon-mask-192.png','icon-mask-512.png'];
 // install: scarica sempre dalla rete (non dalla cache del browser, che su GitHub Pages dura 10 minuti)
 self.addEventListener('install',e=>{e.waitUntil(caches.open(C).then(c=>c.addAll(F.map(u=>new Request(u,{cache:'reload'})))));self.skipWaiting()});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(k=>Promise.all(k.filter(x=>x!==C).map(x=>caches.delete(x)))).then(()=>self.clients.claim()))});
