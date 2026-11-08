@@ -231,14 +231,15 @@ function decrypt(o,pin){var c=crypto.subtle;return c.importKey('raw',new TextEnc
   .then(function(k){return c.deriveKey({name:'PBKDF2',salt:b64(o.salt),iterations:o.it,hash:'SHA-256'},k,{name:'AES-GCM',length:256},false,['decrypt'])})
   .then(function(key){return c.decrypt({name:'AES-GCM',iv:b64(o.iv)},key,b64(o.data))})
   .then(function(buf){return JSON.parse(new TextDecoder().decode(buf))})}
+var MV=2; // aumentare quando merge() impara a leggere nuovi campi delle distinte (es. referto)
 function syncDistinte(ask){if(!window.crypto||!crypto.subtle)return Promise.resolve();
   return fetch('distinte.enc?t='+Date.now(),{cache:'no-store'}).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(o){
     if(!DB.pin){if(!ask)return;var p=prompt('Codice squadra (si inserisce una sola volta):');if(!p)return;DB.pin=p.trim()}
-    if(DB.encv===o.data&&!ask)return;
+    if(DB.encv===o.data&&DB.mv===MV&&!ask)return;
     return decrypt(o,DB.pin).then(function(d){
       DB.rdone=DB.rdone||{};(d.resets||[]).forEach(function(x){var m=byId(x.id),k=x.id+'@'+x.at;if(!m||DB.rdone[k])return;DB.rdone[k]=1;
         if((m.upd||0)<x.at&&m.log.length){F.concat(['x']).forEach(function(f){m[f]=z()});m.og=0;m.ogu=0;m.log=[];m.per=1;m.done=false;m.upd=Date.now();if(S&&S.id==m.id)all()}});
-      var r=merge(d.matches||[]);DB.encv=o.data;persist();renderHome();fetchStats();publish(false);
+      var r=merge(d.matches||[]);DB.encv=o.data;DB.mv=MV;persist();renderHome();fetchStats();publish(false);
       if(r[0]||ask)toast('Distinte aggiornate: '+r[0]+' nuove, '+r[1]+' controllate')},
       function(){DB.pin='';persist();toast('Codice squadra errato');if(ask)setTimeout(function(){syncDistinte(true)},800)})
   }).catch(function(){})}
