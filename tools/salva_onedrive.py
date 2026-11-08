@@ -20,6 +20,10 @@ def score(m): return sum(m['g'])+sum(m['gu']), m['og']+m['ogu']
 def res(m):
     a, c = score(m); o_ = m.get('opp', '')
     return f"Azzurra {a}-{c} {o_}"   # sempre Azzurra prima; casa/trasferta in colonna a parte
+def base(m):
+    a, c = score(m); g = (m.get('gio','') or '').replace('ª','a')
+    t = f"Azzurra U16 - {m.get('date','')}" + (f" - {g}" if g else '') + f" - vs {m.get('opp','')} ({'casa' if m.get('home') else 'trasferta'}) {a}-{c}" + ('' if m.get('done') else ' in corso')
+    return ''.join('-' if ch in '\\/:*?"<>|' else ch for ch in t)
 def parz(m):
     r = []
     for p in range(1, 5):
@@ -57,7 +61,7 @@ for m in ms:
     if not m.get('done'): continue
     wb = Workbook()
     sheet(wb, 'Partita', H_P, [prow(m)], True); sheet(wb, 'Giocatori', H_G, grows(m)); sheet(wb, 'Eventi', H_E, erows(m))
-    fn = f"{m.get('date','')} {m.get('gio','')} - {res(m)}.xlsx".replace('/', '-').strip()
+    fn = base(m) + ' - Dati.xlsx'
     wb.save(os.path.join(out, fn)); saved.append(fn)
 # riepilogo di stagione
 T = {}
@@ -73,5 +77,5 @@ ws = wb.create_sheet('Giocatori per partita'); ws.append(['Data','Avversario']+H
 for c in ws[1]: c.font = HF; c.fill = HB
 for m in ms:
     for r in grows(m): ws.append([m.get('date',''), m.get('opp','')]+r)
-fn = 'Statistiche stagione 2026-27 (aggiornate).xlsx'; wb.save(os.path.join(out, fn)); saved.append(fn)
+fn = 'Azzurra U16 - Stagione 2026-27 - Dati (aggiornati).xlsx'; wb.save(os.path.join(out, fn)); saved.append(fn)
 print(json.dumps({'partite': len(ms), 'concluse': sum(1 for m in ms if m.get('done')), 'file': saved}, ensure_ascii=False))
