@@ -130,6 +130,7 @@ body.ro #rob{display:inline-block}
 body.pend-g #g .c:not([data-f="g"]),body.pend-gu #g .c:not([data-f="gu"]){opacity:.25}
 body.pend-g #g .c[data-f="g"],body.pend-gu #g .c[data-f="gu"]{box-shadow:inset 0 0 0 3px #ffd600;background:#fffde7!important}
 #g .c.pend{background:#ffd600!important;opacity:1!important}
+#g .c.pair{position:relative}#g .c.pair::after{content:'';position:absolute;left:50%;top:50%;height:96%;aspect-ratio:1/1;transform:translate(-50%,-50%);border:4px solid #ffc400;border-radius:50%;box-shadow:0 0 0 1.5px #0b3d91,inset 0 0 0 1.5px #0b3d91;pointer-events:none;animation:pairb .5s step-end 6 forwards}@keyframes pairb{50%{opacity:0}}
 body.pend-g #last,body.pend-gu #last{color:#ffd600;font-weight:700;opacity:1}
 </style>
 </head>
@@ -430,6 +431,7 @@ var AC=null,TONE={g:[880,1320],gu:[880,1320],og:[440,330],ogu:[440,330],a:[660,9
 function beep(f,sign){if(DB.mute)return;try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();if(AC.state=='suspended')AC.resume();
   var fr=sign>0?TONE[f]:[220,0],t=AC.currentTime;fr.forEach(function(hz,k){if(!hz)return;var o=AC.createOscillator(),gn=AC.createGain();o.type='sine';o.frequency.value=hz;
   gn.gain.setValueAtTime(0.0001,t+k*.09);gn.gain.exponentialRampToValueAtTime(0.5,t+k*.09+.01);gn.gain.exponentialRampToValueAtTime(0.0001,t+k*.09+.12);o.connect(gn);gn.connect(AC.destination);o.start(t+k*.09);o.stop(t+k*.09+.13)})}catch(e){}}
+function pairFx(ids){ids.forEach(function(id){var el=document.getElementById(id);if(!el)return;el.classList.remove('pair');void el.offsetWidth;el.classList.add('pair');clearTimeout(el._pt);el._pt=setTimeout(function(){el.classList.remove('pair')},3000)})}
 function fb(f,i,sign){beep(f,sign);
   var who=(f=='og'||f=='ogu')?(S.opp||'Avversario'):(f=='x'?'Avv. cal. '+(i+1):(i+1)+' '+(S.names[i]||''));
   document.getElementById('last').textContent=(sign>0?'✓ ':'− ')+LBL[f]+' · '+who+' · '+S.per+'T';
@@ -459,7 +461,7 @@ function add(f,i,ok){if(S.done)return;
   if(PEND){
     if(f!==GOALOF[PEND.f]){toast('Prima tocca il marcatore in '+(PEND.f=='au'?'GOL uomo +':'GOL')+' (oppure Annulla assist)');beep('e',-1);return}
     if(i===PEND.i){toast('Il marcatore deve essere diverso da chi ha fatto l\'assist');beep('e',-1);return}
-    var L=Date.now();rec(PEND.f,PEND.i,L);rec(f,i,L);var pa=PEND;PEND=null;pendUI();totals();save();fb(f,i,1);
+    var L=Date.now();rec(PEND.f,PEND.i,L);rec(f,i,L);var pa=PEND;PEND=null;pendUI();totals();save();fb(f,i,1);pairFx([pa.f+pa.i,f+i]);
     document.getElementById('last').textContent='✓ Gol di '+nm(i)+' · assist '+nm(pa.i)+' · '+S.per+'T';return}
   if(f=='a'||f=='au'){if(S.e[i]>=3){toast('Calotta '+(i+1)+': è fuori per 3 falli');return}
     PEND={f:f,i:i};beep('a',1);pendUI();return}
@@ -985,7 +987,7 @@ fetchStats();livePoll();viewAuto();
 window.addEventListener('online',function(){syncDistinte(false);livePoll()});
 document.addEventListener('visibilitychange',function(){if(document.visibilityState=='visible')livePoll()});
 // aggiornamenti: controlla a ogni riapertura; la nuova versione si carica da sola quando si è nell'elenco partite (mai durante la registrazione)
-var APPV=54,swReg=null,swReload=false;document.getElementById('appv').textContent='Versione '+APPV;
+var APPV=55,swReg=null,swReload=false;document.getElementById('appv').textContent='Versione '+APPV;
 if('serviceWorker' in navigator&&!VIEW){var hadCtrl=!!navigator.serviceWorker.controller;
   navigator.serviceWorker.register('sw.js').then(function(r){swReg=r}).catch(function(){});
   document.addEventListener('visibilitychange',function(){if(!document.hidden&&swReg)swReg.update().catch(function(){})});
