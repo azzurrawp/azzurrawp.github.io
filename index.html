@@ -101,6 +101,7 @@ body.ro #g .nm input,body.ro #opp{pointer-events:none}
 .mi{text-align:left;font-size:19px!important;padding:14px 16px!important}
 #rob{display:none;background:#2e7d32!important}
 body.ro #rob{display:inline-block}
+#refv{position:fixed;inset:0;background:#111;z-index:60;display:none;flex-direction:column}#refv .rb{display:flex;gap:10px;padding:8px;align-items:center;color:#fff;font-size:18px}#refv .rb span{flex:1}#refv .rb button{font-size:20px;padding:10px 18px;border:0;border-radius:8px;background:#555;color:#fff}#refv .ri{flex:1;overflow:auto;-webkit-overflow-scrolling:touch}#refv img{display:block;width:100%}#refv.z img{width:220%}
 #home2{background:#455a64!important;font-size:22px!important}
 #top{gap:6px!important}#top button{padding:0 10px!important}#last{flex:1 1 0;min-width:0}#top input{width:110px}
 body.pend-g #g .c:not([data-f="g"]),body.pend-gu #g .c:not([data-f="gu"]){opacity:.25}
@@ -124,6 +125,7 @@ body.pend-g #last,body.pend-gu #last{color:#ffd600;font-weight:700;opacity:1}
   <button id="fs">⛶</button>
 </div>
 <div id="g"></div>
+<div id="refv"><div class="rb"><span id="reft">Referto</span><button id="refz">🔍 Ingrandisci</button><button id="refc">Chiudi</button></div><div class="ri"><img id="refi" alt="Referto"></div></div>
 <div id="ov"><div class="box">
   <div class="row"><button class="btn" id="sb1" style="background:#0b3d91">Breve (WhatsApp)</button><button class="btn" id="sb2" style="background:#90a4ae">Analisi completa</button></div>
   <textarea id="txt" readonly></textarea>
@@ -131,6 +133,7 @@ body.pend-g #last,body.pend-gu #last{color:#ffd600;font-weight:700;opacity:1}
     <button class="btn" id="copy">Copia testo</button>
     <button class="btn" id="csv">Scarica CSV</button>
     <button class="btn" id="bak" style="background:#2e7d32">Salva copia</button>
+    <button class="btn" id="refb" style="background:#00838f">📄 Referto</button>
     <button class="btn" id="send" style="background:#6a1b9a">☁ Pubblica</button>
     <button class="btn" id="end" style="background:#c62828">Termina partita</button>
     <button class="btn" id="rst" style="background:#795548">Azzera partita</button>
@@ -208,7 +211,7 @@ function byId(id){for(var i=0;i<DB.matches.length;i++)if(DB.matches[i].id==id)re
 // importa distinte: aggiunge nuove partite; aggiorna quelle non iniziate; non tocca mai statistiche già registrate
 function merge(list){var n=0,u=0;list.forEach(function(m){if(!m)return;var ex=m.id?byId(m.id):null;
   if(!ex){DB.matches.push(blank(m));n++;return}
-  ['gio','date','time','home','opp','place'].forEach(function(k){if(m[k]!==undefined)ex[k]=m[k]});
+  ['gio','date','time','home','opp','place','ref'].forEach(function(k){if(m[k]!==undefined)ex[k]=m[k]});
   if(!ex.log.length&&m.names)ex.names=blank({names:m.names}).names;
   if(m.log&&m.log.length&&!ex.log.length){F.concat(['x','og','ogu','log','per','done']).forEach(function(k){if(m[k]!==undefined)ex[k]=m[k]})}
   u++});persist();return [n,u]}
@@ -519,11 +522,22 @@ function showSeason(){var ms=DB.matches.filter(function(m){return m.log.length})
     rows.map(function(t){return '<tr><td>'+esc(t.n)+'</td><td>'+t.p+'</td><td><b>'+t.g+'</b></td><td>'+t.gu+'</td><td><b>'+t.a+'</b></td><td>'+t.au+'</td><td>'+t.e+'</td></tr>'}).join('')+'</table>';
   var gf=0,gs=0,uf=0,us=0,ef=0,es=0;ms.forEach(function(m){var s=score(m);gf+=s[0];gs+=s[1];uf+=sum(m.gu);us+=m.ogu;ef+=sum(m.e);es+=sum(m.x)});
   h+='<h2>Squadra</h2><table id="stab"><tr><th></th><th>Gol fatti</th><th>Gol subiti</th><th>Gol in sup. fatti</th><th>Gol in sup. subiti</th><th>Espulsioni</th><th>Espulsioni avv.</th></tr><tr><td>Totale</td><td>'+gf+'</td><td>'+gs+'</td><td>'+uf+'</td><td>'+us+'</td><td>'+ef+'</td><td>'+es+'</td></tr><tr><td>Media a partita</td><td>'+(ms.length?(gf/ms.length).toFixed(1):'–')+'</td><td>'+(ms.length?(gs/ms.length).toFixed(1):'–')+'</td><td></td><td></td><td>'+(ms.length?(ef/ms.length).toFixed(1):'–')+'</td><td>'+(ms.length?(es/ms.length).toFixed(1):'–')+'</td></tr></table>';
-  h+='<h2>Partite</h2><table id="stab"><tr><th>Partita</th><th>Data</th><th>Risultato</th><th>Stato</th></tr>'+ms.map(function(m){return '<tr><td>'+esc(title(m))+'</td><td>'+esc(fdate(m))+'</td><td><b>'+res(m)+'</b></td><td>'+(m.done?'Conclusa':'In corso')+'</td></tr>'}).join('')+'</table>';
+  h+='<h2>Partite</h2><table id="stab"><tr><th>Partita</th><th>Data</th><th>Risultato</th><th>Stato</th><th>Referto</th></tr>'+ms.map(function(m){return '<tr><td>'+esc(title(m))+'</td><td>'+esc(fdate(m))+'</td><td><b>'+res(m)+'</b></td><td>'+(m.done?'Conclusa':'In corso')+'</td><td>'+(m.ref?'<button class="btn" data-ref="'+esc(m.id)+'" style="background:#00838f;padding:6px 12px;font-size:16px">📄 Apri</button>':'')+'</td></tr>'}).join('')+'</table>';
   if(!ms.length)h='<div id="empty">Nessuna statistica ancora registrata.</div>';
   document.getElementById('sbody').innerHTML=h;document.getElementById('season').style.display='flex'}
 document.getElementById('sclose').addEventListener('click',function(){document.getElementById('season').style.display='none'});
-document.getElementById('sbody').addEventListener('click',function(e){var c=e.target.closest('[data-live]');if(c){document.getElementById('season').style.display='none';openMatch(c.dataset.live)}});
+document.getElementById('sbody').addEventListener('click',function(e){var rf=e.target.closest('[data-ref]');if(rf){showRef(byId(rf.dataset.ref));return}var c=e.target.closest('[data-live]');if(c){document.getElementById('season').style.display='none';openMatch(c.dataset.live)}});
+// ---------- referto (foto cifrata sul sito, copia locale per l'uso offline) ----------
+function showRef(m){if(!m||!m.ref)return;var v=document.getElementById('refv'),im=document.getElementById('refi'),K='wp_ref_'+m.id;
+  document.getElementById('reft').textContent='Referto · '+title(m)+' · '+fdate(m);v.classList.remove('z');
+  var open=function(src){im.src=src;v.style.display='flex'},c=null;try{c=localStorage.getItem(K)}catch(e){}
+  if(c){open(c);return}if(!window.crypto||!crypto.subtle||!DB.pin){toast('Referto non disponibile');return}toast('Carico il referto…');
+  fetch('referti/'+encodeURIComponent(m.id)+'.enc?t='+Date.now(),{cache:'no-store'}).then(function(r){if(!r.ok)throw 0;return r.json()})
+    .then(function(o){return decrypt(o,DB.pin)}).then(function(d){try{localStorage.setItem(K,d.img)}catch(e){}open(d.img)})
+    .catch(function(){toast('Referto non disponibile: serve internet la prima volta')})}
+document.getElementById('refb').addEventListener('click',function(){showRef(S)});
+document.getElementById('refc').addEventListener('click',function(){document.getElementById('refv').style.display='none'});
+document.getElementById('refz').addEventListener('click',function(){var v=document.getElementById('refv');v.classList.toggle('z');this.textContent=v.classList.contains('z')?'🔍 Adatta':'🔍 Ingrandisci'});
 function showHome(){if(PEND){PEND=null;pendUI()}S=null;liveDot();document.getElementById('ov').style.display='none';renderHome();home.style.display='flex';publish(false)}
 document.getElementById('home2').addEventListener('click',showHome);
 document.getElementById('hxls').addEventListener('click',function(){if(!DB.matches.some(function(m){return m.log.length})){toast('Nessuna statistica ancora registrata');return}exportExcel()});
@@ -607,7 +621,7 @@ function csv(){var r=['Calotta;Nome;Gol;Gol UP;Assist;Assist UP;Espulsioni;Espul
 var ov=document.getElementById('ov'),txt=document.getElementById('txt');
 function setMode(md){smode=md;txt.value=summary();document.getElementById('sb1').style.background=md=='b'?'#0b3d91':'#90a4ae';document.getElementById('sb2').style.background=md=='f'?'#0b3d91':'#90a4ae'}
 document.getElementById('sb1').addEventListener('click',function(){setMode('b')});document.getElementById('sb2').addEventListener('click',function(){setMode('f')});
-document.getElementById('sum').addEventListener('click',function(){if(PEND){toast('Prima tocca il marcatore (oppure Annulla assist)');return}setMode(smode);document.getElementById('end').style.display=(S.done||(S.remote&&!DB.gh))?'none':'';document.getElementById('rst').style.display=(S.remote&&!DB.gh)||!S.log.length?'none':'';document.getElementById('send').style.display=DB.gh?'':'none';ov.style.display='flex'});
+document.getElementById('sum').addEventListener('click',function(){if(PEND){toast('Prima tocca il marcatore (oppure Annulla assist)');return}setMode(smode);document.getElementById('end').style.display=(S.done||(S.remote&&!DB.gh))?'none':'';document.getElementById('rst').style.display=(S.remote&&!DB.gh)||!S.log.length?'none':'';document.getElementById('send').style.display=DB.gh?'':'none';document.getElementById('refb').style.display=S.ref?'':'none';ov.style.display='flex'});
 document.getElementById('close').addEventListener('click',function(){ov.style.display='none'});
 document.getElementById('copy').addEventListener('click',function(){
   function fb2(){txt.removeAttribute('readonly');txt.select();try{document.execCommand('copy');toast('Copiato')}catch(e){toast('Seleziona e copia a mano')}txt.setAttribute('readonly','')}
