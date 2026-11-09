@@ -581,7 +581,7 @@ function openMatch(id){S=byId(id);if(!S)return;if(VIEW){document.getElementById(
   var ro=!!(S.done||(S.remote&&!DB.gh));document.body.classList.toggle('ro',ro);document.getElementById('rob').style.visibility=DB.gh?'':'hidden';all();home.style.display='none';goFS();liveBadge();liveDot();
   if(!S.done&&!S.log.length)toast((S.gio?S.gio+': ':'')+title(S)+' – pronta a registrare')}
 // ---------- cruscotto statistiche: stagione + una scheda per partita ----------
-var DSEL='season';
+var DSEL=null;
 function isPen(e){return e[5]===1}
 function evLbl(e){var f=e[0];if(e[5]===1){if(f=='e')return 'Fallo da rigore';if(f=='x')return 'Fallo da rigore avv';if(f=='g'||f=='gu')return 'Gol su rigore';if(f=='og'||f=='ogu')return 'Gol avv su rigore'}return LBL[f]||f}
 function goalsOf(m,per){var A=0,B=0,out=[],L={};m.log.forEach(function(e){if((e[0]=='a'||e[0]=='au')&&e[4])L[e[4]]=e});
@@ -629,7 +629,7 @@ function goalsHTML(m,p){var G=goalsOf(m,p);if(!G.length)return '';var cp=functio
       (g.a?'<span class="gas">assist '+cp(g.a.n,true)+' '+esc(g.a.nm)+(g.a.sup?' <i>uomo +</i>':'')+'</span>':'')+'</span></div>'}).join('')+'</details>'}
 function matchDash(m){var o=mstat(m),k=analyze(m),O=m.opp||'Avversario',diff=o.A-o.B,w=0,l=0,x=0;o.P.forEach(function(q){if(q.a>q.b)w++;else if(q.a<q.b)l++;else x++});
   var es=m.done?(diff>0?'Vittoria':diff<0?'Sconfitta':'Pareggio'):'In corso',ec=m.done?(diff>0?'#2e7d32':diff<0?'#c62828':'#546e7a'):'#e65100';
-  var h='<div class="dhead"><div><div class="dt">'+titleH(m)+' <b>'+resH(m)+'</b></div><div class="ds">'+esc((m.gio?m.gio+' · ':'')+fdate(m)+(m.place?' · '+m.place:''))+'</div></div><span class="where" style="font-size:16px;padding:6px 14px">'+where(m)+'</span><span class="pill" style="background:'+ec+'">'+es+(m.done&&diff?' ('+sgn(diff)+')':'')+'</span>'+
+  var h=(isLive(m)?'<div class="card run live" data-live="'+esc(m.id)+'" style="margin-bottom:12px"><div class="match">🔴 '+titleH(m)+'<small>In diretta · '+m.per+'° tempo · '+where(m)+' · tocca per seguire la partita</small></div><div class="st"><b>'+resH(m)+'</b></div></div>':'')+'<div class="dhead"><div><div class="dt">'+titleH(m)+' <b>'+resH(m)+'</b></div><div class="ds">'+esc((m.gio?m.gio+' · ':'')+fdate(m)+(m.place?' · '+m.place:''))+'</div></div><span class="where" style="font-size:16px;padding:6px 14px">'+where(m)+'</span><span class="pill" style="background:'+ec+'">'+es+(m.done&&diff?' ('+sgn(diff)+')':'')+'</span>'+
     '</div>'+
     '<div class="dlr"><span>Apri e scarica:</span><button data-dl="m:'+esc(m.id)+':pdf">📄 PDF partita</button>'+(m.ref?'<button data-dl="m:'+esc(m.id)+':ref">🖼 Referto</button>':'')+'<button data-dl="m:'+esc(m.id)+':grid">📋 Griglia bordo vasca</button><button data-dl="m:'+esc(m.id)+':xls">📊 Excel</button></div>';
   h+='<div id="kpi">'+KP('wide',parz(m,o.P),'Parziali (Azzurra – '+esc(O)+')','Tempi: '+w+' vinti ('+pct(w,4)+') · '+x+' pari · '+l+' persi')+
@@ -873,8 +873,9 @@ function dlSeason(what){var n='Azzurra U16 - Stagione '+season()+' - ';if(what==
 function seasonOpen(){return document.getElementById('season').style.display=='flex'}
 var autoDone={};function viewAuto(){if(!VIEW||S)return;DB.matches.forEach(function(m){if(isLive(m)&&!autoDone[m.id]){autoDone[m.id]=1;openMatch(m.id)}})}
 function showSeason(keep){setTimeout(rotCheck,0);var ms=DB.matches.filter(function(m){return m.log.length}).sort(function(a,b){return (a.date+a.time).localeCompare(b.date+b.time)});
-  if(DSEL!='season'&&!ms.some(function(m){return m.id==DSEL}))DSEL='season';
-  var tabs='<div id="dtabs"><button data-dsel="season" class="'+(DSEL=='season'?'on':'')+'">Stagione</button>'+ms.map(function(m){var d=(m.date||'').split('-');return '<button data-dsel="'+esc(m.id)+'" class="'+(DSEL==m.id?'on':'')+'">'+(m.home?'🏠 ':'🚌 ')+(d.length==3?d[2]+'/'+d[1]+' ':'')+'<span class="cA">Azzurra</span> vs <span class="cB">'+esc(m.opp||'?')+'</span> <b>'+resH(m)+'</b></button>'}).join('')+'</div>';
+  var rv=ms.slice().reverse();if(DSEL!='season'&&!ms.some(function(m){return m.id==DSEL}))DSEL=rv.length?rv[0].id:'season';
+  var tb=function(m){var d=(m.date||'').split('-');return '<button data-dsel="'+esc(m.id)+'" class="'+(DSEL==m.id?'on':'')+'">'+(m.home?'🏠 ':'🚌 ')+(d.length==3?d[2]+'/'+d[1]+' ':'')+'<span class="cA">Azzurra</span> vs <span class="cB">'+esc(m.opp||'?')+'</span> <b>'+resH(m)+'</b></button>'},sbt='<button data-dsel="season" class="'+(DSEL=='season'?'on':'')+'">Stagione</button>';
+  var tabs='<div id="dtabs">'+(rv.length?tb(rv[0]):'')+sbt+rv.slice(1).map(tb).join('')+'</div>';
   var h=!ms.length?'<div id="empty">Nessuna statistica ancora registrata.</div>':tabs+(DSEL=='season'?seasonDash(ms):matchDash(byId(DSEL)));
   var sb=document.getElementById('sbody'),st=sb.scrollTop;sb.innerHTML=h;sb.scrollTop=keep?st:0;document.getElementById('season').style.display='flex'}
 document.getElementById('sclose').addEventListener('click',function(){document.getElementById('season').style.display='none'});
@@ -1020,7 +1021,7 @@ fetchStats();livePoll();viewAuto();
 window.addEventListener('online',function(){syncDistinte(false);livePoll()});
 document.addEventListener('visibilitychange',function(){if(document.visibilityState=='visible')livePoll()});
 // aggiornamenti: controlla a ogni riapertura; la nuova versione si carica da sola quando si è nell'elenco partite (mai durante la registrazione)
-var APPV=58,swReg=null,swReload=false;document.getElementById('appv').textContent='Versione '+APPV;
+var APPV=59,swReg=null,swReload=false;document.getElementById('appv').textContent='Versione '+APPV;
 if('serviceWorker' in navigator&&!VIEW){var hadCtrl=!!navigator.serviceWorker.controller;
   navigator.serviceWorker.register('sw.js').then(function(r){swReg=r}).catch(function(){});
   document.addEventListener('visibilitychange',function(){if(!document.hidden&&swReg)swReg.update().catch(function(){})});
