@@ -621,6 +621,9 @@ function mstat(m){var o={A:0,B:0,ga:0,gu:0,gr:0,oa:0,ou:0,or:0,P:[],pl:{},ast:0,
     if(e[1]>=0&&f!='x'&&f!='og'&&f!='ogu'&&f!='rs'&&f!='ors'){var n=m.names[e[1]]||('Calotta '+(e[1]+1)),t=o.pl[n]||(o.pl[n]={n:n,i:e[1],g:0,gu:0,gr:0,a:0,au:0,e:0});
       if(f=='g'||f=='gu'){t.g++;if(pen)t.gr++;else if(f=='gu')t.gu++}else if(f=='a'||f=='au'){t.a++;if(f=='au')t.au++}else if(f=='e')t.e++}});
   o.su=o.eb-o.tb;o.in=o.ea-o.ta;o.prov=!m.ref&&(o.su+o.in)>0;return o}
+function parTile(ms){var R=rigStat(ms);if(!R.O.t)return '';var d=R.G.filter(function(g){return g.v}).map(function(g){return esc(clean(g.n))+' '+g.v}).join(' · ');
+  return KP('',R.O.p+' / '+R.O.t,'Rigori parati','dai nostri portieri'+(d?' · '+d:'')+' · '+pct(R.O.p,R.O.t))}
+function parSub(ms){var R=rigStat(ms);return R.O.t?' · parati da noi '+R.O.p+' / '+R.O.t:''}
 function rigTile(o,O){var has=o.ta+o.tb>0;return has?{v:o.gr+' / '+o.tb,l:'Rigori trasformati',s:O+' '+o.or+' / '+o.ta+' · '+pct(o.gr,o.A)+' / '+pct(o.or,o.B)+' dei gol'}:{v:o.gr+' / '+o.or,l:'Gol su rigore',s:'fatti / subiti · '+pct(o.gr,o.A)+' / '+pct(o.or,o.B)+' dei gol'}}
 function supTxt(g,n){return n?Math.min(g,n)+' / '+n:'–'}
 function supSub(g,n,ok,prov){return (n?pct(Math.min(g,n),n)+' · '+Math.max(n-g,0)+(ok?' difese':' non sfruttate'):'nessuna')+(prov?' · provvisorio':'')}
@@ -662,7 +665,7 @@ function matchDash(m){var o=mstat(m),k=analyze(m),O=m.opp||'Avversario',diff=o.A
     '<div class="dlr"><span>Apri e scarica:</span><button data-dl="m:'+esc(m.id)+':pdf">📄 PDF partita</button>'+(m.ref?'<button data-dl="m:'+esc(m.id)+':ref">🖼 Referto</button>':'')+'<button data-dl="m:'+esc(m.id)+':grid">📋 Griglia bordo vasca</button><button data-dl="m:'+esc(m.id)+':xls">📊 Excel</button></div>';
   h+='<div id="kpi">'+KP('wide',parz(m,o.P),'Parziali (Azzurra – '+esc(O)+')','Tempi: '+w+' vinti ('+pct(w,4)+') · '+x+' pari · '+l+' persi')+
     KP('g',o.A,'Gol fatti',o.ga+" d'azione ("+pct(o.ga,o.A)+') · '+o.gu+' uomo + ('+pct(o.gu,o.A)+') · '+o.gr+' su rigore ('+pct(o.gr,o.A)+')')+KP('r',o.B,'Gol subiti',o.oa+" d'azione ("+pct(o.oa,o.B)+') · '+o.ou+' in inferiorità ('+pct(o.ou,o.B)+') · '+o.or+' su rigore ('+pct(o.or,o.B)+')')+
-    KP('g',supTxt(o.gu,o.su),'Superiorità sfruttate',supSub(o.gu,o.su,false,o.prov))+KP('r',supTxt(o.ou,o.in),'Inferiorità subite',supSub(o.ou,o.in,true,o.prov))+(function(t){return KP('y',t.v,t.l,t.s)})(rigTile(o,esc(O)))+
+    KP('g',supTxt(o.gu,o.su),'Superiorità sfruttate',supSub(o.gu,o.su,false,o.prov))+KP('r',supTxt(o.ou,o.in),'Inferiorità subite',supSub(o.ou,o.in,true,o.prov))+(function(t){return KP('y',t.v,t.l,t.s)})(rigTile(o,esc(O)))+parTile([m])+
     KP('',Math.min(o.ast,o.A)+' / '+o.A,'Gol con assist',pct(Math.min(o.ast,o.A),o.A)+' dei gol')+KP('',Object.keys(o.pl).filter(function(n){return o.pl[n].g}).length,'Marcatori diversi',(function(){var t=Object.keys(o.pl).map(function(n){return o.pl[n]}).sort(function(a,b){return b.g-a.g})[0];return t&&t.g?'il migliore '+esc(clean(t.n))+': '+pct(t.g,o.A)+' dei gol':''})())+
     KP('',(k.maxL?'+'+k.maxL:'0')+' / '+(k.maxD?'-'+k.maxD:'0'),'Vantaggio / svantaggio max','')+
     (k.run.n>=2?KP(k.run.t=='A'?'g':'r',k.run.n+'-0','Miglior parziale',(k.run.t=='A'?'Azzurra':esc(O))+(k.run.p==k.run.e?' nel '+k.run.p+'° tempo':' tra '+k.run.p+'° e '+k.run.e+'° t.')):'')+
@@ -685,7 +688,7 @@ function seasonDash(ms){var T={},o=[];
   var h=(lv?'<div class="card run live" data-live="'+esc(lv.id)+'" style="margin-bottom:12px"><div class="match">🔴 '+titleH(lv)+'<small>In diretta · '+lv.per+'° tempo · '+where(lv)+' · tocca per seguire la partita</small></div><div class="st"><b>'+resH(lv)+'</b></div></div>':'')+
    '<div class="dlr"><span>Apri e scarica:</span><button data-dl="s:pdf">📄 PDF stagione</button><button data-dl="s:xls">📊 Excel stagione</button></div>'+
    '<div id="kpi">'+KP('',ms.length,'Partite',(W+P+L)?W+' V ('+pct(W,W+P+L)+') · '+P+' N · '+L+' P':'')+KP('',HM.c+' / '+HM.t,'In casa / in trasferta',(HM.cw+HM.tw)?'vinte: '+HM.cw+' in casa · '+HM.tw+' fuori':'')+KP('g',S.A,'Gol fatti','media '+(S.A/nd).toFixed(1))+KP('r',S.B,'Gol subiti','media '+(S.B/nd).toFixed(1))+
-   KP(S.A-S.B>=0?'g':'r',sgn(S.A-S.B),'Differenza reti','')+KP('g',supTxt(S.gu,S.su),'Superiorità sfruttate',supSub(S.gu,S.su,false,S.prov))+KP('r',supTxt(S.ou,S.in),'Inferiorità subite',supSub(S.ou,S.in,true,S.prov))+(function(t){return KP('y',t.v,t.l,t.s)})(rigTile(S,'avversari'))+
+   KP(S.A-S.B>=0?'g':'r',sgn(S.A-S.B),'Differenza reti','')+KP('g',supTxt(S.gu,S.su),'Superiorità sfruttate',supSub(S.gu,S.su,false,S.prov))+KP('r',supTxt(S.ou,S.in),'Inferiorità subite',supSub(S.ou,S.in,true,S.prov))+(function(t){return KP('y',t.v,t.l,t.s)})(rigTile(S,'avversari'))+parTile(ms)+
    KP('',Math.min(S.ast,S.A)+' / '+S.A,'Gol con assist',pct(Math.min(S.ast,S.A),S.A)+' dei gol')+KP('',S.in+' / '+S.su,'Espulsioni','Azzurra / avversari'+(S.ta+S.tb?' · più falli da rigore '+S.ta+' / '+S.tb:''))+
    (top&&top.g?KP('y',top.g,'Capocannoniere',esc(clean(top.n))+' · '+pct(top.g,S.A)+' dei gol'):'')+(ta&&ta.a?KP('y',ta.a,'Più assist',esc(clean(ta.n))+' · '+pct(ta.a,S.ast)+' degli assist'):'')+'</div>';
   h+='<h2>Giocatori ('+ms.length+(ms.length==1?' partita':' partite')+')</h2>'+ptable(rows,true,S.A)+'<div class="pnote">% G+A = partecipazione ai gol: (gol + assist del giocatore) ÷ gol della squadra.</div>'+rigHTML(rigStat(ms),true);
@@ -804,7 +807,7 @@ function matchPDF(m){var P=new PDF(),o=mstat(m),k=analyze(m),O=m.opp||'Avversari
     [PC.gr,String(o.A),'Gol fatti',o.ga+" d'azione ("+pct(o.ga,o.A)+') · '+o.gu+' uomo + ('+pct(o.gu,o.A)+') · '+o.gr+' su rigore ('+pct(o.gr,o.A)+')'],
     [PC.rd,String(o.B),'Gol subiti',o.oa+" d'azione ("+pct(o.oa,o.B)+') · '+o.ou+' in inferiorità ('+pct(o.ou,o.B)+') · '+o.or+' su rigore ('+pct(o.or,o.B)+')'],
     [PC.gr,supTxt(o.gu,o.su),'Superiorità sfruttate',supSub(o.gu,o.su,false,o.prov)],[PC.rd,supTxt(o.ou,o.in),'Inferiorità subite',supSub(o.ou,o.in,true,o.prov)],
-    (function(t){return ['#f9a825',t.v,t.l,t.s]})(rigTile(o,O)),
+    (function(t){return ['#f9a825',t.v,t.l,t.s+parSub([m])]})(rigTile(o,O)),
     [PC.blu,Math.min(o.ast,o.A)+' / '+o.A,'Gol con assist',pct(Math.min(o.ast,o.A),o.A)+' dei gol'],
     [PC.blu,String(Object.keys(o.pl).filter(function(n){return o.pl[n].g}).length),'Marcatori diversi',top&&top.g?'il migliore '+clean(top.n)+': '+pct(top.g,o.A)+' dei gol':''],
     [PC.blu,(k.maxL?'+'+k.maxL:'0')+' / '+(k.maxD?'-'+k.maxD:'0'),'Vantaggio / svantaggio max',''],
@@ -834,7 +837,7 @@ function seasonPDF(){var ms=DB.matches.filter(function(m){return m.log.length}).
   var y=pKpis(P,112,[[PC.blu,String(ms.length),'Partite',(W+Pa+L)?W+' V ('+pct(W,W+Pa+L)+') · '+Pa+' N · '+L+' P':''],[PC.blu,HM.c+' / '+HM.t,'In casa / in trasferta',(HM.cw+HM.tw)?'vinte: '+HM.cw+' in casa · '+HM.tw+' fuori':''],
     [PC.gr,String(S.A),'Gol fatti','media '+(S.A/nd).toFixed(1)],[PC.rd,String(S.B),'Gol subiti','media '+(S.B/nd).toFixed(1)],
     [S.A-S.B>=0?PC.gr:PC.rd,(S.A-S.B>0?'+':'')+(S.A-S.B),'Differenza reti',''],[PC.gr,supTxt(S.gu,S.su),'Superiorità sfruttate',supSub(S.gu,S.su,false,S.prov)],[PC.rd,supTxt(S.ou,S.in),'Inferiorità subite',supSub(S.ou,S.in,true,S.prov)],
-    (function(t){return ['#f9a825',t.v,t.l,t.s]})(rigTile(S,'avversari')),[PC.blu,Math.min(S.ast,S.A)+' / '+S.A,'Gol con assist',pct(Math.min(S.ast,S.A),S.A)+' dei gol'],
+    (function(t){return ['#f9a825',t.v,t.l,t.s+parSub(ms)]})(rigTile(S,'avversari')),[PC.blu,Math.min(S.ast,S.A)+' / '+S.A,'Gol con assist',pct(Math.min(S.ast,S.A),S.A)+' dei gol'],
     [PC.blu,S.in+' / '+S.su,'Espulsioni','Azzurra / avversari'+(S.ta+S.tb?' · più falli da rigore '+S.ta+' / '+S.tb:'')],['#f9a825',top&&top.g?String(top.g):'–','Capocannoniere',top&&top.g?clean(top.n)+' · '+pct(top.g,S.A)+' dei gol':''],
     ['#f9a825',ta&&ta.a?String(ta.a):'–','Più assist',ta&&ta.a?clean(ta.n)+' · '+pct(ta.a,S.ast)+' degli assist':'']],4);
   y=pH2(P,y+12,'Giocatori ('+ms.length+(ms.length==1?' partita':' partite')+')');
@@ -1053,7 +1056,7 @@ fetchStats();livePoll();viewAuto();
 window.addEventListener('online',function(){syncDistinte(false);livePoll()});
 document.addEventListener('visibilitychange',function(){if(document.visibilityState=='visible')livePoll()});
 // aggiornamenti: controlla a ogni riapertura; la nuova versione si carica da sola quando si è nell'elenco partite (mai durante la registrazione)
-var APPV=62,swReg=null,swReload=false;document.getElementById('appv').textContent='Versione '+APPV;
+var APPV=63,swReg=null,swReload=false;document.getElementById('appv').textContent='Versione '+APPV;
 if('serviceWorker' in navigator&&!VIEW){var hadCtrl=!!navigator.serviceWorker.controller;
   navigator.serviceWorker.register('sw.js').then(function(r){swReg=r}).catch(function(){});
   document.addEventListener('visibilitychange',function(){if(!document.hidden&&swReg)swReg.update().catch(function(){})});
