@@ -1,11 +1,13 @@
 <!DOCTYPE html>
-<html lang="it">
+<html lang="it" translate="no">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>Azzurra WP Stat</title>
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#0b3d91">
+<meta name="google" content="notranslate">
+<meta name="format-detection" content="telephone=no,date=no,address=no,email=no">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-mask-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -16,6 +18,7 @@
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
 html,body{height:100%;height:100dvh;overflow:hidden;background:#fff;color:#102a43;font-family:system-ui,Roboto,sans-serif}
 body{display:flex;flex-direction:column;touch-action:manipulation}
+html:not(.view),html:not(.view) body{overscroll-behavior:none;touch-action:pan-x pan-y;-webkit-touch-callout:none}html:not(.view) img,html:not(.view) canvas{-webkit-user-drag:none}
 #top{display:flex;align-items:center;gap:10px;padding:5px 10px;background:#0b3d91;color:#fff;flex:0 0 auto}
 #top .sc{display:flex;align-items:center;gap:8px;font-size:30px;font-weight:800;white-space:nowrap;background:#082c6c;border-radius:8px;padding:0 12px;height:46px}
 #top .sc small{font-size:15px;font-weight:600;opacity:.85}
@@ -145,7 +148,7 @@ body.pend-g #last,body.pend-gu #last{color:#ffd600;font-weight:700;opacity:1}
 <div id="top">
   <button id="home2" title="Elenco partite">☰</button>
   <span class="sc"><small>AZZURRA<i id="swh"></i></small><span id="sA">0</span>–<span id="sB">0</span></span>
-  <input id="opp" placeholder="Avversario">
+  <input id="opp" placeholder="Avversario" autocomplete="off" autocorrect="off" spellcheck="false" enterkeyhint="done">
   <div class="og"><button data-og="p">+Gol avv</button><button class="u" data-og="u">+Gol avv UP</button></div>
   <span id="ldot" style="display:none;font-size:22px">●</span><span id="last"></span>
   <button id="rob">✎ Modifica</button>
@@ -424,7 +427,7 @@ function d(cls,html,attr){return '<div class="'+cls+'"'+(attr||'')+'>'+(html||''
 var GC={g:'cg gl',gu:'cg up',a:'ca gl',au:'ca up',e:'ce gl'};
 H+=d('h hn','Cal.')+d('h hn','Giocatore')+d('h hg gl','GOL')+d('h hu','GOL<br>uomo +')+d('h ha gl','ASSIST')+d('h hu','ASSIST<br>uomo +')+d('h he gl','ESPULS.')+d('sep')+d('h hx','Cal.')+d('h hx','ESPULS.<br>avversari');
 for(var i=0;i<N;i++){var zb=i%2?' z':'';
-  H+=d('n'+zb,'<span class="cap" id="cp'+i+'">'+(i+1)+'</span>',' id="n'+i+'"')+d('nm'+zb,'<input data-i="'+i+'" maxlength="16">',' id="m'+i+'"');
+  H+=d('n'+zb,'<span class="cap" id="cp'+i+'">'+(i+1)+'</span>',' id="n'+i+'"')+d('nm'+zb,'<input data-i="'+i+'" maxlength="16" autocomplete="off" autocorrect="off" spellcheck="false" enterkeyhint="done">',' id="m'+i+'"');
   F.forEach(function(f){H+=d('c '+GC[f]+zb,'',' data-f="'+f+'" data-i="'+i+'" id="'+f+i+'"')});
   H+=d('sep')+d('n'+zb,'<span class="cap" id="cpx'+i+'">'+(i+1)+'</span>',' id="nx'+i+'"')+d('c cx'+zb,'',' data-f="x" data-i="'+i+'" id="x'+i+'"');
 }
@@ -581,7 +584,10 @@ fsb.addEventListener('click',function(){if(document.fullscreenElement){try{docum
 document.addEventListener('fullscreenchange',function(){fsb.classList.toggle('warn',!document.fullscreenElement)});fsb.classList.add('warn');
 var sb=document.getElementById('snd');function sbu(){sb.textContent=DB.mute?'🔇':'🔊'}sbu();
 sb.addEventListener('click',function(){DB.mute=!DB.mute;sbu();persist();if(!DB.mute)beep('g',1)});
-function wake(){try{if(navigator.wakeLock)navigator.wakeLock.request('screen').catch(function(){})}catch(e){}}
+var WL=null;function wake(){try{if(navigator.wakeLock&&(!WL||WL.released))navigator.wakeLock.request('screen').then(function(l){WL=l}).catch(function(){})}catch(e){}}
+if(!VIEW){document.addEventListener('contextmenu',function(e){var t=e.target;if(t&&(t.tagName=='INPUT'||t.tagName=='TEXTAREA'))return;e.preventDefault()});
+  document.addEventListener('dragstart',function(e){e.preventDefault()});document.addEventListener('pointerdown',wake,true);
+  document.addEventListener('keydown',function(e){if(e.key=='Enter'&&e.target&&e.target.tagName=='INPUT')e.target.blur()})}
 wake();document.addEventListener('visibilitychange',function(){if(document.visibilityState=='visible')wake()});
 
 // ---------- file ----------
@@ -1087,7 +1093,7 @@ fetchStats();livePoll();viewAuto();
 window.addEventListener('online',function(){syncDistinte(false);livePoll()});
 document.addEventListener('visibilitychange',function(){if(document.visibilityState=='visible')livePoll()});
 // aggiornamenti: controlla a ogni riapertura; la nuova versione si carica da sola quando si è nell'elenco partite (mai durante la registrazione)
-var APPV=64,swReg=null,swReload=false;document.getElementById('appv').textContent='Versione '+APPV;
+var APPV=65,swReg=null,swReload=false;document.getElementById('appv').textContent='Versione '+APPV;
 if('serviceWorker' in navigator&&!VIEW){var hadCtrl=!!navigator.serviceWorker.controller;
   navigator.serviceWorker.register('sw.js').then(function(r){swReg=r}).catch(function(){});
   document.addEventListener('visibilitychange',function(){if(!document.hidden&&swReg)swReg.update().catch(function(){})});
