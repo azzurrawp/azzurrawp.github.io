@@ -134,7 +134,13 @@ body.pend-g #g .c:not([data-f="g"]),body.pend-gu #g .c:not([data-f="gu"]){opacit
 body.pend-g #g .c[data-f="g"],body.pend-gu #g .c[data-f="gu"]{box-shadow:inset 0 0 0 3px #ffd600;background:#fffde7!important}
 #g .c.pend{background:#ffd600!important;opacity:1!important}
 #rgb{position:fixed;left:50%;bottom:6px;transform:translateX(-50%);z-index:20;background:#ffd600;color:#3e2723;border-radius:14px;padding:8px 10px 8px 18px;align-items:center;gap:14px;box-shadow:0 4px 18px rgba(0,0,0,.35);font-size:20px;font-weight:800;max-width:96vw}#rgb.on{display:flex!important}
-#hist{background:#455a64!important}html.view #hist{display:none!important}
+#hist{background:#455a64!important}
+#ftb{position:fixed;left:70px;bottom:3px;z-index:6;border:0;border-radius:10px;font-size:15px;font-weight:800;padding:5px 12px;background:#ffd600!important;color:#3e2723!important;animation:pl 1.6s infinite}html.view #ftb,body.ro #ftb{display:none!important}
+#ft{position:fixed;inset:0;background:rgba(11,61,145,.72);z-index:27;align-items:center;justify-content:center}#ft.on{display:flex!important}
+.ftc{background:#fff;border-radius:22px;padding:22px 34px 26px;width:min(620px,94vw);text-align:center;box-shadow:0 10px 40px rgba(0,0,0,.4);border-top:10px solid #ffd600}
+.fti{font-size:72px;line-height:1.1;animation:ftp 1.4s ease-in-out infinite}@keyframes ftp{50%{transform:scale(1.12) rotate(-6deg)}}
+#ftq{font-size:34px;font-weight:800;color:#0b3d91;margin-top:2px}#fts{font-size:19px;color:#546e7a;margin-top:8px}
+.ftbs{display:flex;gap:14px;margin-top:22px}.ftbs .btn{flex:1;font-size:23px;padding:20px 10px}#fty{background:#2e7d32}#ftn{background:#78909c}html.view #hist{display:none!important}
 #hl{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:23;align-items:center;justify-content:center}#hl.on{display:flex!important}
 .hlb{background:#fff;border-radius:16px;width:min(760px,96vw);max-height:90vh;display:flex;flex-direction:column;box-shadow:0 8px 30px rgba(0,0,0,.3)}
 .hlh{display:flex;align-items:center;gap:12px;padding:14px 18px;border-bottom:1px solid #e0e0e0;font-size:22px;color:#0b3d91}.hlh span{flex:1;font-size:15px;color:#78909c}.hlh .btn{background:#546e7a;font-size:18px;padding:10px 18px}
@@ -155,6 +161,7 @@ body.pend-g #last,body.pend-gu #last{color:#ffd600;font-weight:700;opacity:1}
   <button class="per" data-p="1">1T</button><button class="per" data-p="2">2T</button><button class="per" data-p="3">3T</button><button class="per" data-p="4">4T</button>
   <button id="undo">↶ Annulla</button>
   <button id="hist" title="Ultime azioni">🕘 Azioni</button>
+  <button id="ftb" title="Foto di squadra da fare" style="display:none">📸 Foto da fare</button>
   <button id="sum">Riepilogo</button>
   <button id="snd">🔊</button>
   <button id="fs">⛶</button>
@@ -212,6 +219,8 @@ body.pend-g #last,body.pend-gu #last{color:#ffd600;font-weight:700;opacity:1}
   </div>
 </div>
 <div id="hl" style="display:none"><div class="hlb"><div class="hlh"><b>Azioni registrate</b><span id="hlsub"></span><button id="hlx" class="btn">Chiudi</button></div><div id="hll"></div></div></div>
+<div id="ft" style="display:none"><div class="ftc"><div class="fti">📸</div><div id="ftq">Foto di squadra!</div><div id="fts"></div>
+  <div class="ftbs"><button id="fty" class="btn">✅ Fatta</button><button id="ftn" class="btn">⏳ Non ancora</button></div></div></div>
 <div id="rgb" style="display:none"><span id="rgbt"></span><button id="rgbm" class="btn">Sbagliato</button><button id="rgbp" class="btn">Parato</button></div>
 <div id="pconf" style="position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:25;display:none;align-items:center;justify-content:center">
   <div style="background:#fff;border-radius:16px;padding:26px 30px;width:min(560px,92vw);text-align:center;box-shadow:0 8px 30px rgba(0,0,0,.3)">
@@ -500,7 +509,14 @@ function tooClose(f,i){if(!GOALS[f])return false;for(var k=S.log.length-1;k>=0;k
   askBig({q:'Gol a '+d+' second'+(d==1?'o':'i')+' dal precedente: confermi?',sub:'Gol precedente: '+goalDesc(e[0],e[1])+'. Ora stai registrando: '+goalDesc(f,i)+'.',
     warn:'Due gol così vicini di solito sono un tocco sbagliato.',yes:'Sì, registra',color:'#e65100',
     onYes:function(){add(f,i,true)},onNo:function(){toast(PEND?'Gol non registrato: tocca il marcatore giusto':'Gol non registrato')}});return true}return false}
-var RIG=null,RIG_last={},RGQ=null,SHOT=null;
+var RIG=null,RIG_last={},RGQ=null,SHOT=null,FTend=null;
+function ftUI(){var b=document.getElementById('ftb');if(b)b.style.display=(S&&!VIEW&&!S.done&&S.foto===0)?'':'none'}
+function ftAsk(end){if(VIEW||window.NOFOTO)return false;FTend=end||null;
+  document.getElementById('ftq').textContent=end?'Ultima occasione!':'Foto di squadra!';
+  document.getElementById('fts').textContent=end?'Foto di squadra prima che vadano negli spogliatoi.':'Tutti in posa a bordo vasca prima del fischio d\'inizio.';
+  document.getElementById('ftn').textContent=end?'Oggi niente foto':'⏳ Non ancora';document.getElementById('ft').classList.add('on');return true}
+function ftAns(v){document.getElementById('ft').classList.remove('on');var e=FTend;FTend=null;if(!S)return;S.foto=v?1:(e?2:0);save();ftUI();
+  if(v)toast('📸 Foto di squadra fatta');if(e)e()}
 function rigAsk(f,i){RGQ={f:f,i:i};document.getElementById('rgcq').textContent=f=='e'?'Calotta '+(i+1)+' '+(S.names[i]?clean(S.names[i]):''):(S.opp||'Avversario')+' · calotta '+(i+1);
   document.getElementById('rgc').style.display='flex'}
 function rigClose(){document.getElementById('rgc').style.display='none';var q=RGQ;RGQ=null;return q}
@@ -563,6 +579,8 @@ document.getElementById('pcno').addEventListener('click',function(){document.get
 document.getElementById('g').addEventListener('click',function(ev){if(!S||S.done||VIEW||!ev.target.closest('#nlh')||!S.log.length)return;
   if(NLU){NLU=false;nlUI();toast('Nomi bloccati');return}
   askBig({q:'Sbloccare i nomi?',sub:'Potrai modificare i nomi dei giocatori e dell\'avversario. Tocca di nuovo "Giocatore" per ribloccarli.',yes:'Sblocca',color:'#1565c0',onYes:function(){NLU=true;nlUI();toast('Nomi sbloccati: tocca un nome per modificarlo')}})});
+document.getElementById('fty').addEventListener('click',function(){ftAns(true)});document.getElementById('ftn').addEventListener('click',function(){ftAns(false)});
+document.getElementById('ftb').addEventListener('click',function(){ftAsk()});
 document.getElementById('hist').addEventListener('click',function(){if(PEND){PEND=null;pendUI()}hlShow()});
 document.getElementById('hlx').addEventListener('click',function(){document.getElementById('hl').classList.remove('on')});
 document.getElementById('hll').addEventListener('click',function(ev){var b=ev.target.closest('[data-hk]');if(b&&!S.done)hlDel(+b.dataset.hk)});
@@ -620,7 +638,7 @@ function renderHome(){document.getElementById('hnew').style.display=DB.gh||!DB.m
   if(!ms.length){listEl.innerHTML='<div id="empty">Nessuna partita.<br>Apri il link della distinta oppure tocca "+ Nuova partita".</div>';return}
   listEl.innerHTML=ms.map(function(m){var lv=isLive(m)&&!DB.gh,cls=lv?'run live':m.done?'done':(m.log.length?'run':''),st=lv?'🔴 IN DIRETTA · '+m.per+'T<b>'+resH(m)+'</b>':m.done?'Conclusa<b>'+resH(m)+'</b>':(m.log.length?'In corso · '+m.per+'T<b>'+resH(m)+'</b>':'Da giocare');
     return '<div class="card '+cls+'" data-id="'+esc(m.id)+'"><div class="when"><b>'+esc(m.gio||'Partita')+'</b>'+esc(fdate(m))+(m.time?' · '+esc(m.time):'')+'<span class="where">'+where(m)+'</span></div>'+
-      '<div class="match">'+titleH(m)+'<small>'+esc(m.place||'')+(m.log.length&&DB.gh&&!m.remote?(pending(m)?' · ☁ da pubblicare':' · ☁ pubblicata ✓'):'')+'</small></div><div class="st">'+st+'</div>'+(DB.gh&&!m.done?(m.log.length?'<button class="del" data-rst="'+esc(m.id)+'" title="Azzera">↺</button>':'')+'<button class="del" data-del="'+esc(m.id)+'">🗑</button>':'')+'</div>'}).join('')}
+      '<div class="match">'+titleH(m)+(m.foto===1&&!VIEW?' <span title="Foto di squadra fatta">📸</span>':'')+'<small>'+esc(m.place||'')+(m.log.length&&DB.gh&&!m.remote?(pending(m)?' · ☁ da pubblicare':' · ☁ pubblicata ✓'):'')+'</small></div><div class="st">'+st+'</div>'+(DB.gh&&!m.done?(m.log.length?'<button class="del" data-rst="'+esc(m.id)+'" title="Azzera">↺</button>':'')+'<button class="del" data-del="'+esc(m.id)+'">🗑</button>':'')+'</div>'}).join('')}
 listEl.addEventListener('click',function(e){var rs=e.target.closest('[data-rst]');if(rs){if(resetMatch(byId(rs.dataset.rst)))renderHome();return}
   var del=e.target.closest('[data-del]');
   if(del){var m=byId(del.dataset.del);if(!confirm('Eliminare la partita "'+title(m)+'"?'+(m.log.length?' Prima ne scarico una copia.':'')))return;
@@ -628,7 +646,7 @@ listEl.addEventListener('click',function(e){var rs=e.target.closest('[data-rst]'
   var c=e.target.closest('.card');if(c)openMatch(c.dataset.id)});
 function openMatch(id){S=byId(id);if(!S)return;NLU=false;if(VIEW){document.getElementById('season').style.display='none';try{history.pushState({v:1},'',location.href)}catch(e){}}lastRow=null;[].forEach.call(document.querySelectorAll('#g .last'),function(x){x.classList.remove('last')});document.getElementById('last').textContent=(S.done||(S.remote&&!DB.gh))?(S.done?'Partita conclusa':'Partita in corso')+' · sola lettura':(S.gio?S.gio+' · ':'')+fdate(S);
   var ro=!!(S.done||(S.remote&&!DB.gh));document.body.classList.toggle('ro',ro);document.getElementById('rob').style.visibility=DB.gh?'':'hidden';all();home.style.display='none';goFS();liveBadge();liveDot();
-  if(!S.done&&!S.log.length)toast((S.gio?S.gio+': ':'')+title(S)+' – pronta a registrare')}
+  ftUI();if(!S.done&&!S.log.length){toast((S.gio?S.gio+': ':'')+title(S)+' – pronta a registrare');if(!ro&&S.foto===undefined)ftAsk()}}
 // ---------- cruscotto statistiche: stagione + una scheda per partita ----------
 var DSEL=null;
 function isPen(e){return e[5]===1}
@@ -974,7 +992,7 @@ window.addEventListener('popstate',function(e){if(PVskip){PVskip=false;e.stopImm
 document.getElementById('rotok').addEventListener('click',function(){rotOk=true;rotCheck()});
 document.getElementById('refc').addEventListener('click',function(){document.getElementById('refv').style.display='none'});
 document.getElementById('refz').addEventListener('click',function(){var v=document.getElementById('refv');v.classList.toggle('z');this.textContent=v.classList.contains('z')?'🔍 Adatta':'🔍 Ingrandisci'});
-function showHome(){setTimeout(rotCheck,0);document.getElementById('hl').classList.remove('on');if(RIG)rigEnd();if(SHOT){SHOT=null;rigUI()}if(VIEW){S=null;document.getElementById('ov').style.display='none';home.style.display='none';showSeason();return}if(PEND){PEND=null;pendUI()}S=null;if(swReload){location.reload();return}liveDot();document.getElementById('ov').style.display='none';renderHome();home.style.display='flex';publish(false)}
+function showHome(){setTimeout(rotCheck,0);document.getElementById('ft').classList.remove('on');FTend=null;document.getElementById('hl').classList.remove('on');if(RIG)rigEnd();if(SHOT){SHOT=null;rigUI()}if(VIEW){S=null;document.getElementById('ov').style.display='none';home.style.display='none';showSeason();return}if(PEND){PEND=null;pendUI()}S=null;if(swReload){location.reload();return}liveDot();document.getElementById('ov').style.display='none';renderHome();home.style.display='flex';publish(false)}
 document.getElementById('home2').addEventListener('click',function(){if(VIEW&&history.state&&history.state.v){history.back();return}showHome()});
 if(VIEW){var sh=document.querySelector('#season h1');if(sh)sh.textContent='📊 Azzurra U16 · Statistiche';document.title='Azzurra U16 · Statistiche'}
 var menu=document.getElementById('menu');
@@ -1066,12 +1084,12 @@ document.getElementById('send').addEventListener('click',function(){publish(true
 function resetMatch(m){
   if(!confirm('AZZERARE la partita "'+title(m)+'"?\n\nVerranno cancellati gol, assist, espulsioni e tempi. I nomi restano.'))return false;
   if(!confirm('Conferma di nuovo: l\'azzeramento non si può annullare.\n(Prima scarico comunque una copia di sicurezza in Download.)'))return false;
-  if(m.log.length)backup('prima_di_azzerare',m);F.concat(['x']).forEach(function(f){m[f]=z()});m.og=0;m.ogu=0;m.log=[];m.per=1;m.done=false;m.upd=Date.now();persist();publish(false);if(DB.gh){var keep=S;S=m;liveKick(true);S=keep}toast('Partita azzerata');return true}
+  if(m.log.length)backup('prima_di_azzerare',m);F.concat(['x']).forEach(function(f){m[f]=z()});m.og=0;m.ogu=0;m.log=[];m.per=1;m.done=false;delete m.foto;m.upd=Date.now();persist();publish(false);if(DB.gh){var keep=S;S=m;liveKick(true);S=keep}toast('Partita azzerata');return true}
 document.getElementById('rst').addEventListener('click',function(){if(!resetMatch(S))return;document.body.classList.remove('ro');all();ov.style.display='none';document.getElementById('last').textContent='Partita azzerata'});
 document.getElementById('end').addEventListener('click',function(){var sc=score(S);document.getElementById('ov').style.display='none';
   askBig({q:'Terminare la partita?',sub:hdr(S)+' · dopo si potrà solo consultare (riapribile con ✎ Modifica).',warn:S.per<4?'⚠ Sei ancora nel '+S.per+'° tempo.':'',
     yes:'Sì, termina la partita',color:'#c62828',onYes:function(){
-  S.done=true;save();backup('finale');showHome()},onNo:function(){toast('La partita continua')}})});
+  var fin=function(){S.done=true;save();backup('finale');showHome()};if(S.foto===1||S.foto===2||!ftAsk(fin))fin()},onNo:function(){toast('La partita continua')}})});
 
 // Indietro: torna all'elenco, non chiude l'app
 var bye=document.getElementById('bye'),leaving=false;
@@ -1099,7 +1117,7 @@ fetchStats();livePoll();viewAuto();
 window.addEventListener('online',function(){syncDistinte(false);livePoll()});
 document.addEventListener('visibilitychange',function(){if(document.visibilityState=='visible')livePoll()});
 // aggiornamenti: controlla a ogni riapertura; la nuova versione si carica da sola quando si è nell'elenco partite (mai durante la registrazione)
-var APPV=66,swReg=null,swReload=false;document.getElementById('appv').textContent='Versione '+APPV;
+var APPV=67,swReg=null,swReload=false;document.getElementById('appv').textContent='Versione '+APPV;
 if('serviceWorker' in navigator&&!VIEW){var hadCtrl=!!navigator.serviceWorker.controller;
   navigator.serviceWorker.register('sw.js').then(function(r){swReg=r}).catch(function(){});
   document.addEventListener('visibilitychange',function(){if(!document.hidden&&swReg)swReg.update().catch(function(){})});
