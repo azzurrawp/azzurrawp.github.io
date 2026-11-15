@@ -1,6 +1,6 @@
 {
-  "latestVersion": "0.2.4",
-  "releaseNotes": "0.2.4: calibrazione del campo anche sull'iPhone che riprende, con lente d'ingrandimento e linee 2, 5, 6 e metà campo.",
+  "latestVersion": "0.2.5",
+  "releaseNotes": "0.2.5: prima ripresa automatica (il gimbal segue la palla) e ritorno all'automatico 5 s dopo l'ultimo comando o subito se il monitor si scollega.",
   "params": {
     "gimbalSpeed": 0.3,
     "zoomRampRate": 1.5
