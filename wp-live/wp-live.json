@@ -1,6 +1,6 @@
 {
-  "latestVersion": "0.2.9",
-  "releaseNotes": "0.2.9: collegamento del regista con QR code o link da condividere + password di 6 cifre; il monitor usa l'hotspot dell'iPhone che riprende.",
+  "latestVersion": "0.3.0",
+  "releaseNotes": "0.3.0: schermata semplificata (comandi sui bordi), due dita sull'immagine per muovere e zoomare, posizione reale del gimbal per la calibrazione.",
   "params": {
     "gimbalSpeed": 0.3,
     "zoomRampRate": 1.5
