@@ -1,6 +1,6 @@
 {
-  "latestVersion": "0.2.0",
-  "releaseNotes": "0.2.0: monitor remoto dal browser (PIN), registrazione sul telefono, calibrazione del campo, riconoscimento palla di prova.",
+  "latestVersion": "0.2.1",
+  "releaseNotes": "0.2.1: sul monitor la palla è sempre cerchiata; se il software la perde compare 'PALLA PERSA' con l'ultima posizione nota.",
   "params": {
     "gimbalSpeed": 0.3,
     "zoomRampRate": 1.5
