@@ -1,6 +1,6 @@
 {
-  "latestVersion": "0.3.1",
-  "releaseNotes": "0.3.1: calibrazione con giro automatico del gimbal come XbotGo, rettangolo proposto su panoramica con vertici da trascinare (iPhone e monitor).",
+  "latestVersion": "0.4.0",
+  "releaseNotes": "0.4.0: diretta YouTube (RTMP) con pulsante LIVE sull'iPhone e sul monitor, dati YouTube inseribili da entrambi, riconnessione automatica.",
   "params": {
     "gimbalSpeed": 0.3,
     "zoomRampRate": 1.5
