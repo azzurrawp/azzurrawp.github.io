@@ -311,7 +311,7 @@ function pending(m){return !m.remote&&(m.log.length||m.sent)&&(m.upd||0)>(m.sent
 function rowsOf(m){var ms_=mstat(m),s=score(m),O=m.opp||'',P=[],Gi=[],E=[],ps=[];
   for(var p=1;p<=4;p++){var a=0,b=0;m.log.forEach(function(e){if(e[2]!=p)return;if(e[0]=='g'||e[0]=='gu')a++;if(e[0]=='og'||e[0]=='ogu')b++});ps.push(a+'-'+b)}
   P.push([m.id,m.gio||'',m.date||'',m.time||'',m.home?'Casa':'Trasferta',O,m.place||'',s[0],s[1],'Azzurra '+s[0]+'-'+s[1]+' '+O,ps.join(' / '),sum(m.gu),m.ogu,ms_.su,ms_.su?Math.round(100*Math.min(ms_.gu,ms_.su)/ms_.su)+'%':'',ms_.in,ms_.in?Math.round(100*Math.min(ms_.ou,ms_.in)/ms_.in)+'%':'',sum(m.e),sum(m.x),m.done?'Conclusa':'In corso',new Date(m.upd||Date.now()).toLocaleString('it-IT')]);
-  for(var i=0;i<N;i++)if(m.names[i]||m.g[i]||m.gu[i]||m.a[i]||m.au[i]||m.e[i])Gi.push([m.id,m.date||'',O,i+1,m.names[i]||('Calotta '+(i+1)),m.g[i]+m.gu[i]+m.a[i]+m.au[i],m.g[i]+m.gu[i],m.gu[i],m.a[i]+m.au[i],m.au[i],m.e[i],m.log.filter(function(e){return e[0]=='e'&&e[1]==i&&e[5]===1}).length]);
+  for(var i=0;i<N;i++)if(m.names[i]||m.g[i]||m.gu[i]||m.a[i]||m.au[i]||m.e[i]){var nn=m.names[i]||('Calotta '+(i+1)),q=ms_.pl[nn]||{g:0,gu:0,gr:0,a:0,au:0,e:0,fr:0};Gi.push([m.id,m.date||'',O,i+1,nn,q.g+q.a,q.g,q.gu,q.gr,q.a,q.au,q.e+q.fr,q.fr])}
   m.log.forEach(function(e){var c=e[1]>=0?e[1]+1:(e[6]||'');E.push([m.id,m.date||'',O,e[2]+'T',new Date(e[3]).toLocaleTimeString('it-IT'),evLbl(e),c,(e[0]=='x'||e[0]=='og'||e[0]=='ogu'||e[0]=='ors'||e[1]<0)?'':(m.names[e[1]]||'')])});
   return {Partite:P,Giocatori:Gi,Eventi:E}}
 function u8b64(u){var s='',C=0x8000;for(var i=0;i<u.length;i+=C)s+=String.fromCharCode.apply(null,u.subarray(i,i+C));return btoa(s)}
@@ -377,13 +377,13 @@ function xlsx(sheets){var f=[],wb='',rel='',ct='';
   return zip(f)}
 function seasonSheets(L){var ms=L||DB.matches.filter(function(m){return m.log.length}).sort(function(a,b){return (a.date+a.time).localeCompare(b.date+b.time)});
   var P=[['ID partita','Giornata','Data','Ora','Casa/Trasferta','Avversario','Piscina','Gol Azzurra','Gol avversari','Risultato','Parziali','Gol Azzurra uomo +','Gol avv. uomo +','Superiorità avute','% superiorità sfruttate','Inferiorità avute','% inferiorità subite','Espulsioni Azzurra','Espulsioni avv.','Stato','Aggiornata il']],
-      G=[['ID partita','Data','Avversario','Calotta','Giocatore','G + A','Gol totali','Gol uomo +','Assist totali','Assist uomo +','Espulsioni (tutti i falli personali)','di cui falli da rigore']],
+      G=[['ID partita','Data','Avversario','Calotta','Giocatore','G + A','Gol totali','Gol uomo +','Gol su rigore','Assist totali','Assist uomo +','Espulsioni (tutti i falli personali)','di cui falli da rigore']],
       E=[['ID partita','Data','Avversario','Tempo','Ora','Evento','Calotta','Giocatore']],T={},order=[];
   ms.forEach(function(m){var r=rowsOf(m);P=P.concat(r.Partite);G=G.concat(r.Giocatori);E=E.concat(r.Eventi);
-    r.Giocatori.forEach(function(g){var n=g[4];if(!T[n]){T[n]=[n,0,0,0,0,0,0,0,0];order.push(n)}var t=T[n];t[1]++;for(var q=2;q<9;q++)t[q]+=g[q+3]})});
-  var TT=[['Giocatore','Partite','G + A','Gol totali','Gol uomo +','Assist totali','Assist uomo +','Espulsioni (tutti i falli personali)','di cui falli da rigore']].concat(order.map(function(n){return T[n]}).sort(function(a,b){return b[2]-a[2]||b[3]-a[3]}));
-  return [{name:'Totali stagione',rows:TT,w:[22,9,8,10,11,12,13,30,20]},{name:'Partite',rows:P,w:[16,12,11,7,13,22,26,11,12,28,22,18,15,12,14,12,13,15,13,10,18]},
-    {name:'Giocatori',rows:G,w:[16,11,20,8,20,8,10,11,12,13,30,20]},{name:'Eventi',rows:E,w:[16,11,20,7,9,12,8,20]}].concat((function(){var R=rigStat(ms);if(!R.rows.length&&!R.O.t)return [];var r=[['Giocatore','Tirati','Segnati','Sbagliati','% segnati']].concat(R.rows.map(function(t){return [clean(t.n),t.t,t.s,t.m,t.t?Math.round(100*t.s/t.t)+'%':'']}));if(R.O.t)r=r.concat([[],['Rigori avversari','Tirati','Segnati','Parati da noi','Sbagliati da loro'],['',R.O.t,R.O.s,R.O.p,R.O.m],[],['Portiere','Rigori parati']]).concat(R.G.map(function(g){return [clean(g.n),g.v]}));return [{name:'Rigori',rows:r,w:[26,9,9,13,16]}]})())}
+    r.Giocatori.forEach(function(g){var n=g[4];if(!T[n]){T[n]=[n,0,0,0,0,0,0,0,0,0];order.push(n)}var t=T[n];t[1]++;for(var q=2;q<10;q++)t[q]+=g[q+3]})});
+  var TT=[['Giocatore','Partite','G + A','Gol totali','Gol uomo +','Gol su rigore','Assist totali','Assist uomo +','Espulsioni (tutti i falli personali)','di cui falli da rigore']].concat(order.map(function(n){return T[n]}).sort(function(a,b){return b[2]-a[2]||b[3]-a[3]}));
+  return [{name:'Totali stagione',rows:TT,w:[22,9,8,10,11,12,12,13,30,20]},{name:'Partite',rows:P,w:[16,12,11,7,13,22,26,11,12,28,22,18,15,12,14,12,13,15,13,10,18]},
+    {name:'Giocatori',rows:G,w:[16,11,20,8,20,8,10,11,12,12,13,30,20]},{name:'Eventi',rows:E,w:[16,11,20,7,9,12,8,20]}].concat((function(){var R=rigStat(ms);if(!R.rows.length&&!R.O.t)return [];var r=[['Giocatore','Tirati','Segnati','Sbagliati','% segnati']].concat(R.rows.map(function(t){return [clean(t.n),t.t,t.s,t.m,t.t?Math.round(100*t.s/t.t)+'%':'']}));if(R.O.t)r=r.concat([[],['Rigori avversari','Tirati','Segnati','Parati da noi','Sbagliati da loro'],['',R.O.t,R.O.s,R.O.p,R.O.m],[],['Portiere','Rigori parati']]).concat(R.G.map(function(g){return [clean(g.n),g.v]}));return [{name:'Rigori',rows:r,w:[26,9,9,13,16]}]})())}
 function seasonWorkbook(L){return xlsx(seasonSheets(L))}
 function exportExcel(){dlSeason('xls')}
 // ---------- diretta: trasmissione cifrata via ntfy.sh (solo con internet) ----------
@@ -1134,7 +1134,7 @@ fetchStats();livePoll();viewAuto();
 window.addEventListener('online',function(){syncDistinte(false);livePoll()});
 document.addEventListener('visibilitychange',function(){if(document.visibilityState=='visible')livePoll()});
 // aggiornamenti: controlla a ogni riapertura; la nuova versione si carica da sola quando si è nell'elenco partite (mai durante la registrazione)
-var APPV=72,swReg=null,swReload=false;document.getElementById('appv').textContent='Versione '+APPV;
+var APPV=73,swReg=null,swReload=false;document.getElementById('appv').textContent='Versione '+APPV;
 if('serviceWorker' in navigator&&!VIEW){var hadCtrl=!!navigator.serviceWorker.controller;
   navigator.serviceWorker.register('sw.js').then(function(r){swReg=r}).catch(function(){});
   document.addEventListener('visibilitychange',function(){if(!document.hidden&&swReg)swReg.update().catch(function(){})});
