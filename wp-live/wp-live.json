@@ -1,6 +1,6 @@
 {
-  "latestVersion": "0.2.5",
-  "releaseNotes": "0.2.5: prima ripresa automatica (il gimbal segue la palla) e ritorno all'automatico 5 s dopo l'ultimo comando o subito se il monitor si scollega.",
+  "latestVersion": "0.2.6",
+  "releaseNotes": "0.2.6: sul monitor la telecamera si comanda anche con due dita sull'anteprima (trascina per muovere, pizzico per lo zoom); dal PC rotella per lo zoom.",
   "params": {
     "gimbalSpeed": 0.3,
     "zoomRampRate": 1.5
