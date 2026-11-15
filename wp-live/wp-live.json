@@ -1,6 +1,6 @@
 {
-  "latestVersion": "0.1.4",
-  "releaseNotes": "0.1.4: la configurazione si scarica da sola a ogni avvio, senza impostare nulla.",
+  "latestVersion": "0.1.5",
+  "releaseNotes": "0.1.5: il gimbal si ferma subito quando togli il dito dalle frecce.",
   "params": {
     "gimbalSpeed": 0.3,
     "zoomRampRate": 1.5
