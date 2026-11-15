@@ -1,6 +1,6 @@
 {
-  "latestVersion": "0.2.6",
-  "releaseNotes": "0.2.6: sul monitor la telecamera si comanda anche con due dita sull'anteprima (trascina per muovere, pizzico per lo zoom); dal PC rotella per lo zoom.",
+  "latestVersion": "0.2.7",
+  "releaseNotes": "0.2.7: microfono acceso/spento sia dall'iPhone che riprende sia dal monitor (vale per registrazione e diretta).",
   "params": {
     "gimbalSpeed": 0.3,
     "zoomRampRate": 1.5
