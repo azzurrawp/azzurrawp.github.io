@@ -447,7 +447,7 @@ function save(){if(!S)return;S.upd=Date.now();persist();liveKick(S.done)}
 var g=document.getElementById('g'),H='';
 function d(cls,html,attr){return '<div class="'+cls+'"'+(attr||'')+'>'+(html||'')+'</div>'}
 var FD=['g','a','gu','au','e'],GC={g:'cg gl',gu:'cg up gl gl2',a:'ca',au:'ca up',e:'ce gl'};
-H+=d('h hn','Cal.')+'<div class="h hn" id="nlh">Giocatore <span id="nli"></span></div>'+d('h hg gl','GOL')+d('h ha','ASSIST')+d('h hu gl gl2','GOL<br>uomo +')+d('h hu','ASSIST<br>uomo +')+d('h he gl','ESPULS.')+d('sep')+d('h hx','Cal.')+d('h hx','ESPULS.<br>avversari');
+H+=d('h hn','Cal.')+'<div class="h hn" id="nlh">Giocatore <span id="nli"></span></div>'+d('h hg gl','GOL')+d('h ha','ASSIST')+d('h hu gl gl2','GOL<br>uomo +')+d('h hu','ASSIST<br>uomo +')+d('h he gl','FALLI<br>GRAVI')+d('sep')+d('h hx','Cal.')+d('h hx','FALLI GRAVI<br>avversari');
 for(var i=0;i<N;i++){var zb=i%2?' z':'';
   H+=d('n'+zb,'<span class="cap" id="cp'+i+'">'+(i+1)+'</span>',' id="n'+i+'"')+d('nm'+zb,'<input data-i="'+i+'" maxlength="16" autocomplete="off" autocorrect="off" spellcheck="false" enterkeyhint="done">',' id="m'+i+'"');
   FD.forEach(function(f){H+=d('c '+GC[f]+zb,'',' data-f="'+f+'" data-i="'+i+'" id="'+f+i+'"')});
@@ -1121,7 +1121,7 @@ function summaryFull(m){var k=analyze(m),pl=players(m),t=[],O=m.opp||'avversari'
     return t.join('\n')}
 function summary(){return smode=='b'?summaryShort(S):summaryFull(S)}
 var smode='b';
-function csv(){var r=['Calotta;Nome;Gol;Gol UP;Assist;Assist UP;Espulsioni;Espulsioni avv'];
+function csv(){var r=['Calotta;Nome;Gol;Gol UP;Assist;Assist UP;Falli gravi;Falli gravi avv'];
   for(var i=0;i<N;i++)r.push([i+1,'"'+(S.names[i]||'').replace(/"/g,"'")+'"',S.g[i],S.gu[i],S.a[i],S.au[i],S.e[i],S.x[i]].join(';'));
   r.push('');r.push('Avversario;'+(S.opp||'')+';Gol avv;'+S.og+';Gol avv UP;'+S.ogu);
   r.push('');r.push('Evento;Calotta;Tempo;Ora');
@@ -1172,7 +1172,7 @@ fetchStats();livePoll();viewAuto();
 window.addEventListener('online',function(){syncDistinte(false);livePoll()});
 document.addEventListener('visibilitychange',function(){if(document.visibilityState=='visible')livePoll()});
 // aggiornamenti: controlla a ogni riapertura; la nuova versione si carica da sola quando si è nell'elenco partite (mai durante la registrazione)
-var APPV=82,swReg=null,swReload=false;document.getElementById('appv').textContent='Versione '+APPV;
+var APPV=83,swReg=null,swReload=false;document.getElementById('appv').textContent='Versione '+APPV;
 if('serviceWorker' in navigator&&!VIEW){var hadCtrl=!!navigator.serviceWorker.controller;
   navigator.serviceWorker.register('sw.js').then(function(r){swReg=r}).catch(function(){});
   document.addEventListener('visibilitychange',function(){if(!document.hidden&&swReg)swReg.update().catch(function(){})});
