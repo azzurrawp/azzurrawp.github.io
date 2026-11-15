@@ -1,6 +1,6 @@
 {
-  "latestVersion": "0.2.3",
-  "releaseNotes": "0.2.3: angoli del campo con pallino e puntino; toccandoli si apre la lente d'ingrandimento a piena risoluzione per correggerli.",
+  "latestVersion": "0.2.4",
+  "releaseNotes": "0.2.4: calibrazione del campo anche sull'iPhone che riprende, con lente d'ingrandimento e linee 2, 5, 6 e metà campo.",
   "params": {
     "gimbalSpeed": 0.3,
     "zoomRampRate": 1.5
