@@ -1,6 +1,6 @@
 {
-  "latestVersion": "0.2.7",
-  "releaseNotes": "0.2.7: microfono acceso/spento sia dall'iPhone che riprende sia dal monitor (vale per registrazione e diretta).",
+  "latestVersion": "0.2.8",
+  "releaseNotes": "0.2.8: schermata dell'iPhone riordinata, i pannelli non escono più dallo schermo; diagnostica spostata nelle impostazioni.",
   "params": {
     "gimbalSpeed": 0.3,
     "zoomRampRate": 1.5
