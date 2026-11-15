@@ -1,6 +1,6 @@
 {
-  "latestVersion": "0.4.0",
-  "releaseNotes": "0.4.0: diretta YouTube (RTMP) con pulsante LIVE sull'iPhone e sul monitor, dati YouTube inseribili da entrambi, riconnessione automatica.",
+  "latestVersion": "0.4.1",
+  "releaseNotes": "0.4.1: nuova disposizione dei comandi su iPhone e monitor (pulsanti tondi, REC rotondo, Larga|Auto), batteria del gimbal, monitor a tutto schermo senza joystick.",
   "params": {
     "gimbalSpeed": 0.3,
     "zoomRampRate": 1.5
