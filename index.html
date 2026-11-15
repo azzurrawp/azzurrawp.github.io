@@ -744,7 +744,7 @@ function matchDash(m){var o=mstat(m),k=analyze(m),O=m.opp||'Avversario',diff=o.A
   h+='<h2>Andamento tempo per tempo</h2><div class="dper">'+[1,2,3,4].map(function(p){var q=o.P[p-1],df=q.a-q.b;
     return '<div class="dpc"><div class="dpt">'+p+'° tempo <b style="color:'+(df>0?'#2e7d32':df<0?'#c62828':'#546e7a')+'">Azzurra '+q.a+' – '+q.b+' '+esc(O)+'</b></div><div class="dsu">Superiorità sfruttate <b>'+supTxt(q.gu,q.su)+'</b> · Inferiorità subite <b>'+supTxt(q.ou,q.in)+'</b></div>'+(q.a+q.b?trendSVG(m,O,p,sc):'<div style="color:#78909c;padding:30px 0;text-align:center">Nessun gol</div>')+goalsHTML(m,p)+'</div>'}).join('')+'</div><div style="font-size:14px;color:#546e7a">Ogni tempo parte da 0: sopra la linea Azzurra avanti nel parziale del tempo, sotto '+esc(O)+' avanti.</div>';
   var rows=Object.keys(o.pl).map(function(n){return o.pl[n]}).filter(function(t){return t.g||t.a||t.e}).sort(function(a,b){return b.g-a.g||b.a-a.a||a.i-b.i});
-  h+='<h2>Giocatori</h2>'+(rows.length?ptable(rows,false,o.A)+'<div class="pnote">% G+A = partecipazione ai gol: (gol + assist del giocatore) ÷ gol della squadra.</div>':'<div id="empty">Nessun dato per i giocatori.</div>');h+=rigHTML(rigStat([m]),m.home);
+  h+='<h2>Giocatori</h2>'+(rows.length?ptable(rows,false,o.A)+'<div class="pnote"><b>% G+A</b> = a quanti gol della squadra ha partecipato il giocatore, segnando o facendo l\'assist: (gol + assist) ÷ gol della squadra. Ogni gol conta sia per chi segna sia per chi fa l\'assist, quindi la somma delle percentuali supera il 100%.</div>':'<div id="empty">Nessun dato per i giocatori.</div>');h+=rigHTML(rigStat([m]),m.home);
   return h}
 function seasonDash(ms){var T={},o=[];
   ms.forEach(function(m){var s=mstat(m);Object.keys(s.pl).forEach(function(n){var q=s.pl[n];if(!T[n]){T[n]={n:n,p:0,g:0,gu:0,gr:0,a:0,au:0,e:0};o.push(n)}var t=T[n];['g','gu','gr','a','au','e'].forEach(function(f){t[f]+=q[f]})});
@@ -760,7 +760,7 @@ function seasonDash(ms){var T={},o=[];
    KP(S.A-S.B>=0?'g':'r',sgn(S.A-S.B),'Differenza reti','')+KP('g',supTxt(S.gu,S.su),'Superiorità sfruttate',supSub(S.gu,S.su,false,S.prov))+KP('r',supTxt(S.ou,S.in),'Inferiorità subite',supSub(S.ou,S.in,true,S.prov))+(function(t){return KP('y',t.v,t.l,t.s)})(rigTile(S,'avversari'))+parTile(ms)+
    KP('',Math.min(S.ast,S.A)+' / '+S.A,'Gol con assist',pct(Math.min(S.ast,S.A),S.A)+' dei gol')+KP('',S.in+' / '+S.su,'Espulsioni',esc(expSub(S,'avversari')))+
    (top&&top.g?KP('y',top.g,'Capocannoniere',esc(clean(top.n))+' · '+pct(top.g,S.A)+' dei gol'):'')+(ta&&ta.a?KP('y',ta.a,'Più assist',esc(clean(ta.n))+' · '+pct(ta.a,S.ast)+' degli assist'):'')+'</div>';
-  h+='<h2>Giocatori ('+ms.length+(ms.length==1?' partita':' partite')+')</h2>'+ptable(rows,true,S.A)+'<div class="pnote">% G+A = partecipazione ai gol: (gol + assist del giocatore) ÷ gol della squadra.</div>'+rigHTML(rigStat(ms),true);
+  h+='<h2>Giocatori ('+ms.length+(ms.length==1?' partita':' partite')+')</h2>'+ptable(rows,true,S.A)+'<div class="pnote"><b>% G+A</b> = a quanti gol della squadra ha partecipato il giocatore, segnando o facendo l\'assist: (gol + assist) ÷ gol della squadra. Ogni gol conta sia per chi segna sia per chi fa l\'assist, quindi la somma delle percentuali supera il 100%.</div>'+rigHTML(rigStat(ms),true);
   h+='<h2>Partite</h2><div class="tw"><table id="stab"><tr><th>Partita</th><th>Dove</th><th>Data</th><th>Risultato</th><th>Stato</th><th></th></tr>'+ms.map(function(m){return '<tr data-dsel="'+esc(m.id)+'" style="cursor:pointer"><td>'+titleH(m)+'</td><td style="white-space:nowrap">'+where(m)+'</td><td>'+esc(fdate(m))+'</td><td><b>'+resH(m)+'</b></td><td>'+(m.done?'Conclusa':'In corso')+'</td><td>'+(m.ref?'<button class="btn" data-ref="'+esc(m.id)+'" style="background:#00838f;padding:6px 12px;font-size:16px">🖼 Referto</button> ':'')+'<span style="color:#0b3d91;font-weight:700">Cruscotto ›</span></td></tr>'}).join('')+'</table></div>';
   return h}
 // ---------- PDF generato sul telefono (senza librerie): statistiche partita/stagione + referto ----------
@@ -889,7 +889,7 @@ function matchPDF(m){var P=new PDF(),o=mstat(m),k=analyze(m),O=m.opp||'Avversari
     [PC.blu,String(Object.keys(o.pl).filter(function(n){return o.pl[n].g}).length),'Marcatori diversi',top&&top.g?'il migliore '+clean(top.n)+': '+pct(top.g,o.A)+' dei gol':''],
     [PC.blu,(k.maxL?'+'+k.maxL:'0')+' / '+(k.maxD?'-'+k.maxD:'0'),'Vantaggio / svantaggio max',''],
     [k.run.t=='A'?PC.gr:PC.rd,k.run.n>=2?k.run.n+'-0':'–','Miglior parziale',k.run.n>=2?(k.run.t=='A'?'Azzurra':O)+(k.run.p==k.run.e?' nel '+k.run.p+'° tempo':' tra '+k.run.p+'° e '+k.run.e+'° t.'):''],
-    [PC.blu,k.ties+' / '+k.chg,'Parità / cambi vantaggio',''],[PC.blu,o.in+' / '+o.su,'Espulsioni',expSub(o,O).replace('🟥 ','')]],4);
+    [PC.blu,k.ties+' / '+k.chg,'Parità / cambi vantaggio',''],[PC.blu,o.in+' / '+o.su,'Espulsioni',expSub({ta:o.ta,tb:o.tb,da:o.da,db:o.db},O).replace('🟥 ','')]],4);
   y=pH2(P,y+12,'Gol per tempo');pBars(P,28,y,250,130,o.P,'Azzurra',O);
   P.text(310,y-8,'Andamento del punteggio',11,true,PC.blu);pTrend(P,m,306,y,262,118);P.text(306,y+128,'Sopra la linea: Azzurra in vantaggio · sotto: '+O,7,false,PC.gy);
   y+=146;y=pH2(P,y,'Andamento tempo per tempo');var sc=[1,-1];[1,2,3,4].forEach(function(p){var d=0;m.log.forEach(function(e){if(e[2]!=p)return;if(e[0]=='g'||e[0]=='gu')d++;else if(e[0]=='og'||e[0]=='ogu')d--;else return;sc[0]=Math.max(sc[0],d);sc[1]=Math.min(sc[1],d)})});
@@ -898,7 +898,7 @@ function matchPDF(m){var P=new PDF(),o=mstat(m),k=analyze(m),O=m.opp||'Avversari
   y+=88;y=pH2(P,y,'Giocatori');
   var rows=Object.keys(o.pl).map(function(n){return o.pl[n]}).filter(function(t){return t.g||t.a||t.e}).sort(function(a,b){return b.g-a.g||b.a-a.a||a.i-b.i});
   y=pTable(P,y,['Giocatore','Gol','% G+A','uomo +','su rig.','Assist','uomo +','Espuls.'],rows.map(function(t){return [t.n,t.g,t.g+t.a?pct(t.g+t.a,o.A):'–',t.gu,t.gr,t.a,t.au,t.e]}),[3,1,1.2,1,1,1,1,1],[0,'b',0,0,0,'b']);
-  P.text(28,y+4,'% G+A = partecipazione ai gol: (gol + assist del giocatore) ÷ gol della squadra.',7,false,PC.gy);pFoot(P);
+  P.text(28,y+4,'% G+A = gol a cui ha partecipato (gol + assist) ÷ gol della squadra. Un gol conta per chi segna e per chi fa l\'assist: la somma supera il 100%.',7,false,PC.gy);pFoot(P);
   goalsPDF(P,m,o);
   if(!m.ref)return Promise.resolve(P);
   return getRef(m).then(jpegInfo).then(function(im){P.page(im.w>im.h);pHead(P,'Referto');var p=P.p,mw=p.w-40,mh=p.h-100,s=Math.min(mw/im.w,mh/im.h);
@@ -919,7 +919,7 @@ function seasonPDF(){var ms=DB.matches.filter(function(m){return m.log.length}).
     ['#f9a825',ta&&ta.a?String(ta.a):'–','Più assist',ta&&ta.a?clean(ta.n)+' · '+pct(ta.a,S.ast)+' degli assist':'']],4);
   y=pH2(P,y+12,'Giocatori ('+ms.length+(ms.length==1?' partita':' partite')+')');
   y=pTable(P,y,['Giocatore','Partite','Gol','% G+A','uomo +','su rig.','Assist','uomo +','Espuls.'],rows.map(function(t){return [t.n,t.p,t.g,t.g+t.a?pct(t.g+t.a,S.A):'–',t.gu,t.gr,t.a,t.au,t.e]}),[3,1,1,1.2,1,1,1,1,1],[0,0,'b',0,0,0,'b']);
-  P.text(28,y+4,'% G+A = partecipazione ai gol: (gol + assist del giocatore) ÷ gol della squadra.',7,false,PC.gy);y+=20;var y0=y;y=rigPDF(P,y,rigStat(ms));if(y>y0)y+=14;
+  P.text(28,y+4,'% G+A = gol a cui ha partecipato (gol + assist) ÷ gol della squadra. Un gol conta per chi segna e per chi fa l\'assist: la somma supera il 100%.',7,false,PC.gy);y+=20;var y0=y;y=rigPDF(P,y,rigStat(ms));if(y>y0)y+=14;
   if(y>P.p.h-120){pFoot(P);P.page();pHead(P,'Statistiche stagione '+season());y=72}
   y=pH2(P,y,'Partite');y=pTable(P,y,['Data','Partita','Dove','Risultato','Parziali','Stato'],ms.map(function(m){var s=mstat(m),dd=(m.date||'').split('-');return [dd.length==3?dd[2]+'/'+dd[1]+'/'+dd[0]:'','Azzurra – '+(m.opp||'?'),m.home?'In casa':'In trasferta',s.A+' – '+s.B,parz(m,s.P),m.done?'Conclusa':'In corso']}),[1.4,2.6,1.2,1,2,1.1],[0,0,0,'b']);
   pFoot(P);return Promise.resolve(P)}
@@ -1134,7 +1134,7 @@ fetchStats();livePoll();viewAuto();
 window.addEventListener('online',function(){syncDistinte(false);livePoll()});
 document.addEventListener('visibilitychange',function(){if(document.visibilityState=='visible')livePoll()});
 // aggiornamenti: controlla a ogni riapertura; la nuova versione si carica da sola quando si è nell'elenco partite (mai durante la registrazione)
-var APPV=68,swReg=null,swReload=false;document.getElementById('appv').textContent='Versione '+APPV;
+var APPV=69,swReg=null,swReload=false;document.getElementById('appv').textContent='Versione '+APPV;
 if('serviceWorker' in navigator&&!VIEW){var hadCtrl=!!navigator.serviceWorker.controller;
   navigator.serviceWorker.register('sw.js').then(function(r){swReg=r}).catch(function(){});
   document.addEventListener('visibilitychange',function(){if(!document.hidden&&swReg)swReg.update().catch(function(){})});
