@@ -1,6 +1,6 @@
 {
-  "latestVersion": "0.1.5",
-  "releaseNotes": "0.1.5: il gimbal si ferma subito quando togli il dito dalle frecce.",
+  "latestVersion": "0.2.0",
+  "releaseNotes": "0.2.0: monitor remoto dal browser (PIN), registrazione sul telefono, calibrazione del campo, riconoscimento palla di prova.",
   "params": {
     "gimbalSpeed": 0.3,
     "zoomRampRate": 1.5
