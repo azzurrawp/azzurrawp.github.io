@@ -1,6 +1,6 @@
 {
-  "latestVersion": "0.3.0",
-  "releaseNotes": "0.3.0: schermata semplificata (comandi sui bordi), due dita sull'immagine per muovere e zoomare, posizione reale del gimbal per la calibrazione.",
+  "latestVersion": "0.3.1",
+  "releaseNotes": "0.3.1: calibrazione con giro automatico del gimbal come XbotGo, rettangolo proposto su panoramica con vertici da trascinare (iPhone e monitor).",
   "params": {
     "gimbalSpeed": 0.3,
     "zoomRampRate": 1.5
