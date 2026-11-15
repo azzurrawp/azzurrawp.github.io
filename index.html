@@ -252,7 +252,7 @@ body.pend-g #last,body.pend-gu #last{color:#ffd600;font-weight:700;opacity:1}
     <button class="btn mi" id="mtok" style="background:#455a64">🔑 Codice di pubblicazione</button>
     <button class="btn mi" id="mclose" style="background:#90a4ae">Chiudi</button>
     <div id="appv" style="text-align:center;color:#78909c;font-size:14px;margin-top:4px"></div>
-    <div class="leg"><b>© 2026 – Tutti i diritti riservati all’autore.</b><br>Software realizzato dall’autore a titolo personale, non su incarico di associazioni o società sportive, attualmente per uso privato e non commerciale. Sono vietati la copia, la modifica, la decompilazione, la distribuzione e qualsiasi uso commerciale, totale o parziale, senza autorizzazione scritta dell’autore, che si riserva ogni diritto di sfruttamento economico, anche futuro. Il software è fornito “così com’è”, senza garanzie.</div>
+    <div class="leg">© 2026 Azzurra WP Stat · Tutti i diritti riservati all’autore · Uso privato, vietati copia e uso commerciale</div>
   </div>
 </div>
 <div id="msg"></div>
@@ -1028,7 +1028,7 @@ function showSeason(keep){setTimeout(rotCheck,0);var ms=DB.matches.filter(functi
   var tb=function(m){var d=(m.date||'').split('-');return '<button data-dsel="'+esc(m.id)+'" class="'+(DSEL==m.id?'on':'')+'">'+(m.home?'🏠 ':'🚌 ')+(d.length==3?d[2]+'/'+d[1]+' ':'')+'<span class="cA">Azzurra</span> vs <span class="cB">'+esc(m.opp||'?')+'</span> <b>'+resH(m)+'</b></button>'},sbt='<button data-dsel="season" class="'+(DSEL=='season'?'on':'')+'">Stagione</button>';
   var tabs='<div id="dtabs">'+(rv.length?tb(rv[0]):'')+sbt+rv.slice(1).map(tb).join('')+'</div>';
   var h=!ms.length?'<div id="empty">Nessuna statistica ancora registrata.</div>':tabs+(DSEL=='season'?seasonDash(ms):matchDash(byId(DSEL)));
-  var sb=document.getElementById('sbody'),st=sb.scrollTop;sb.innerHTML=h+'<div class="leg"><b>© 2026 – Tutti i diritti riservati all’autore.</b><br>Software realizzato dall’autore a titolo personale, non su incarico di associazioni o società sportive, attualmente per uso privato e non commerciale. Sono vietati la copia, la modifica, la decompilazione, la distribuzione e qualsiasi uso commerciale, totale o parziale, senza autorizzazione scritta dell’autore, che si riserva ogni diritto di sfruttamento economico, anche futuro. Il software è fornito “così com’è”, senza garanzie.</div>';sb.scrollTop=keep?st:0;document.getElementById('season').style.display='flex'}
+  var sb=document.getElementById('sbody'),st=sb.scrollTop;sb.innerHTML=h+'<div class="leg">© 2026 Azzurra WP Stat · Tutti i diritti riservati all’autore · Uso privato, vietati copia e uso commerciale</div>';sb.scrollTop=keep?st:0;document.getElementById('season').style.display='flex'}
 document.getElementById('sclose').addEventListener('click',function(){document.getElementById('season').style.display='none'});
 document.getElementById('sbody').addEventListener('click',function(e){var rf=e.target.closest('[data-ref]');if(rf){showRef(byId(rf.dataset.ref));return}var dd=e.target.closest('[data-dl]');if(dd){var q=dd.dataset.dl.split(':');if(q[0]=='s')dlSeason(q[1]);else dlMatch(q.slice(1,-1).join(':'),q[q.length-1]);return}var ds=e.target.closest('[data-dsel]');if(ds){DSEL=ds.dataset.dsel;showSeason();return}var c=e.target.closest('[data-live]');if(c){document.getElementById('season').style.display='none';openMatch(c.dataset.live)}});
 // ---------- referto (foto cifrata sul sito, copia locale per l'uso offline) ----------
@@ -1172,7 +1172,7 @@ fetchStats();livePoll();viewAuto();
 window.addEventListener('online',function(){syncDistinte(false);livePoll()});
 document.addEventListener('visibilitychange',function(){if(document.visibilityState=='visible')livePoll()});
 // aggiornamenti: controlla a ogni riapertura; la nuova versione si carica da sola quando si è nell'elenco partite (mai durante la registrazione)
-var APPV=78,swReg=null,swReload=false;document.getElementById('appv').textContent='Versione '+APPV;
+var APPV=79,swReg=null,swReload=false;document.getElementById('appv').textContent='Versione '+APPV;
 if('serviceWorker' in navigator&&!VIEW){var hadCtrl=!!navigator.serviceWorker.controller;
   navigator.serviceWorker.register('sw.js').then(function(r){swReg=r}).catch(function(){});
   document.addEventListener('visibilitychange',function(){if(!document.hidden&&swReg)swReg.update().catch(function(){})});
