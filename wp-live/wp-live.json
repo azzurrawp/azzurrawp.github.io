@@ -1,6 +1,6 @@
 {
-  "latestVersion": "0.2.8",
-  "releaseNotes": "0.2.8: schermata dell'iPhone riordinata, i pannelli non escono più dallo schermo; diagnostica spostata nelle impostazioni.",
+  "latestVersion": "0.2.9",
+  "releaseNotes": "0.2.9: collegamento del regista con QR code o link da condividere + password di 6 cifre; il monitor usa l'hotspot dell'iPhone che riprende.",
   "params": {
     "gimbalSpeed": 0.3,
     "zoomRampRate": 1.5
