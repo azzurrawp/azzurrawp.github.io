@@ -1,6 +1,6 @@
 {
-  "latestVersion": "0.2.1",
-  "releaseNotes": "0.2.1: sul monitor la palla è sempre cerchiata; se il software la perde compare 'PALLA PERSA' con l'ultima posizione nota.",
+  "latestVersion": "0.2.2",
+  "releaseNotes": "0.2.2: dopo la calibrazione il monitor disegna le linee dei 2, 5, 6 metri e la metà campo (campo da 25 m).",
   "params": {
     "gimbalSpeed": 0.3,
     "zoomRampRate": 1.5
