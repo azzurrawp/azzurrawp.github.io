@@ -864,7 +864,7 @@ function today(){var d=new Date();return d.getFullYear()+'-'+('0'+(d.getMonth()+
 function saveFile(name,blob){var coarse=false;try{coarse=matchMedia('(pointer:coarse)').matches}catch(e){}
   try{var file=new File([blob],name,{type:blob.type});if(coarse&&navigator.canShare&&navigator.canShare({files:[file]})){navigator.share({files:[file],title:name}).catch(function(){});return}}catch(e){}
   var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},2000);toast('Scaricato: '+name)}
-function getPic(m){var K='wp_pic_'+m.id,c=null;try{c=localStorage.getItem(K)}catch(e){}if(c)return Promise.resolve(c);
+function getPic(m){var K='wp_pic2_'+m.id,c=null;try{localStorage.removeItem('wp_pic_'+m.id);c=localStorage.getItem(K)}catch(e){}if(c)return Promise.resolve(c);
   if(!window.crypto||!crypto.subtle||!DB.pin)return Promise.reject(0);
   return fetch('foto/'+encodeURIComponent(m.id)+'.enc?t='+Date.now(),{cache:'no-store'}).then(function(r){if(!r.ok)throw 0;return r.json()})
     .then(function(o){return decrypt(o,DB.pin)}).then(function(d){try{localStorage.setItem(K,d.img)}catch(e){}return d.img})}
@@ -1172,7 +1172,7 @@ fetchStats();livePoll();viewAuto();
 window.addEventListener('online',function(){syncDistinte(false);livePoll()});
 document.addEventListener('visibilitychange',function(){if(document.visibilityState=='visible')livePoll()});
 // aggiornamenti: controlla a ogni riapertura; la nuova versione si carica da sola quando si è nell'elenco partite (mai durante la registrazione)
-var APPV=80,swReg=null,swReload=false;document.getElementById('appv').textContent='Versione '+APPV;
+var APPV=81,swReg=null,swReload=false;document.getElementById('appv').textContent='Versione '+APPV;
 if('serviceWorker' in navigator&&!VIEW){var hadCtrl=!!navigator.serviceWorker.controller;
   navigator.serviceWorker.register('sw.js').then(function(r){swReg=r}).catch(function(){});
   document.addEventListener('visibilitychange',function(){if(!document.hidden&&swReg)swReg.update().catch(function(){})});
