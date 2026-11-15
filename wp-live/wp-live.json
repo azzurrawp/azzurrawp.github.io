@@ -1,0 +1,8 @@
+{
+  "latestVersion": "0.1.4",
+  "releaseNotes": "0.1.4: la configurazione si scarica da sola a ogni avvio, senza impostare nulla.",
+  "params": {
+    "gimbalSpeed": 0.3,
+    "zoomRampRate": 1.5
+  }
+}
