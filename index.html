@@ -730,7 +730,7 @@ function matchTiles(m){var o=mstat(m),k=analyze(m),O=m.opp||'Avversario',w=0,l=0
   T.push({ic:'👥',l:'Marcatori',v:String(Object.keys(o.pl).filter(function(n){return o.pl[n].g}).length),d:top&&top.g?'miglior marcatore: '+clean(top.n)+' '+top.g+' gol':'nessun gol'});
   T.push({ic:'📈',l:'Massimo vantaggio',v:k.maxL?'+'+k.maxL:'0',d:k.maxD?'svantaggio massimo −'+k.maxD:'mai in svantaggio'});
   if(bp>=0)T.push({ic:'🏅',l:'Miglior parziale',v:o.P[bp].a+' – '+o.P[bp].b,d:'il '+(bp+1)+'° tempo'});
-  if(k.run.n>=3)T.push({ic:'🔥',l:'Miglior break',v:k.run.n+'-0',d:(k.run.t=='A'?'dell\'Azzurra':'di '+O)+(k.run.p==k.run.e?' nel '+k.run.p+'° tempo':' tra '+k.run.p+'° e '+k.run.e+'° tempo')});
+  if(k.run.n>=3)T.push({ic:'🔥',l:'Miglior break',v:k.run.n+'-0',d:k.run.n+' gol di fila '+(k.run.t=='A'?'dell\'Azzurra':'di '+O)+' senza subirne, '+(k.run.p==k.run.e?'nel '+k.run.p+'° tempo':'tra '+k.run.p+'° e '+k.run.e+'° tempo')+' (da '+k.run.f+' a '+k.run.to+')'});
   T.push({ic:'⚖️',l:'Equilibrio',v:String(k.ties),d:(k.ties==1?'volta in parità':'volte in parità')+' · '+plu(k.chg,'cambio di vantaggio','cambi di vantaggio')});
   T=T.concat(tPar(R));T.O=O;return T}
 function seasonTiles(ms){var S={A:0,B:0,gu:0,ou:0,gr:0,or:0,ast:0,ea:0,eb:0,ta:0,tb:0,su:0,in:0,da:0,db:0,prov:false},W=0,Pa=0,Lo=0,HM={c:0,t:0,cw:0,tw:0},PT={},R=rigStat(ms);
@@ -1076,7 +1076,7 @@ function pct(a,b){return b?Math.round(a*100/b)+'%':'–'}
 function analyze(m){var s=score(m),A=s[0],B=s[1],P=[],run={t:null,n:0,best:{t:null,n:0,p:0}},d=0,maxL=0,maxD=0,ties=0,chg=0,lead=0,firstLead=null;
   for(var p=1;p<=4;p++){var a=0,b=0,ea=0,eb=0;m.log.forEach(function(e){if(e[2]!=p)return;if(e[0]=='g'||e[0]=='gu')a++;if(e[0]=='og'||e[0]=='ogu')b++;if(e[0]=='e')ea++;if(e[0]=='x')eb++});P.push({a:a,b:b,ea:ea,eb:eb})}
   m.log.forEach(function(e){var us=(e[0]=='g'||e[0]=='gu'),them=(e[0]=='og'||e[0]=='ogu');if(!us&&!them)return;var t=us?'A':'B';d+=us?1:-1;
-    if(run.t==t)run.n++;else{run.t=t;run.n=1;run.p=e[2]}if(run.n>run.best.n)run.best={t:t,n:run.n,p:run.p,e:e[2]};
+    if(run.t==t)run.n++;else{run.t=t;run.n=1;run.p=e[2];run.f=(run.sa||0)+'-'+(run.sb||0)}if(us)run.sa=(run.sa||0)+1;else run.sb=(run.sb||0)+1;if(run.n>run.best.n)run.best={t:t,n:run.n,p:run.p,e:e[2],f:run.f,to:run.sa+'-'+(run.sb||0)};
     maxL=Math.max(maxL,d);maxD=Math.min(maxD,d);var nl=d>0?1:d<0?-1:0;if(nl==0)ties++;if(nl!=0&&lead!=0&&nl!=lead)chg++;if(nl!=0){if(firstLead===null)firstLead=nl;lead=nl}});
   return {A:A,B:B,P:P,maxL:maxL,maxD:-maxD,ties:ties,chg:chg,run:run.best,
     gu:sum(m.gu),ga:sum(m.g),snA:sum(m.x),ogu:m.ogu,oga:m.og,snB:sum(m.e),ast:sum(m.a)+sum(m.au)}}
@@ -1172,7 +1172,7 @@ fetchStats();livePoll();viewAuto();
 window.addEventListener('online',function(){syncDistinte(false);livePoll()});
 document.addEventListener('visibilitychange',function(){if(document.visibilityState=='visible')livePoll()});
 // aggiornamenti: controlla a ogni riapertura; la nuova versione si carica da sola quando si è nell'elenco partite (mai durante la registrazione)
-var APPV=83,swReg=null,swReload=false;document.getElementById('appv').textContent='Versione '+APPV;
+var APPV=84,swReg=null,swReload=false;document.getElementById('appv').textContent='Versione '+APPV;
 if('serviceWorker' in navigator&&!VIEW){var hadCtrl=!!navigator.serviceWorker.controller;
   navigator.serviceWorker.register('sw.js').then(function(r){swReg=r}).catch(function(){});
   document.addEventListener('visibilitychange',function(){if(!document.hidden&&swReg)swReg.update().catch(function(){})});
