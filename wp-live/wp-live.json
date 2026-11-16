@@ -1,6 +1,6 @@
 {
-  "latestVersion": "0.6.5",
-  "releaseNotes": "0.6.5: anteprima dell'iPhone spenta 2 minuti dopo il collegamento del monitor del regista.",
+  "latestVersion": "0.6.6",
+  "releaseNotes": "0.6.6: monitor del regista a prova di errore: annulla gol, tieni premuto per le azioni critiche, pulsanti grandi, schermo sempre acceso, tasti rapidi.",
   "params": {
     "gimbalSpeed": 0.3,
     "zoomRampRate": 1.5
