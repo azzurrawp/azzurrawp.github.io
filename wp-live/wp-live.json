@@ -1,6 +1,6 @@
 {
-  "latestVersion": "0.6.8",
-  "releaseNotes": "0.6.8: tabellone su tre righe (partita, casa, ospiti), barra dei gol in basso al centro senza coprirlo, anteprima iPhone che si riaccende al tocco, pulsante per scollegare il monitor.",
+  "latestVersion": "0.6.9",
+  "releaseNotes": "0.6.9: pulsante Fine partita: ferma diretta e registrazione e avvisa quando il video è salvato.",
   "params": {
     "gimbalSpeed": 0.3,
     "zoomRampRate": 1.5
