@@ -1,6 +1,6 @@
 {
-  "latestVersion": "0.6.2",
-  "releaseNotes": "0.6.2: portieri riconosciuti dalla calottina rossa ed esclusi dal gruppo dei giocatori.",
+  "latestVersion": "0.6.3",
+  "releaseNotes": "0.6.3: qualità della diretta che si adatta alla rete, movimenti più calmi, calottine confermate nel tempo, risparmio calore.",
   "params": {
     "gimbalSpeed": 0.3,
     "zoomRampRate": 1.5
