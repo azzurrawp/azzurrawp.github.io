@@ -1,6 +1,6 @@
 {
-  "latestVersion": "0.6.4",
-  "releaseNotes": "0.6.4: risparmio calore automatico quando è collegato il monitor del regista.",
+  "latestVersion": "0.6.5",
+  "releaseNotes": "0.6.5: anteprima dell'iPhone spenta 2 minuti dopo il collegamento del monitor del regista.",
   "params": {
     "gimbalSpeed": 0.3,
     "zoomRampRate": 1.5
