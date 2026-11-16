@@ -1,6 +1,6 @@
 {
-  "latestVersion": "0.6.0",
-  "releaseNotes": "0.6.0: zoom automatico con le regole della pallanuoto (transizione, attacco, 6 metri, lato lontano, dopo il gol).",
+  "latestVersion": "0.6.1",
+  "releaseNotes": "0.6.1: riconoscimento delle calottine: segue i giocatori quando la palla non si vede, attaccanti sempre in vista ai 6 metri, eccezione Azzurra.",
   "params": {
     "gimbalSpeed": 0.3,
     "zoomRampRate": 1.5
