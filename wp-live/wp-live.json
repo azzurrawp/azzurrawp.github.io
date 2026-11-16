@@ -1,6 +1,6 @@
 {
-  "latestVersion": "0.5.1",
-  "releaseNotes": "0.5.1: tabellone in basso a sinistra, orologio facoltativo (spento di serie), colori standard e mixer.",
+  "latestVersion": "0.5.2",
+  "releaseNotes": "0.5.2: nome della partita sopra il tabellone e nomi delle squadre per intero.",
   "params": {
     "gimbalSpeed": 0.3,
     "zoomRampRate": 1.5
