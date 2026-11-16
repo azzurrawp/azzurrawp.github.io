@@ -1,6 +1,6 @@
 {
-  "latestVersion": "0.4.2",
-  "releaseNotes": "0.4.2: le registrazioni si salvano solo nel rullino Foto.",
+  "latestVersion": "0.5.0",
+  "releaseNotes": "0.5.0: tabellone in diretta con squadre, colori, loghi (rullino, Google Drive, OneDrive), punteggio, tempi, orologio e banner GOL.",
   "params": {
     "gimbalSpeed": 0.3,
     "zoomRampRate": 1.5
