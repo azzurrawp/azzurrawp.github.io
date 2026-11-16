@@ -1,6 +1,6 @@
 {
-  "latestVersion": "0.5.0",
-  "releaseNotes": "0.5.0: tabellone in diretta con squadre, colori, loghi (rullino, Google Drive, OneDrive), punteggio, tempi, orologio e banner GOL.",
+  "latestVersion": "0.5.1",
+  "releaseNotes": "0.5.1: tabellone in basso a sinistra, orologio facoltativo (spento di serie), colori standard e mixer.",
   "params": {
     "gimbalSpeed": 0.3,
     "zoomRampRate": 1.5
