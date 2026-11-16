@@ -1,6 +1,6 @@
 {
-  "latestVersion": "0.4.1",
-  "releaseNotes": "0.4.1: nuova disposizione dei comandi su iPhone e monitor (pulsanti tondi, REC rotondo, Larga|Auto), batteria del gimbal, monitor a tutto schermo senza joystick.",
+  "latestVersion": "0.4.2",
+  "releaseNotes": "0.4.2: le registrazioni si salvano solo nel rullino Foto.",
   "params": {
     "gimbalSpeed": 0.3,
     "zoomRampRate": 1.5
