@@ -1,6 +1,6 @@
 {
-  "latestVersion": "0.5.2",
-  "releaseNotes": "0.5.2: nome della partita sopra il tabellone e nomi delle squadre per intero.",
+  "latestVersion": "0.6.0",
+  "releaseNotes": "0.6.0: zoom automatico con le regole della pallanuoto (transizione, attacco, 6 metri, lato lontano, dopo il gol).",
   "params": {
     "gimbalSpeed": 0.3,
     "zoomRampRate": 1.5
