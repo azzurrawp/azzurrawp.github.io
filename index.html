@@ -507,13 +507,13 @@ function hlRow(k){var e=S.log[k],f=e[0],O=S.opp||'Avversario',pen=e[5]===1,t='';
   else if(f=='ors')t='<b>'+(e[5]===2?'Rigore parato':'Rigore avversario sbagliato')+'</b>'+(e[5]===2&&e[7]>=0&&e.length>7?' · '+esc(nm(e[7])):'');
   else return '';
   var op=f=='og'||f=='ogu'||f=='x'||f=='ors';
-  return '<div class="hr'+(op?' op':'')+'"><span class="ht">'+e[2]+'T '+new Date(e[3]).toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'})+'</span><span class="hq">'+t+'</span><button data-he="'+k+'">Modifica</button><button data-hk="'+k+'">Togli</button></div>'}
+  return '<div class="hr'+(op?' op':'')+'"><span class="ht">'+e[2]+'T '+new Date(e[3]).toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'})+'</span><span class="hq">'+t+'</span><button data-he="'+k+'">Modifica</button><button data-hk="'+k+'">Elimina</button></div>'}
 function hlShow(){var h='';for(var k=S.log.length-1;k>=0;k--)h+=hlRow(k);document.getElementById('hll').innerHTML=h||'<div style="padding:30px;text-align:center;color:#78909c;font-size:18px">Nessuna azione registrata</div>';
-  document.getElementById('hlsub').textContent=S.done?'partita conclusa: puoi correggere con Modifica':'Modifica per correggere · Togli per cancellare';document.getElementById('hl').classList.add('on')}
-function hlDel(k){var e=S.log[k];if(!e)return;var row=hlRow(k).replace(/<[^>]+>/g,' ').replace(/Modifica\s*Togli\s*$/,'').replace(/\s+/g,' ').trim();
-  askBig({q:'Togliere questa azione?',sub:row,yes:'Togli',color:'#c62828',onYes:function(){if(RIG)rigEnd();shotEnd();var x=S.log[k];if(x!==e)return;unrec(k);
+  document.getElementById('hlsub').textContent=S.done?'partita conclusa: puoi correggere con Modifica':'Modifica per correggere · Elimina per cancellare';document.getElementById('hl').classList.add('on')}
+function hlDel(k){var e=S.log[k];if(!e)return;var row=hlRow(k).replace(/<[^>]+>/g,' ').replace(/Modifica\s*Elimina\s*$/,'').replace(/\s+/g,' ').trim();
+  askBig({q:'Eliminare questa azione?',sub:row,yes:'Elimina',color:'#c62828',onYes:function(){if(RIG)rigEnd();shotEnd();var x=S.log[k];if(x!==e)return;unrec(k);
     if(e[4]&&(e[0]=='g'||e[0]=='gu'||e[0]=='a'||e[0]=='au')){for(var j=S.log.length-1;j>=0;j--)if(S.log[j][4]===e[4]){unrec(j);break}}
-    totals();save();toast('Tolto: '+row);hlShow()}})}
+    totals();save();toast('Eliminato: '+row);hlShow()}})}
 // ---------- modifica di un'azione dalla Cronologia ----------
 var HE=null;
 function heFind(e){for(var j=0;j<S.log.length;j++){var a=S.log[j];if(a!==e&&e[4]&&a[4]===e[4]&&(a[0]=='a'||a[0]=='au'))return a}return null}
@@ -1215,7 +1215,7 @@ fetchStats();livePoll();viewAuto();
 window.addEventListener('online',function(){syncDistinte(false);livePoll()});
 document.addEventListener('visibilitychange',function(){if(document.visibilityState=='visible')livePoll()});
 // aggiornamenti: controlla a ogni riapertura; la nuova versione si carica da sola quando si è nell'elenco partite (mai durante la registrazione)
-var APPV=85,swReg=null,swReload=false;document.getElementById('appv').textContent='Versione '+APPV;
+var APPV=86,swReg=null,swReload=false;document.getElementById('appv').textContent='Versione '+APPV;
 if('serviceWorker' in navigator&&!VIEW){var hadCtrl=!!navigator.serviceWorker.controller;
   navigator.serviceWorker.register('sw.js').then(function(r){swReg=r}).catch(function(){});
   document.addEventListener('visibilitychange',function(){if(!document.hidden&&swReg)swReg.update().catch(function(){})});
