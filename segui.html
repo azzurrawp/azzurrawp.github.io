@@ -153,7 +153,7 @@ body.pend-g #g .c[data-f="g"],body.pend-gu #g .c[data-f="gu"]{box-shadow:inset 0
 .hlb{background:#fff;border-radius:16px;width:min(760px,96vw);max-height:90vh;display:flex;flex-direction:column;box-shadow:0 8px 30px rgba(0,0,0,.3)}
 .hlh{display:flex;align-items:center;gap:12px;padding:14px 18px;border-bottom:1px solid #e0e0e0;font-size:22px;color:#0b3d91}.hlh span{flex:1;font-size:15px;color:#78909c}.hlh .btn{background:#546e7a;font-size:18px;padding:10px 18px}
 #hll{overflow:auto;padding:4px 10px 10px}.hr{display:flex;align-items:center;gap:12px;padding:10px 8px;border-bottom:1px solid #eceff1;font-size:19px}.hr .ht{color:#78909c;font-size:15px;flex:0 0 92px}.hr .hq{flex:1;color:#263238}.hr .hq b{color:#0b3d91}.hr.op .hq b{color:#e65100}
-.hr button{background:#c62828;color:#fff;border:0;border-radius:10px;font-size:17px;font-weight:700;padding:10px 16px}body.ro .hr button{display:none}body.shot #g [id^="n"]:not([id^="nx"]) .cap{box-shadow:0 0 0 4px #ffd600;animation:pl 1s infinite}body.shot #g [id^="n"]:not([id^="nx"]){cursor:pointer}#rgbm,#rgbp{background:#5d4037;font-size:18px;padding:10px 16px;white-space:nowrap}#rgbp{background:#1565c0}
+.hr button{background:#c62828;color:#fff;border:0;border-radius:10px;font-size:17px;font-weight:700;padding:10px 16px}body.ro .hr button[data-hk]{display:none}.hr button[data-he]{background:#1565c0}#he{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:27;display:none;align-items:center;justify-content:center}#he.on{display:flex}.heb{background:#fff;border-radius:16px;width:min(860px,97vw);max-height:94vh;overflow:auto;padding:18px 22px;box-shadow:0 8px 30px rgba(0,0,0,.3)}#heq{font-size:24px;font-weight:800;color:#0b3d91}.hes{font-size:15px;font-weight:700;color:#546e7a;text-transform:uppercase;letter-spacing:.04em;margin:14px 0 6px}.heg{display:grid;gap:8px;grid-template-columns:repeat(5,1fr)}.heg.t{grid-template-columns:repeat(4,1fr)}.heg.y{grid-template-columns:repeat(3,1fr)}.heg button{background:#eceff1;color:#263238;border:2px solid #cfd8dc;border-radius:10px;font-size:17px;font-weight:700;padding:11px 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.heg button.on{background:#0b3d91;color:#fff;border-color:#0b3d91}.heg.o button.on{background:#e65100;border-color:#e65100}.hef{display:flex;gap:12px;margin-top:18px}.hef .btn{flex:1;font-size:21px;padding:16px 10px}body.shot #g [id^="n"]:not([id^="nx"]) .cap{box-shadow:0 0 0 4px #ffd600;animation:pl 1s infinite}body.shot #g [id^="n"]:not([id^="nx"]){cursor:pointer}#rgbm,#rgbp{background:#5d4037;font-size:18px;padding:10px 16px;white-space:nowrap}#rgbp{background:#1565c0}
 #g .c.pair{position:relative}#g .c.pair::after{content:'';position:absolute;left:50%;top:50%;height:96%;aspect-ratio:1/1;transform:translate(-50%,-50%);border:4px solid #ffc400;border-radius:50%;box-shadow:0 0 0 1.5px #0b3d91,inset 0 0 0 1.5px #0b3d91;pointer-events:none;animation:pairb .5s step-end 6 forwards}@keyframes pairb{50%{opacity:0}}
 body.pend-g #last,body.pend-gu #last{color:#ffd600;font-weight:700;opacity:1}
 </style>
@@ -228,6 +228,7 @@ body.pend-g #last,body.pend-gu #last{color:#ffd600;font-weight:700;opacity:1}
   </div>
 </div>
 <div id="hl" style="display:none"><div class="hlb"><div class="hlh"><b>Cronologia azioni</b><span id="hlsub"></span><button id="hlx" class="btn">Chiudi</button></div><div id="hll"></div></div></div>
+<div id="he"><div class="heb"><div id="heq"></div><div id="hebd"></div><div class="hef"><button id="hes" class="btn" style="background:#2e7d32">✓ Salva</button><button id="hec" class="btn" style="background:#90a4ae">Annulla</button></div></div></div>
 <div id="ft" style="display:none"><div class="ftc"><div class="fti">📸</div><div id="ftq">Foto di squadra!</div><div id="fts"></div>
   <div class="ftbs"><button id="fty" class="btn">✅ Fatta</button><button id="ftn" class="btn">⏳ Non ancora</button></div></div></div>
 <div id="rgb" style="display:none"><span id="rgbt"></span><button id="rgbm" class="btn">Sbagliato</button><button id="rgbp" class="btn">Parato</button></div>
@@ -503,13 +504,53 @@ function hlRow(k){var e=S.log[k],f=e[0],O=S.opp||'Avversario',pen=e[5]===1,t='';
   else if(f=='ors')t='<b>'+(e[5]===2?'Rigore parato':'Rigore avversario sbagliato')+'</b>'+(e[5]===2&&e[7]>=0&&e.length>7?' · '+esc(nm(e[7])):'');
   else return '';
   var op=f=='og'||f=='ogu'||f=='x'||f=='ors';
-  return '<div class="hr'+(op?' op':'')+'"><span class="ht">'+e[2]+'T '+new Date(e[3]).toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'})+'</span><span class="hq">'+t+'</span><button data-hk="'+k+'">Togli</button></div>'}
+  return '<div class="hr'+(op?' op':'')+'"><span class="ht">'+e[2]+'T '+new Date(e[3]).toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'})+'</span><span class="hq">'+t+'</span><button data-he="'+k+'">Modifica</button><button data-hk="'+k+'">Togli</button></div>'}
 function hlShow(){var h='';for(var k=S.log.length-1;k>=0;k--)h+=hlRow(k);document.getElementById('hll').innerHTML=h||'<div style="padding:30px;text-align:center;color:#78909c;font-size:18px">Nessuna azione registrata</div>';
-  document.getElementById('hlsub').textContent=S.done?'partita conclusa: solo consultazione':'tocca Togli per cancellare un\'azione';document.getElementById('hl').classList.add('on')}
-function hlDel(k){var e=S.log[k];if(!e)return;var row=hlRow(k).replace(/<[^>]+>/g,' ').replace(/Togli\s*$/,'').replace(/\s+/g,' ').trim();
+  document.getElementById('hlsub').textContent=S.done?'partita conclusa: puoi correggere con Modifica':'Modifica per correggere · Togli per cancellare';document.getElementById('hl').classList.add('on')}
+function hlDel(k){var e=S.log[k];if(!e)return;var row=hlRow(k).replace(/<[^>]+>/g,' ').replace(/Modifica\s*Togli\s*$/,'').replace(/\s+/g,' ').trim();
   askBig({q:'Togliere questa azione?',sub:row,yes:'Togli',color:'#c62828',onYes:function(){if(RIG)rigEnd();shotEnd();var x=S.log[k];if(x!==e)return;unrec(k);
     if(e[4]&&(e[0]=='g'||e[0]=='gu'||e[0]=='a'||e[0]=='au')){for(var j=S.log.length-1;j>=0;j--)if(S.log[j][4]===e[4]){unrec(j);break}}
     totals();save();toast('Tolto: '+row);hlShow()}})}
+// ---------- modifica di un'azione dalla Cronologia ----------
+var HE=null;
+function heFind(e){for(var j=0;j<S.log.length;j++){var a=S.log[j];if(a!==e&&e[4]&&a[4]===e[4]&&(a[0]=='a'||a[0]=='au'))return a}return null}
+function heOpen(k){var e=S.log[k];if(!e)return;var go=function(){if(S.log[k]!==e)return;if(RIG)rigEnd();shotEnd();var f=e[0],H={k:k,e:e,per:e[2],i:e[1]};
+  if(f=='g'||f=='gu'){H.kind='goal';H.a=heFind(e);H.ai=H.a?H.a[1]:-1;H.ty=e[5]===1?2:f=='gu'?1:0}
+  else if(f=='a'||f=='au'){H.kind='ast';H.ty=f=='au'?1:0}
+  else if(f=='og'||f=='ogu'){H.kind='ogoal';H.ty=e[5]===1?2:f=='ogu'?1:0;H.cap=e[6]||0}
+  else if(f=='e'||f=='x'){H.kind=f=='e'?'foul':'ofoul';H.ty=e[5]===1?1:e[5]===3?2:0}
+  else if(f=='rs'){H.kind='rs'}
+  else if(f=='ors'){H.kind='ors';H.ty=e[5]===2?1:0;H.gk=(e.length>7&&e[7]>=0)?e[7]:-1}
+  else return;HE=H;heUI();document.getElementById('he').classList.add('on')};
+  if(S.done)askBig({q:'La partita è conclusa. Vuoi correggere questa azione?',sub:'Dopo il salvataggio le statistiche vengono aggiornate.',yes:'Sì, correggi',color:'#1565c0',onYes:go});else go()}
+function heUI(){var H=HE,O=S.opp||'Avversario',h='';
+  function grp(t,cls,key,items){h+='<div class="hes">'+t+'</div><div class="heg '+cls+'">'+items.map(function(x){return '<button data-hek="'+key+'" data-hev="'+x[0]+'"'+(H[key]===x[0]?' class="on"':'')+'>'+x[1]+'</button>'}).join('')+'</div>'}
+  function pl(extra){var a=[];for(var i=0;i<N;i++)a.push([i,(i+1)+' '+esc(clean(S.names[i]||''))]);if(extra)a.push([-1,extra]);return a}
+  function caps(zero){var a=[];for(var i=1;i<=N;i++)a.push([zero?i-1:i,'Cal. '+i]);return a}
+  grp('Tempo','t','per',[1,2,3,4].map(function(p){return [p,p+'° tempo']}));
+  var T={goal:'Gol Azzurra',ast:'Assist',ogoal:'Gol '+O,foul:'Fallo grave Azzurra',ofoul:'Fallo grave '+O,rs:'Rigore sbagliato (Azzurra)',ors:'Rigore di '+O+' non segnato'};
+  if(H.kind=='goal'){var ty=[[0,'Gol'],[1,'Gol uomo +']];if(!H.a)ty.push([2,'Gol su rigore']);grp('Tipo','y','ty',ty);grp('Chi ha segnato','','i',pl());if(H.a)grp('Chi ha fatto l\'assist','','ai',pl())}
+  else if(H.kind=='ast'){grp('Tipo','y','ty',[[0,'Assist'],[1,'Assist uomo +']]);grp('Chi ha fatto l\'assist','','i',pl())}
+  else if(H.kind=='ogoal'){grp('Tipo','y o','ty',[[0,'Gol'],[1,'Gol uomo +'],[2,'Gol su rigore']]);grp('Calotta di chi ha segnato','o','cap',caps().concat([[0,'Non so']]))}
+  else if(H.kind=='foul'||H.kind=='ofoul'){var o=H.kind=='ofoul';grp('Tipo','y'+(o?' o':''),'ty',[[0,'Espulsione'],[1,'Fallo da rigore'],[2,'🟥 Definitiva']]);
+    if(o)grp('Calotta avversaria','o','i',caps(true));else grp('Chi ha commesso il fallo','','i',pl())}
+  else if(H.kind=='rs')grp('Chi ha tirato','','i',pl('Non so'));
+  else if(H.kind=='ors'){grp('Esito','y o','ty',[[0,'Sbagliato (fuori o legno)'],[1,'Parato']]);if(H.ty==1)grp('Chi ha parato','','gk',pl('Non so'))}
+  document.getElementById('heq').textContent='Modifica: '+T[H.kind];document.getElementById('hebd').innerHTML=h}
+function heClose(){HE=null;document.getElementById('he').classList.remove('on')}
+function heCnt(e,d){var f=e[0];if(f=='rs'||f=='ors')return;if(f=='og'||f=='ogu')S[f]=Math.max(0,S[f]+d);else S[f][e[1]]=Math.max(0,(S[f][e[1]]||0)+d)}
+function heSave(){var H=HE;if(!H)return;var e=S.log[H.k];if(e!==H.e){heClose();hlShow();return}var f=e[0],a=H.a;
+  if(H.kind=='goal'&&a&&H.i===H.ai){beep('e',-1);toast('Il marcatore deve essere diverso da chi ha fatto l\'assist');return}
+  if((H.kind=='foul'||H.kind=='ofoul')&&H.i!==e[1]&&(S[f][H.i]>=3||defOut(S,f,H.i))){beep('e',-1);toast((f=='x'?'Avversario cal. ':'Calotta ')+(H.i+1)+': è già fuori');return}
+  heCnt(e,-1);if(a)heCnt(a,-1);e[2]=H.per;
+  if(H.kind=='goal'){e[0]=H.ty==1?'gu':'g';e[1]=H.i;if(H.ty==2||e.length>5){while(e.length<6)e.push(0);e[5]=H.ty==2?1:0}if(a){a[0]=H.ty==1?'au':'a';a[1]=H.ai;a[2]=H.per}}
+  else if(H.kind=='ast'){e[0]=H.ty==1?'au':'a';e[1]=H.i}
+  else if(H.kind=='ogoal'){e[0]=H.ty==1?'ogu':'og';while(e.length<7)e.push(0);e[5]=H.ty==2?1:0;e[6]=H.cap||0}
+  else if(H.kind=='foul'||H.kind=='ofoul'){e[1]=H.i;while(e.length<6)e.push(0);e[5]=H.ty==1?1:H.ty==2?3:0}
+  else if(H.kind=='rs'){e[1]=H.i}
+  else if(H.kind=='ors'){while(e.length<8)e.push(0);e[5]=H.ty==1?2:0;e[7]=H.ty==1?H.gk:-1}
+  heCnt(e,1);if(a)heCnt(a,1);all();totals();save();heClose();hlShow();toast('Azione corretta');
+  document.getElementById('last').textContent='✎ Azione corretta nella Cronologia'}
 function rec(f,i,link){if(f=='og'||f=='ogu')S[f]++;else{S[f][i]++;cell(f,i)}var e=[f,i,S.per,Date.now()];if(link)e.push(link);S.log.push(e)}
 // due gol a meno di 15 secondi: quasi sempre un tocco sbagliato, si chiede conferma
 var CLOSE_S=window.CLOSE_S!=null?window.CLOSE_S:15,GOALS={g:1,gu:1,og:1,ogu:1},GLBL={g:'GOL',gu:'GOL uomo +',og:'gol avversario',ogu:'gol avversario uomo +'};
@@ -593,7 +634,9 @@ document.getElementById('fty').addEventListener('click',function(){ftAns(true)})
 document.getElementById('ftb').addEventListener('click',function(){ftAsk()});
 document.getElementById('hist').addEventListener('click',function(){if(PEND){PEND=null;pendUI()}hlShow()});
 document.getElementById('hlx').addEventListener('click',function(){document.getElementById('hl').classList.remove('on')});
-document.getElementById('hll').addEventListener('click',function(ev){var b=ev.target.closest('[data-hk]');if(b&&!S.done)hlDel(+b.dataset.hk)});
+document.getElementById('hll').addEventListener('click',function(ev){var m=ev.target.closest('[data-he]');if(m){heOpen(+m.dataset.he);return}var b=ev.target.closest('[data-hk]');if(b&&!S.done)hlDel(+b.dataset.hk)});
+document.getElementById('hebd').addEventListener('click',function(ev){var b=ev.target.closest('[data-hek]');if(!b||!HE)return;HE[b.dataset.hek]=+b.dataset.hev;heUI()});
+document.getElementById('hes').addEventListener('click',heSave);document.getElementById('hec').addEventListener('click',heClose);
 document.getElementById('rgce').addEventListener('click',function(){var q=rigClose();if(q)add(q.f,q.i,true)});
 document.getElementById('rgcd').addEventListener('click',function(){var q=rigClose();if(!q)return;add(q.f,q.i,true);var e=S.log[S.log.length-1];if(!e||e[0]!=q.f||e[1]!=q.i)return;while(e.length<6)e.push(0);e[5]=3;save();all();
   document.getElementById('last').textContent='🟥 Espulsione definitiva · '+(q.f=='e'?nm(q.i):(S.opp||'Avversario')+' cal. '+(q.i+1))+' · '+S.per+'T'});
@@ -1169,7 +1212,7 @@ fetchStats();livePoll();viewAuto();
 window.addEventListener('online',function(){syncDistinte(false);livePoll()});
 document.addEventListener('visibilitychange',function(){if(document.visibilityState=='visible')livePoll()});
 // aggiornamenti: controlla a ogni riapertura; la nuova versione si carica da sola quando si è nell'elenco partite (mai durante la registrazione)
-var APPV=84,swReg=null,swReload=false;document.getElementById('appv').textContent='Versione '+APPV;
+var APPV=85,swReg=null,swReload=false;document.getElementById('appv').textContent='Versione '+APPV;
 if('serviceWorker' in navigator&&!VIEW){var hadCtrl=!!navigator.serviceWorker.controller;
   navigator.serviceWorker.register('sw.js').then(function(r){swReg=r}).catch(function(){});
   document.addEventListener('visibilitychange',function(){if(!document.hidden&&swReg)swReg.update().catch(function(){})});
