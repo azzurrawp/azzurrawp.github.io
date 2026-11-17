@@ -1,6 +1,6 @@
 {
-  "latestVersion": "0.8.0",
-  "releaseNotes": "0.8.0: 'In bolla' sull'iPhone solo prima della calibrazione; dopo, avviso se l'iPhone scivola nel supporto (oltre 2° per 5 s) su iPhone e monitor.",
+  "latestVersion": "0.8.1",
+  "releaseNotes": "0.8.1: ripresa ASSISTITA (il regista muove il gimbal, lo zoom resta automatico senza tagliare la palla); link del monitor con password da condividere al PC.",
   "params": {
     "gimbalSpeed": 0.3,
     "zoomRampRate": 1.5
