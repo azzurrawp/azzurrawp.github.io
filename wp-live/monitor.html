@@ -24,6 +24,10 @@ input,textarea{-webkit-user-select:text;user-select:text}
   #seg,#sbBar,#hint{bottom:calc(12px + env(safe-area-inset-bottom))}
   #undoBtn{bottom:calc(96px + env(safe-area-inset-bottom))}
 }
+#fLoupe{position:fixed;width:230px;height:230px;z-index:12;border:3px solid #ffd400;border-radius:14px;overflow:hidden;background:#000;display:none;pointer-events:none;box-shadow:0 4px 20px rgba(0,0,0,.6)}
+#fLoupe img{position:absolute;inset:0;width:100%;height:100%}
+#fLoupe canvas{position:absolute;inset:0;width:100%;height:100%}
+#fLoupe div{position:absolute;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);color:#ffd400;font-size:12px;font-weight:700;text-align:center;padding:3px}
 #portraitBanner{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:26;max-width:90vw;padding:18px 22px;border-radius:16px;background:rgba(198,40,40,.95);color:#fff;font-size:18px;font-weight:800;text-align:center;display:none;pointer-events:none}
 #seg .zb{min-width:52px;padding:0 8px;font-size:24px}
 button,select{font:inherit;touch-action:manipulation}
@@ -34,7 +38,8 @@ button,select{font:inherit;touch-action:manipulation}
 #app{position:fixed;inset:0;background:#000}
 #viewBox{position:absolute;inset:0;touch-action:none;display:flex;align-items:center;justify-content:center}
 #frame{position:relative;width:min(100vw,177.78vh);aspect-ratio:16/9}
-#view{display:block;width:100%;height:100%;background:#000}
+#view{display:block;width:100%;height:100%;background:#000;-webkit-user-drag:none;user-select:none}
+img{-webkit-user-drag:none}
 #ov{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
 #viewBox.calib{outline:4px solid #ffd400;outline-offset:-4px}
 #calibHint{position:absolute;left:0;right:0;top:44px;padding:8px;background:rgba(0,0,0,.7);color:#ffd400;font-weight:700;text-align:center;display:none;z-index:3}
@@ -252,11 +257,12 @@ select{width:100%;padding:8px;border-radius:8px;background:#0b1420;color:#fff;bo
 </div>
 
 <div id="toast"></div>
+<div id="fLoupe"><img id="fLoupeImg" alt=""><canvas id="fLoupeCv"></canvas><div id="fLoupeTxt"></div></div>
 <div id="portraitBanner">iPhone in verticale sul gimbal: premi 2 volte il pulsante Switch del gimbal per tornare in orizzontale</div>
 <div id="endBanner" title="Tocca per nascondere" style="display:none;cursor:pointer;position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:25;max-width:90vw;padding:18px 22px;border-radius:16px;color:#fff;font-size:18px;font-weight:800;text-align:center"></div>
 <div id="app" style="display:none">
   <div id="viewBox">
-    <div id="frame"><img id="view" alt="Anteprima"><canvas id="ov"></canvas></div>
+    <div id="frame"><img id="view" draggable="false" alt="Anteprima"><canvas id="ov"></canvas></div>
     <div id="calibHint"></div>
   </div>
   <div id="hud">
@@ -401,7 +407,7 @@ function drawOverlay() {
   if (c.height !== h) c.height = h;
   const x = c.getContext('2d');
   x.clearRect(0, 0, w, h);
-  const pts = calibPts || S.corners || [];
+  const pts = dragPts || calibPts || S.corners || [];
   if (pts.length) {
     x.strokeStyle = calibPts ? '#ffd400' : 'rgba(94,224,138,.9)';
     x.fillStyle = x.strokeStyle;
@@ -497,7 +503,7 @@ function hitCorner(e) {
   const pts = calibPts || S.corners || [];
   const r = $('view').getBoundingClientRect();
   for (let i = 0; i < pts.length; i++) {
-    if (Math.hypot(e.clientX - r.left - pts[i][0] * r.width, e.clientY - r.top - pts[i][1] * r.height) < 26) return i;
+    if (Math.hypot(e.clientX - r.left - pts[i][0] * r.width, e.clientY - r.top - pts[i][1] * r.height) < (e.pointerType === 'touch' ? 34 : 26)) return i;
   }
   return -1;
 }
@@ -513,8 +519,7 @@ $('viewBox').addEventListener('click', e => {
     toast(learnLeft > 0 ? 'Bene. Tocca di nuovo la palla, in un altro punto (' + (3 - learnLeft) + '/3)' : 'Colore della palla imparato', 2500);
     return;
   }
-  const hit = hitCorner(e);
-  if (hit >= 0) { openLoupe(hit); return; }
+  if (hitCorner(e) >= 0) { toast('Trascina il pallino: la lente mostra il punto preciso', 2200); return; }
   if (!calibPts) return;
   const r = $('view').getBoundingClientRect();
   calibPts.push([(e.clientX - r.left) / r.width, (e.clientY - r.top) / r.height]);
@@ -920,6 +925,87 @@ $('prep').addEventListener('click', e => { if (e.target === $('prep')) $('prep')
 
 // PC: trascina col mouse sull'anteprima per muovere la telecamera
 let M = null, mouseDragged = false;
+// Vertici del campo: si trascinano direttamente sull'immagine; una lente lontana dal dito mostra
+// il punto preciso ingrandito (immagine a piena risoluzione dall'iPhone).
+let dragPts = null, VD = null;
+const CORNER_SHORT = ['1 · porta sx, vicino', '2 · porta dx, vicino', '3 · porta dx, lontano', '4 · porta sx, lontano'];
+function placeFLoupe(px, py) {
+  const fl = $('fLoupe'), W = 230;
+  fl.style.left = (px < innerWidth / 2 ? innerWidth - W - 16 : 16) + 'px';
+  fl.style.top = (py < innerHeight / 2 ? Math.max(70, innerHeight - W - 100) : 70) + 'px';
+}
+function drawFLoupe() {
+  if (!VD || !VD.center) return;
+  const c = $('fLoupeCv'), W = c.clientWidth || 230;
+  c.width = W; c.height = W;
+  const x = c.getContext('2d'), p = VD.pts[VD.i];
+  const px = W / 2 + (p[0] - VD.center[0]) / VD.size * W;
+  const py = W / 2 + (p[1] - VD.center[1]) / (VD.size * 16 / 9) * W;
+  x.strokeStyle = '#ffd400'; x.lineWidth = 1.5;
+  x.beginPath(); x.moveTo(px, 0); x.lineTo(px, W); x.moveTo(0, py); x.lineTo(W, py); x.stroke();
+  x.lineWidth = 2; x.beginPath(); x.arc(px, py, 12, 0, 7); x.stroke();
+  x.fillStyle = '#fff'; x.beginPath(); x.arc(px, py, 2.5, 0, 7); x.fill();
+}
+async function loadFLoupe() {
+  if (!VD || VD.loading) return;
+  VD.loading = true;
+  const p = VD.pts[VD.i], hx = VD.size / 2, hy = VD.size * 16 / 9 / 2;
+  const center = [Math.min(Math.max(p[0], hx), 1 - hx), Math.min(Math.max(p[1], hy), 1 - hy)];
+  try {
+    const r = await api('/crop.jpg?x=' + center[0] + '&y=' + center[1] + '&s=' + VD.size);
+    if (r.ok && VD) {
+      const u = URL.createObjectURL(await r.blob()), img = $('fLoupeImg'), old = img.src;
+      img.src = u; if (old.startsWith('blob:')) URL.revokeObjectURL(old);
+      VD.center = center; drawFLoupe();
+    }
+  } catch (e) {}
+  if (VD) { VD.loading = false; if (Date.now() - VD.lastMove < 400) setTimeout(loadFLoupe, 120); }
+}
+vb.addEventListener('pointerdown', e => {
+  if (e.pointerType === 'mouse' && e.button !== 0) return;
+  if (e.pointerType === 'touch' && touches.size > 1) return;
+  const i = hitCorner(e); if (i < 0) return;
+  const base = (calibPts || S.corners || []).map(p => p.slice());
+  if (base.length !== 4 && !calibPts) return;
+  e.stopImmediatePropagation(); e.preventDefault();
+  VD = {i, pts: base, id: e.pointerId, moved: false, size: 0.06, lastMove: Date.now()};
+  dragPts = base;
+  vb.setPointerCapture(e.pointerId);
+  const r = $('view').getBoundingClientRect();
+  placeFLoupe(r.left + base[i][0] * r.width, r.top + base[i][1] * r.height);
+  $('fLoupeTxt').textContent = 'Angolo ' + CORNER_SHORT[i];
+  $('fLoupe').style.display = 'block';
+  loadFLoupe();
+}, true);
+vb.addEventListener('pointermove', e => {
+  if (!VD || e.pointerId !== VD.id) return;
+  e.stopImmediatePropagation();
+  const r = $('view').getBoundingClientRect();
+  VD.pts[VD.i] = [Math.min(1, Math.max(0, (e.clientX - r.left) / r.width)), Math.min(1, Math.max(0, (e.clientY - r.top) / r.height))];
+  VD.moved = true; VD.lastMove = Date.now();
+  placeFLoupe(e.clientX, e.clientY);
+  drawOverlay(); drawFLoupe();
+  if (!VD.loading) loadFLoupe();
+}, true);
+function vertexEnd(e) {
+  if (!VD || (e && e.pointerId !== VD.id)) return;
+  if (e) e.stopImmediatePropagation();
+  const v = VD; VD = null;
+  $('fLoupe').style.display = 'none';
+  if (v.moved) {
+    mouseDragged = true;
+    if (calibPts) { calibPts = v.pts; dragPts = null; }
+    else {
+      S.corners = v.pts; cmd({a: 'calib', pts: v.pts});
+      toast('Angolo ' + (v.i + 1) + ' spostato', 1500);
+      setTimeout(() => { dragPts = null; drawOverlay(); }, 1500);
+    }
+  } else { dragPts = null; }
+  drawOverlay();
+}
+vb.addEventListener('pointerup', vertexEnd, true);
+vb.addEventListener('pointercancel', vertexEnd, true);
+
 // Telefono: un dito trascinato sull'anteprima muove la telecamera (due dita: pizzico = zoom).
 vb.addEventListener('pointerdown', e => {
   if (e.pointerType === 'touch') {
