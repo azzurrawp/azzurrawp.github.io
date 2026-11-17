@@ -1,6 +1,6 @@
 {
-  "latestVersion": "0.7.2",
-  "releaseNotes": "0.7.2: ricerca di palla e calottine un po' oltre il bordo del campo; conversione pixel-angolo con i dati veri della lente.",
+  "latestVersion": "0.7.3",
+  "releaseNotes": "0.7.3: colore della palla a scelta (arancione, giallo, verde, rosso, rosa, blu) o imparato toccando la palla 3 volte sul monitor; controllo misura palla taglia 5; avviso se il colore si confonde con le calottine.",
   "params": {
     "gimbalSpeed": 0.3,
     "zoomRampRate": 1.5
