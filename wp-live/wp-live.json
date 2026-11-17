@@ -1,6 +1,6 @@
 {
-  "latestVersion": "0.7.1",
-  "releaseNotes": "0.7.1: limiti di rotazione del gimbal dal campo calibrato; pulsanti Rigore sul monitor.",
+  "latestVersion": "0.7.2",
+  "releaseNotes": "0.7.2: ricerca di palla e calottine un po' oltre il bordo del campo; conversione pixel-angolo con i dati veri della lente.",
   "params": {
     "gimbalSpeed": 0.3,
     "zoomRampRate": 1.5
