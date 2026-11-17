@@ -783,6 +783,7 @@ $('zIn').onclick = () => { const z = Math.min(Math.min(S.maxZoom || 10, 10), (S.
 // ---- Fasi: preparazione e partita ----
 let phase = 'prep';
 try { phase = localStorage.getItem('wpPhase') || 'prep'; } catch (e) {}
+let sbHiding = false;
 let capsSeen = false;
 try { capsSeen = localStorage.getItem('wpCaps') === '1'; } catch (e) {}
 function setPhase(p) { phase = p; try { localStorage.setItem('wpPhase', p); } catch (e) {} renderPhase(); }
@@ -800,6 +801,8 @@ function renderPhase() {
   b.toggle('penOn', pen); $('penOn').checked = pen;
   b.toggle('sbOn', !!(S.sb && S.sb.visible));
   b.toggle('manual', !S.auto && !S.assisted);
+  // In preparazione il tabellone non va in sovrimpressione: si decide dopo, alla domanda.
+  if (phase === 'prep' && S.sb && S.sb.visible) { if (!sbHiding) { sbHiding = true; cmd({a: 'sbVisible', on: false}); } } else sbHiding = false;
   if (phase !== 'prep') return;
   const set = (id, ok, txt) => { const e = $(id); e.classList.toggle('ok', !!ok); e.querySelector('b').textContent = ok ? '✓' : '○'; if (txt) e.querySelector('span').textContent = txt; };
   const lv = S.level, levelOk = !S.portrait && lv !== undefined && lv < 900 && Math.abs(lv) <= 1;
