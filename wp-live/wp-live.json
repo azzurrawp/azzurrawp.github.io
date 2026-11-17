@@ -1,6 +1,6 @@
 {
-  "latestVersion": "0.7.8",
-  "releaseNotes": "0.7.8: misura dell'altezza con il LiDAR automatica (il gimbal abbassa la telecamera, misura e torna); controllo bolla dell'iPhone nel supporto.",
+  "latestVersion": "0.7.9",
+  "releaseNotes": "0.7.9: misura dell'altezza disattivata con registrazione o diretta in corso (e viceversa durante la misura); misura LiDAR automatica; controllo bolla.",
   "params": {
     "gimbalSpeed": 0.3,
     "zoomRampRate": 1.5
