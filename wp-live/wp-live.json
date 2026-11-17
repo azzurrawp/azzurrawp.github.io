@@ -1,6 +1,6 @@
 {
-  "latestVersion": "0.7.5",
-  "releaseNotes": "0.7.5: calottine Azzurra (blu o bianche, sempre a scacchi sopra) riconosciute anche da lontano; non confuse con avversari blu o bianchi. 0.7.3: colore della palla a scelta o imparato.",
+  "latestVersion": "0.7.7",
+  "releaseNotes": "0.7.7: controllo bolla dell'iPhone nel supporto (iPhone e monitor); altezza della telecamera con il LiDAR e misure della vasca per controllare la calibrazione.",
   "params": {
     "gimbalSpeed": 0.3,
     "zoomRampRate": 1.5
