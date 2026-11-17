@@ -1,6 +1,6 @@
 {
-  "latestVersion": "0.8.5",
-  "releaseNotes": "0.8.5: monitor dal telefono: un dito sull'immagine muove la telecamera, pulsanti − / + per lo zoom, pulsanti più in alto in Safari orizzontale, schermo intero con 'Aggiungi alla schermata Home'; avviso iPhone in verticale; misura LiDAR più sicura; barra dei gol nascosta durante calibrazione e misura; pagina del monitor aggiornabile senza reinstallare.",
+  "latestVersion": "0.8.6",
+  "releaseNotes": "0.8.6: misura dell'altezza con il LiDAR corretta (il gimbal scende subito verso il pavimento). 0.8.5: monitor dal telefono con un dito, zoom − / +, avviso iPhone in verticale.",
   "params": {
     "gimbalSpeed": 0.3,
     "zoomRampRate": 1.5
