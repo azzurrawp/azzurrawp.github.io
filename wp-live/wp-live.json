@@ -1,6 +1,6 @@
 {
-  "latestVersion": "0.8.6",
-  "releaseNotes": "0.8.6: misura dell'altezza con il LiDAR corretta (il gimbal scende subito verso il pavimento). 0.8.5: monitor dal telefono con un dito, zoom − / +, avviso iPhone in verticale.",
+  "latestVersion": "0.8.7",
+  "releaseNotes": "0.8.7: altezza con il LiDAR calcolata su centinaia di punti del pavimento (più precisa sulle piastrelle lucide) e altezza scritta a mano col metro.",
   "params": {
     "gimbalSpeed": 0.3,
     "zoomRampRate": 1.5
