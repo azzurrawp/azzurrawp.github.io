@@ -24,6 +24,20 @@ input,textarea{-webkit-user-select:text;user-select:text}
   #seg,#sbBar,#hint{bottom:calc(12px + env(safe-area-inset-bottom))}
   #undoBtn{bottom:calc(96px + env(safe-area-inset-bottom))}
 }
+/* Due fasi: preparazione (solo il necessario per montare e calibrare) e partita. */
+body.phPrep #sbBar, body.phPrep #penBox, body.phPrep #liveBtn, body.phPrep #recWrap, body.phPrep #micBtn, body.phPrep #undoBtn{display:none !important}
+body.phMatch #ckBox{display:none}
+body.phMatch:not(.penOn) #penBox{display:none}
+body.phMatch:not(.sbOn) #sbBar{display:none}
+body:not(.manual) #seg .zb{display:none !important}
+#ckBox{position:absolute;left:12px;top:96px;width:270px;max-width:46vw;background:rgba(11,20,32,.88);border:2px solid #ffd400;border-radius:14px;padding:10px;font-size:14px;z-index:5}
+#ckBox .ck{display:flex;gap:8px;align-items:center;width:100%;margin:4px 0;padding:8px;border-radius:10px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.06);color:#fff;font-size:14px;text-align:left;cursor:pointer}
+#ckBox .ck b{width:22px;text-align:center}
+#ckBox .ck.ok{border-color:#1e8e3e}
+#ckDone{width:100%;margin-top:6px;min-height:48px;border:0;border-radius:12px;background:#1e8e3e;color:#fff;font-size:16px;font-weight:800}
+#sbAsk{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:20;display:none;align-items:center;justify-content:center}
+#sbAsk > div{background:#132235;border:2px solid #2a8cff;border-radius:16px;padding:18px;max-width:420px;text-align:center}
+#sbAsk button{min-height:52px;min-width:120px;margin:10px 6px 0;border:0;border-radius:12px;font-size:17px;font-weight:800;color:#fff}
 #fLoupe{position:fixed;width:230px;height:230px;z-index:12;border:3px solid #ffd400;border-radius:14px;overflow:hidden;background:#000;display:none;pointer-events:none;box-shadow:0 4px 20px rgba(0,0,0,.6)}
 #fLoupe img{position:absolute;inset:0;width:100%;height:100%}
 #fLoupe canvas{position:absolute;inset:0;width:100%;height:100%}
@@ -99,6 +113,8 @@ img{-webkit-user-drag:none}
 }
 @media (orientation:portrait) and (max-width:600px){
   #seg .zb{display:inline-block;min-width:44px}
+  #ckBox{top:168px;left:6px;right:6px;width:auto;max-width:none;padding:6px 8px}
+  #ckBox .ck{padding:5px 8px;margin:3px 0}
 }
 @media (orientation:portrait) and (max-width:600px){
   #statusBar{top:104px;flex-wrap:wrap;justify-content:center;white-space:normal;max-width:94vw;font-size:12px;gap:8px}
@@ -186,7 +202,11 @@ select{width:100%;padding:8px;border-radius:8px;background:#0b1420;color:#fff;bo
       <div class="small" style="margin-top:6px">Ripresa, registrazione e diretta sull'iPhone continuano: fermale prima, se la partita è finita. Per ricollegarti: QR code o password.</div>
       <div class="small" id="homeTip" style="margin-top:8px;color:#7fd3ff">Su iPhone, per avere il monitor a schermo intero senza le barre di Safari: tasto Condividi › "Aggiungi alla schermata Home", poi aprilo dall'icona "WP Regia" (la password va scritta una volta).</div>
     </div>
-    <div class="card">
+    <div class="card" id="phaseCard">
+      <button class="btn2" id="backPrep" style="width:100%">Torna alla preparazione (checklist)</button>
+      <label style="display:flex;gap:8px;align-items:center;margin-top:8px"><input type="checkbox" id="penOn"> Mostra i pulsanti Rigore</label>
+    </div>
+    <div class="card" id="campoCard">
       <div style="font-weight:700;margin-bottom:6px">Campo</div>
       <div class="small">Giro automatico: il gimbal percorre il campo e propone il rettangolo. A mano: tocca i 4 angoli sulle linee di porta; tocca un angolo per la lente.</div>
       <div class="row" style="margin-top:8px">
@@ -215,7 +235,7 @@ select{width:100%;padding:8px;border-radius:8px;background:#0b1420;color:#fff;bo
       <div style="font-size:12px;opacity:.75">Dal 3° tempo il verso si inverte da solo (cambio campo). Pallini sull'anteprima: azzurri = Azzurra, gialli = avversari, rossi = portieri.</div>
       <div style="font-size:12px;opacity:.75">Serve il campo calibrato. Transizione larga, attacco sulla metà vasca, zona dei 6 metri; dopo un gol (+1) inquadratura ferma e poi larga verso il centro.</div>
     </div>
-    <div class="card">
+    <div class="card" id="teamsCard">
       <div style="font-weight:700;margin-bottom:6px">Squadre e tabellone</div>
       <label>Nome della partita<input class="txt" id="sbTitle" maxlength="60" placeholder="Campionato regionale FIN - Allievi"></label>
       <label style="display:flex;gap:8px;align-items:center;margin-top:6px"><input type="checkbox" id="sbFull"> Nomi delle squadre per intero</label>
@@ -234,7 +254,7 @@ select{width:100%;padding:8px;border-radius:8px;background:#0b1420;color:#fff;bo
       <div class="teamBox" id="tb_home"></div>
       <div class="teamBox" id="tb_away"></div>
     </div>
-    <div class="card">
+    <div class="card" id="capsCard">
       <div style="font-weight:700;margin-bottom:6px">Calottine e palla</div>
       <label>Azzurra<select id="homeCap"></select></label>
       <label>Avversari<select id="awayCap"></select></label>
@@ -257,6 +277,11 @@ select{width:100%;padding:8px;border-radius:8px;background:#0b1420;color:#fff;bo
 </div>
 
 <div id="toast"></div>
+<div id="sbAsk"><div>
+  <div style="font-size:19px;font-weight:800">Preparazione finita</div>
+  <div style="margin-top:8px">Vuoi il tabellone in sovrimpressione (nomi delle squadre e punteggio) nella diretta e nella registrazione?</div>
+  <button id="sbAskYes" style="background:#1e8e3e">Sì</button><button id="sbAskNo" style="background:#3a3f4b">No</button>
+</div></div>
 <div id="fLoupe"><img id="fLoupeImg" alt=""><canvas id="fLoupeCv"></canvas><div id="fLoupeTxt"></div></div>
 <div id="portraitBanner">iPhone in verticale sul gimbal: premi 2 volte il pulsante Switch del gimbal per tornare in orizzontale</div>
 <div id="endBanner" title="Tocca per nascondere" style="display:none;cursor:pointer;position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:25;max-width:90vw;padding:18px 22px;border-radius:16px;color:#fff;font-size:18px;font-weight:800;text-align:center"></div>
@@ -273,6 +298,14 @@ select{width:100%;padding:8px;border-radius:8px;background:#0b1420;color:#fff;bo
     <div id="recWrap"><button class="rb" id="rec"><span class="rc"><span id="recDot"></span></span><span class="rl" id="recTime">REC</span></button></div>
     <button class="rb" id="micBtn"><span class="rc" id="micIcon">🎤</span><span class="rl" id="micTxt">Mic</span></button>
     <div id="seg"><button id="zOut" class="zb" title="Allarga">−</button><button id="zIn" class="zb" title="Stringi">+</button><button id="largaBtn">Larga</button><button id="assistBtn">Assistita</button><button id="autoBtn">Auto</button></div>
+    <div id="ckBox">
+      <div style="font-weight:800;color:#ffd400">Preparazione</div>
+      <button class="ck" id="ck1"><b>○</b><span>iPhone orizzontale e in bolla</span></button>
+      <button class="ck" id="ck2"><b>○</b><span>Altezza della telecamera</span></button>
+      <button class="ck" id="ck3"><b>○</b><span>Campo calibrato</span></button>
+      <button class="ck" id="ck4"><b>○</b><span>Calottine e palla</span></button>
+      <button id="ckDone">Preparazione finita ▶</button>
+    </div>
     <div id="penBox"><button id="penL">◀ Rigore</button><button id="penR">Rigore ▶</button></div>
     <button id="undoBtn">↶ Annulla gol</button>
     <div id="sbBar">
@@ -743,7 +776,46 @@ $('hSet').onclick = () => {
 };
 $('zOut').onclick = () => { const z = Math.max(0.5, (S.zoomValue || 1) / 1.3); S.zoomValue = z; cmd({a: 'zoom', v: z}); };
 $('zIn').onclick = () => { const z = Math.min(Math.min(S.maxZoom || 10, 10), (S.zoomValue || 1) * 1.3); S.zoomValue = z; cmd({a: 'zoom', v: z}); };
+// ---- Fasi: preparazione e partita ----
+let phase = 'prep';
+try { phase = localStorage.getItem('wpPhase') || 'prep'; } catch (e) {}
+let capsSeen = false;
+try { capsSeen = localStorage.getItem('wpCaps') === '1'; } catch (e) {}
+function setPhase(p) { phase = p; try { localStorage.setItem('wpPhase', p); } catch (e) {} renderPhase(); }
+function openCard(id) {
+  $('prep').style.display = 'flex';
+  setTimeout(() => { const c = $(id); if (c) c.scrollIntoView({block: 'start', behavior: 'smooth'}); }, 50);
+  if (id === 'capsCard') { capsSeen = true; try { localStorage.setItem('wpCaps', '1'); } catch (e) {} }
+}
+function renderPhase() {
+  // Con registrazione o diretta in corso si è per forza in partita.
+  if (phase === 'prep' && (S.rec || (S.live && S.live.state && S.live.state !== 'off'))) phase = 'match';
+  const b = document.body.classList;
+  b.toggle('phPrep', phase === 'prep'); b.toggle('phMatch', phase !== 'prep');
+  let pen = false; try { pen = localStorage.getItem('wpPen') === '1'; } catch (e) {}
+  b.toggle('penOn', pen); $('penOn').checked = pen;
+  b.toggle('sbOn', !!(S.sb && S.sb.visible));
+  b.toggle('manual', !S.auto && !S.assisted);
+  if (phase !== 'prep') return;
+  const set = (id, ok, txt) => { const e = $(id); e.classList.toggle('ok', !!ok); e.querySelector('b').textContent = ok ? '✓' : '○'; if (txt) e.querySelector('span').textContent = txt; };
+  const lv = S.level, levelOk = !S.portrait && lv !== undefined && lv < 900 && Math.abs(lv) <= 1;
+  set('ck1', levelOk, S.portrait ? 'iPhone in VERTICALE: 2 volte Switch' : (lv !== undefined && lv < 900 && !levelOk ? 'iPhone storto di ' + lv.toFixed(1) + '°: raddrizzalo' : 'iPhone orizzontale e in bolla'));
+  const hOk = /^Altezza/.test(S.geo || '');
+  set('ck2', hOk, hOk ? (S.geo || '').split(' · ')[0] : 'Altezza della telecamera');
+  set('ck3', (S.corners || []).length === 4, 'Campo calibrato');
+  set('ck4', capsSeen, 'Calottine e palla');
+}
+$('ck1').onclick = () => openCard('campoCard');
+$('ck2').onclick = () => openCard('campoCard');
+$('ck3').onclick = () => openCard('campoCard');
+$('ck4').onclick = () => openCard('capsCard');
+$('ckDone').onclick = () => { $('sbAsk').style.display = 'flex'; };
+$('sbAskYes').onclick = () => { $('sbAsk').style.display = 'none'; cmd({a: 'sbVisible', on: true}); setPhase('match'); openCard('teamsCard'); };
+$('sbAskNo').onclick = () => { $('sbAsk').style.display = 'none'; cmd({a: 'sbVisible', on: false}); setPhase('match'); };
+$('backPrep').onclick = () => { $('prep').style.display = 'none'; setPhase('prep'); };
+$('penOn').onchange = e => { try { localStorage.setItem('wpPen', e.target.checked ? '1' : '0'); } catch (x) {} renderPhase(); };
 function renderGeo() {
+  renderPhase();
   // Durante calibrazione, mappatura e misura dell'altezza la barra dei gol non serve e intralcia.
   $('sbBar').style.visibility = (S.busyGeo || calibPts) ? 'hidden' : '';
   $('portraitBanner').style.display = S.portrait ? 'block' : 'none';
