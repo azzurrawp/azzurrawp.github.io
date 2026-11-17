@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="it"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Monitor regia WP Live</title>
+<style>body{font-family:system-ui,sans-serif;background:#0b1420;color:#fff;text-align:center;padding:30px 18px}
+a{display:inline-block;margin-top:18px;padding:16px 22px;border-radius:12px;background:#1e8e3e;color:#fff;font-weight:700;text-decoration:none;font-size:18px}
+p{color:#9fb3c8;line-height:1.4}</style></head>
+<body>
+<h2>Monitor regia WP Live</h2>
+<p id="msg">Apro il monitor…</p>
+<a id="go" href="#" style="display:none">Apri il monitor</a>
+<p style="margin-top:24px">Il telefono o il PC deve essere collegato all'hotspot (o al Wi-Fi) dell'iPhone che riprende.</p>
+<script>
+// Indirizzo e password stanno dopo il #: non arrivano a nessun server, restano in questo dispositivo.
+// Formato: #172.20.10.1:8080/515807
+(function () {
+  var h = decodeURIComponent(location.hash.slice(1));
+  var m = h.match(/^(\d{1,3}(?:\.\d{1,3}){3}:\d{2,5})\/(\d{4,8})$/);
+  if (!m) { document.getElementById('msg').textContent = 'Link non valido: chiedi un link nuovo.'; return; }
+  var url = 'http://' + m[1] + '/?pin=' + m[2];
+  var a = document.getElementById('go');
+  a.href = url; a.style.display = 'inline-block';
+  history.replaceState(null, '', location.pathname);
+  location.replace(url);
+  setTimeout(function () { document.getElementById('msg').textContent = 'Se non si apre da solo, tocca il pulsante.'; }, 1500);
+})();
+</script>
+</body></html>
