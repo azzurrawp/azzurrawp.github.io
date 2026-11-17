@@ -1,6 +1,6 @@
 {
-  "latestVersion": "0.7.3",
-  "releaseNotes": "0.7.3: colore della palla a scelta (arancione, giallo, verde, rosso, rosa, blu) o imparato toccando la palla 3 volte sul monitor; controllo misura palla taglia 5; avviso se il colore si confonde con le calottine.",
+  "latestVersion": "0.7.4",
+  "releaseNotes": "0.7.4: calottina blu dell'Azzurra riconosciuta anche da lontano (quadri bianchi e blu). 0.7.3: colore della palla a scelta o imparato toccando la palla; controllo taglia 5.",
   "params": {
     "gimbalSpeed": 0.3,
     "zoomRampRate": 1.5
