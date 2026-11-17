@@ -1,0 +1,1053 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<!-- WP-LIVE-MONITOR-API:1 -->
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="WP Regia">
+<title>WP Live – Monitor</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:#0b1420;color:#fff;font-family:-apple-system,system-ui,Roboto,Arial,sans-serif;overscroll-behavior:none;
+  -webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+input,textarea{-webkit-user-select:text;user-select:text}
+/* Safari su iPhone in orizzontale: un tocco vicino al bordo basso fa comparire le barre del browser
+   invece di premere il pulsante. Nel browser i comandi in basso stanno più in alto. */
+@media (hover:none) and (orientation:landscape){
+  #seg,#sbBar,#hint{bottom:calc(46px + env(safe-area-inset-bottom))}
+  #undoBtn{bottom:calc(130px + env(safe-area-inset-bottom))}
+}
+@media (hover:none) and (orientation:landscape) and (display-mode:standalone){
+  #seg,#sbBar,#hint{bottom:calc(12px + env(safe-area-inset-bottom))}
+  #undoBtn{bottom:calc(96px + env(safe-area-inset-bottom))}
+}
+#portraitBanner{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:26;max-width:90vw;padding:18px 22px;border-radius:16px;background:rgba(198,40,40,.95);color:#fff;font-size:18px;font-weight:800;text-align:center;display:none;pointer-events:none}
+#seg .zb{min-width:52px;padding:0 8px;font-size:24px}
+button,select{font:inherit;touch-action:manipulation}
+#login{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:#0b1420;z-index:10}
+#login input{font-size:30px;width:220px;text-align:center;letter-spacing:10px;padding:8px;border-radius:12px;border:2px solid #2a8cff;background:#132235;color:#fff}
+#login button{font-size:20px;padding:12px 30px;border-radius:12px;border:0;background:#2a8cff;color:#fff;font-weight:700}
+#loginMsg{color:#ff8080;min-height:20px}
+#app{position:fixed;inset:0;background:#000}
+#viewBox{position:absolute;inset:0;touch-action:none;display:flex;align-items:center;justify-content:center}
+#frame{position:relative;width:min(100vw,177.78vh);aspect-ratio:16/9}
+#view{display:block;width:100%;height:100%;background:#000}
+#ov{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+#viewBox.calib{outline:4px solid #ffd400;outline-offset:-4px}
+#calibHint{position:absolute;left:0;right:0;top:44px;padding:8px;background:rgba(0,0,0,.7);color:#ffd400;font-weight:700;text-align:center;display:none;z-index:3}
+#viewBox.calib #calibHint{display:block}
+#hud{position:absolute;inset:0;pointer-events:none;z-index:4}
+#hud > *{pointer-events:auto}
+.ok{color:#5ee08a}.warn{color:#ffb347}.bad{color:#ff6b6b}
+#statusBar{position:absolute;top:8px;left:50%;transform:translateX(-50%);display:flex;gap:12px;align-items:center;padding:5px 14px;border-radius:16px;background:rgba(0,0,0,.6);font-size:13px;white-space:nowrap;pointer-events:none}
+#modeTxt{position:absolute;top:40px;left:50%;transform:translateX(-50%);font-size:12px;background:rgba(0,0,0,.5);padding:2px 10px;border-radius:8px;white-space:nowrap;pointer-events:none}
+.chip{padding:1px 8px;border-radius:8px}
+.rb{display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:0;color:#fff;font-size:12px;padding:0;cursor:pointer}
+.rc{width:64px;height:64px;border-radius:50%;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;font-size:22px}
+.rl{background:rgba(0,0,0,.5);padding:1px 6px;border-radius:6px}
+#prepBtn{position:absolute;left:12px;top:10px}
+#liveBtn{position:absolute;right:12px;top:10px}
+#liveBtn .rc{width:auto;padding:0 18px;border-radius:32px;font-size:16px;font-weight:800;border:2px solid #e53935}
+#recWrap{position:absolute;right:12px;top:50%;transform:translateY(-50%)}
+#rec .rc{width:80px;height:80px;border:4px solid #fff;background:rgba(0,0,0,.25)}
+#recDot{width:56px;height:56px;border-radius:50%;background:#e53935}
+#rec.on #recDot{width:26px;height:26px;border-radius:6px}
+#micBtn{position:absolute;right:112px;top:50%;transform:translateY(-50%)}
+#seg{position:absolute;right:12px;bottom:12px;display:flex;border-radius:14px;overflow:hidden}
+#seg button{border:0;color:#fff;font-size:16px;font-weight:800;min-height:64px;padding:0 20px;background:rgba(0,0,0,.7);cursor:pointer}
+#seg button + button{border-left:2px solid #0b1420}
+#hint{position:absolute;left:12px;bottom:12px;font-size:12px;background:rgba(0,0,0,.5);padding:4px 8px;border-radius:8px;max-width:45%;pointer-events:none}
+#sbBar{position:absolute;left:50%;transform:translateX(-50%);bottom:12px;display:flex;align-items:center;gap:12px;background:rgba(0,0,0,.75);padding:6px 10px;border-radius:16px;border:1px solid rgba(255,255,255,.25)}
+#sbBar button{border:2px solid rgba(255,255,255,.35);border-radius:12px;color:#fff;font-weight:800;font-size:22px;cursor:pointer}
+#hPlus,#aPlus{min-width:64px;height:64px;background:#1e8e3e;font-size:30px}
+#hMinus,#aMinus{min-width:46px;height:46px;background:#3a3f4b}
+.tm{display:flex;align-items:center;padding:0 8px;height:44px;border-radius:10px;font-weight:800;font-size:17px}
+.sc{min-width:30px;text-align:center;font-size:28px;font-weight:800}
+#sbClock{min-width:96px;height:56px;white-space:nowrap;font-size:17px !important;background:#244a7a}
+#penBox{position:absolute;left:12px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:16px}
+#penBox button{min-width:112px;min-height:60px;border:2px solid rgba(255,255,255,.4);border-radius:14px;background:rgba(0,0,0,.65);color:#fff;font-size:16px;font-weight:800;cursor:pointer}
+#penBox button.on{background:#ffd400;color:#000;border-color:#fff}
+#undoBtn{position:absolute;left:50%;transform:translateX(-50%);bottom:96px;display:none;min-height:64px;padding:0 22px;border:3px solid #fff;border-radius:16px;background:#e07b00;color:#fff;font-size:18px;font-weight:800}
+.flash{outline:4px solid #fff !important;outline-offset:2px}
+.hold{position:relative}
+.hold::after{content:'';position:absolute;left:0;bottom:-8px;height:5px;border-radius:3px;width:calc(var(--hold,0) * 100%);background:#ffd400;pointer-events:none}
+@media (max-width:900px){
+  #sbBar{gap:8px;padding:5px 8px}
+  #hPlus,#aPlus{min-width:56px;height:56px}
+  #hMinus,#aMinus{min-width:40px;height:40px}
+  #sbClock{min-width:76px;height:50px}
+  .tm{padding:0 6px;font-size:15px}
+  .sc{font-size:24px;min-width:24px}
+  #seg button{min-height:56px;padding:0 12px;font-size:14px}
+}
+@media (max-width:760px){
+  #seg button{padding:0 8px;font-size:13px}
+  #seg .zb{min-width:40px;padding:0 4px;font-size:20px}
+  #sbBar{gap:6px}
+  #sbBar .tm{display:none}
+}
+@media (max-width:700px){
+  #seg .zb{display:none}
+}
+@media (orientation:portrait) and (max-width:600px){
+  #seg .zb{display:inline-block;min-width:44px}
+}
+@media (orientation:portrait) and (max-width:600px){
+  #statusBar{top:104px;flex-wrap:wrap;justify-content:center;white-space:normal;max-width:94vw;font-size:12px;gap:8px}
+  #modeTxt{top:auto;bottom:150px}
+  #sbBar{left:6px;right:6px;bottom:8px;transform:none;justify-content:space-between;gap:4px}
+  #sbBar .tm{display:none}
+  #seg{bottom:182px}
+  #undoBtn{left:8px;transform:none;bottom:84px}
+}
+#toast{position:fixed;left:50%;top:70px;transform:translateX(-50%);background:rgba(0,0,0,.85);color:#ffd400;font-weight:800;padding:10px 16px;border-radius:12px;display:none;z-index:30;white-space:nowrap}
+.swatches{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.sw{width:26px;height:26px;border-radius:50%;border:2px solid #fff;cursor:pointer}
+.teamBox{border-top:1px solid #244a7a;padding-top:8px;margin-top:8px}
+input.txt{width:100%;padding:8px;border-radius:8px;background:#0b1420;color:#fff;border:1px solid #2a8cff}
+#prep{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;z-index:12;justify-content:flex-start}
+#prepPanel{width:min(420px,92vw);height:100%;overflow-y:auto;background:#0b1420;padding:14px;display:flex;flex-direction:column;gap:10px}
+.card{background:#132235;border-radius:12px;padding:10px}
+#status{font-size:14px;line-height:1.5}
+.row{display:flex;gap:6px;flex-wrap:wrap}
+details summary{cursor:pointer;font-weight:700;padding:4px 0}
+.small{font-size:13px;color:#b8c7da}
+.btn2{min-height:48px;padding:10px 14px;border:0;border-radius:10px;background:#244a7a;color:#fff;font-weight:600}
+label{display:block;margin-top:6px;font-size:14px}
+select{width:100%;padding:8px;border-radius:8px;background:#0b1420;color:#fff;border:1px solid #2a8cff}
+#loupe{position:fixed;inset:0;background:rgba(0,0,0,.75);display:none;align-items:center;justify-content:center;z-index:20}
+#loupeBox{background:#132235;border-radius:14px;padding:12px;text-align:center;max-width:94vw}
+#loupeWrap{position:relative;width:min(80vw,62vh,420px);aspect-ratio:1;margin:0 auto}
+#loupeImg,#loupeCv{position:absolute;inset:0;width:100%;height:100%;border-radius:10px}
+#loupeImg{background:#000;object-fit:cover}
+#loupeBtns{display:flex;gap:8px;justify-content:center;margin-top:10px}
+</style>
+</head>
+<body>
+<div id="login">
+  <div style="font-size:22px;font-weight:700">WP Live – Monitor</div>
+  <div class="small">Inserisci la password che vedi sull'iPhone della ripresa</div>
+  <input id="pinIn" inputmode="numeric" maxlength="6" autocomplete="off">
+  <button id="pinBtn">Entra</button>
+  <div id="loginMsg"></div>
+</div>
+
+<div id="loupe">
+  <div id="loupeBox">
+    <div id="loupeTitle" style="font-weight:700;margin-bottom:6px"></div>
+    <div class="small" style="margin-bottom:8px">Ingrandimento reale. Tocca il punto esatto dell'angolo per spostarlo.</div>
+    <div id="loupeWrap"><img id="loupeImg" alt=""><canvas id="loupeCv"></canvas></div>
+    <div id="loupeBtns">
+      <button class="btn2" id="loupeMinus">− zoom</button>
+      <button class="btn2" id="loupePlus">+ zoom</button>
+      <button class="btn2" id="loupeCancel">Annulla</button>
+      <button class="btn2" id="loupeOk" style="background:#2a8cff">OK</button>
+    </div>
+  </div>
+</div>
+
+<div id="review" style="position:fixed;inset:0;background:#0b1420;z-index:15;display:none;flex-direction:column;align-items:center;justify-content:center;padding:10px;gap:8px">
+  <div style="color:#ffd400;font-weight:700;text-align:center">Trascina i vertici sugli angoli del campo (birilli bianchi delle linee di porta)</div>
+  <div id="revWrap" style="position:relative;max-width:100%;touch-action:none">
+    <img id="revImg" style="display:block;max-width:96vw;max-height:72vh" alt="Panoramica della vasca">
+    <canvas id="revCv" style="position:absolute;inset:0;width:100%;height:100%"></canvas>
+  </div>
+  <div class="row">
+    <button class="btn2" id="revCancel">Annulla</button>
+    <button class="btn2" id="revRedo">Rifai il giro</button>
+    <button class="btn2" id="revSave" style="background:#2a8cff">Salva</button>
+  </div>
+</div>
+
+<div id="prep">
+  <div id="prepPanel">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div style="font-size:18px;font-weight:700">Preparazione</div>
+      <button class="btn2" id="prepClose">Chiudi</button>
+    </div>
+    <div class="card">
+      <button class="btn2" id="endBtn" style="width:100%;min-height:56px;background:#8a1c1c;font-size:17px;font-weight:800">Fine partita (tieni premuto)</button>
+      <div class="small" style="margin-top:6px">Ferma diretta e registrazione insieme; quando compare "puoi chiudere l'app" il video è salvato.</div>
+    </div>
+    <div class="card" id="nativeCard" style="display:none">
+      <button class="btn2" id="nativeBtn" style="width:100%;min-height:52px">Schermata fotocamera dell'iPhone</button>
+      <div class="small" style="margin-top:6px">Questa regia resta sull'iPhone finché non si collega un monitor (telefono o PC del regista); poi l'iPhone torna alla schermata fotocamera. Per riaprirla: pulsante "Regia". Per collegare il monitor del regista: schermata fotocamera › "Regista" (QR e password).</div>
+    </div>
+    <div class="card" id="logoutCard">
+      <button class="btn2" id="logoutBtn" style="width:100%;background:#5a2330">Scollega questo monitor (tieni premuto)</button>
+      <div class="small" style="margin-top:6px">Ripresa, registrazione e diretta sull'iPhone continuano: fermale prima, se la partita è finita. Per ricollegarti: QR code o password.</div>
+      <div class="small" id="homeTip" style="margin-top:8px;color:#7fd3ff">Su iPhone, per avere il monitor a schermo intero senza le barre di Safari: tasto Condividi › "Aggiungi alla schermata Home", poi aprilo dall'icona "WP Regia" (la password va scritta una volta).</div>
+    </div>
+    <div class="card">
+      <div style="font-weight:700;margin-bottom:6px">Campo</div>
+      <div class="small">Giro automatico: il gimbal percorre il campo e propone il rettangolo. A mano: tocca i 4 angoli sulle linee di porta; tocca un angolo per la lente.</div>
+      <div class="row" style="margin-top:8px">
+        <button class="btn2" id="calibBtn">Calibra (giro automatico)</button>
+        <button class="btn2" id="calibManual">Calibra a mano</button>
+        <button class="btn2" id="calibClear">Cancella</button>
+      </div>
+      <div class="small" id="levelTxt" style="margin-top:8px"></div>
+      <div id="lidarBox" style="margin-top:10px;display:none">
+        <div class="small">Altezza con il LiDAR: il gimbal abbassa da solo la telecamera verso il pavimento vicino allo stativo, misura e torna dove era. Davanti allo stativo serve pavimento asciutto; registrazione e diretta ferme.</div>
+        <button class="btn2" id="lidarBtn" style="width:100%;margin-top:6px">Misura altezza (LiDAR)</button>
+        <div class="small" id="lidarMsg" style="margin-top:4px"></div>
+        <div class="small" id="geoTxt" style="margin-top:4px;color:#7fd3ff"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div style="font-weight:700;margin-bottom:6px">Ripresa automatica</div>
+      <label style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="azOn"> Zoom automatico (regole della pallanuoto)</label>
+      <div style="font-size:12px;opacity:.75;margin-top:6px">Risparmio calore: con questo monitor collegato, dopo 2 minuti senza tocchi sull'iPhone l'anteprima si spegne e lo schermo va al minimo; un tocco sull'iPhone la riaccende (<span id="heatTxt">…</span>).</div>
+      <label style="margin-top:6px">L'Azzurra attacca verso (1° e 2° tempo)<select id="azzDir"><option value="">Non impostato</option><option value="sinistra">Sinistra</option><option value="destra">Destra</option></select></label>
+      <div style="font-size:12px;opacity:.75">Dal 3° tempo il verso si inverte da solo (cambio campo). Pallini sull'anteprima: azzurri = Azzurra, gialli = avversari, rossi = portieri.</div>
+      <div style="font-size:12px;opacity:.75">Serve il campo calibrato. Transizione larga, attacco sulla metà vasca, zona dei 6 metri; dopo un gol (+1) inquadratura ferma e poi larga verso il centro.</div>
+    </div>
+    <div class="card">
+      <div style="font-weight:700;margin-bottom:6px">Squadre e tabellone</div>
+      <label>Nome della partita<input class="txt" id="sbTitle" maxlength="60" placeholder="Campionato regionale FIN - Allievi"></label>
+      <label style="display:flex;gap:8px;align-items:center;margin-top:6px"><input type="checkbox" id="sbFull"> Nomi delle squadre per intero</label>
+      <label style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="sbVis"> Tabellone in diretta e registrazione</label>
+      <label style="display:flex;gap:8px;align-items:center;margin-top:6px"><input type="checkbox" id="sbClkOn"> Orologio nel tabellone</label>
+      <div style="font-size:12px;opacity:.75">Il tempo ufficiale è della giuria: se accendi l'orologio, avvialo e fermalo col cronometrista o correggilo con "Imposta orologio".</div>
+      <div class="row" style="margin-top:6px">
+        <label style="flex:1">Durata tempo<select id="sbLen"><option>5</option><option>6</option><option>7</option><option selected>8</option><option>10</option></select></label>
+      </div>
+      <div class="row" style="margin-top:6px">
+        <button class="btn2" id="pMinus">Tempo −</button><button class="btn2" id="pPlus">Tempo +</button>
+        <button class="btn2" id="clkSet">Imposta orologio</button>
+        <button class="btn2" id="sbSwap">Inverti squadre</button>
+        <button class="btn2" id="sbReset">Azzera partita</button>
+      </div>
+      <div class="teamBox" id="tb_home"></div>
+      <div class="teamBox" id="tb_away"></div>
+    </div>
+    <div class="card">
+      <div style="font-weight:700;margin-bottom:6px">Calottine e palla</div>
+      <label>Azzurra<select id="homeCap"></select></label>
+      <label>Avversari<select id="awayCap"></select></label>
+      <label style="margin-top:8px">Palla (taglia 5)<select id="ballSel"></select></label>
+      <button class="btn2" id="learnBtn" style="width:100%;margin-top:6px">Insegna il colore della palla</button>
+      <div class="small" id="ballMsg" style="margin-top:4px"></div>
+      <div class="small" id="ballWarn" style="margin-top:4px;color:#ffb300"></div>
+    </div>
+    <div class="card">
+      <div style="font-weight:700;margin-bottom:6px">Dati diretta (RTMP)</div>
+      <div id="liveTxt" class="small"></div>
+      <label>URL dello stream<input id="rtmpUrl" style="width:100%;padding:8px;border-radius:8px;background:#0b1420;color:#fff;border:1px solid #2a8cff" autocomplete="off"></label>
+      <label>Chiave dello stream<input id="rtmpKey" type="password" placeholder="incolla la chiave" style="width:100%;padding:8px;border-radius:8px;background:#0b1420;color:#fff;border:1px solid #2a8cff" autocomplete="off"></label>
+      <label>Qualità<select id="liveQ"><option value="720p">720p (circa 1,2 GB/ora)</option><option value="1080p">1080p (circa 2,2 GB/ora)</option></select></label>
+      <button class="btn2" id="liveSave" style="margin-top:8px;width:100%">Salva dati diretta</button>
+      <div class="small" style="margin-top:4px">La chiave resta sull'iPhone della ripresa.</div>
+    </div>
+    <div class="card" id="status">Collegamento…</div>
+  </div>
+</div>
+
+<div id="toast"></div>
+<div id="portraitBanner">iPhone in verticale sul gimbal: premi 2 volte il pulsante Switch del gimbal per tornare in orizzontale</div>
+<div id="endBanner" title="Tocca per nascondere" style="display:none;cursor:pointer;position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:25;max-width:90vw;padding:18px 22px;border-radius:16px;color:#fff;font-size:18px;font-weight:800;text-align:center"></div>
+<div id="app" style="display:none">
+  <div id="viewBox">
+    <div id="frame"><img id="view" alt="Anteprima"><canvas id="ov"></canvas></div>
+    <div id="calibHint"></div>
+  </div>
+  <div id="hud">
+    <div id="statusBar"></div>
+    <div id="modeTxt"></div>
+    <button class="rb" id="prepBtn"><span class="rc">☰</span><span class="rl">Preparazione</span></button>
+    <button class="rb" id="liveBtn"><span class="rc">● LIVE</span><span class="rl" id="liveTime">spenta</span></button>
+    <div id="recWrap"><button class="rb" id="rec"><span class="rc"><span id="recDot"></span></span><span class="rl" id="recTime">REC</span></button></div>
+    <button class="rb" id="micBtn"><span class="rc" id="micIcon">🎤</span><span class="rl" id="micTxt">Mic</span></button>
+    <div id="seg"><button id="zOut" class="zb" title="Allarga">−</button><button id="zIn" class="zb" title="Stringi">+</button><button id="largaBtn">Larga</button><button id="assistBtn">Assistita</button><button id="autoBtn">Auto</button></div>
+    <div id="penBox"><button id="penL">◀ Rigore</button><button id="penR">Rigore ▶</button></div>
+    <button id="undoBtn">↶ Annulla gol</button>
+    <div id="sbBar">
+      <button id="hMinus">−</button><div class="tm" id="hTag">AZZ</div><div class="sc" id="hScore">0</div><button id="hPlus">+</button>
+      <button id="sbClock">1° 8:00</button>
+      <button id="aPlus">+</button><div class="sc" id="aScore">0</div><div class="tm" id="aTag">OSP</div><button id="aMinus">−</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let PIN = '';
+try { PIN = localStorage.getItem('wpPin') || ''; } catch (e) {}
+// Regia sullo schermo dell'iPhone che riprende (app WP Live): non conta come monitor collegato.
+let LOCAL = false;
+try { LOCAL = new URLSearchParams(location.search).get('local') === '1' || sessionStorage.getItem('wpLocal') === '1'; if (LOCAL) sessionStorage.setItem('wpLocal', '1'); } catch (e) {}
+let S = {};
+let wakeLock = null;
+let disconnected = false;
+let lastBall = null, lastBallT = 0;
+let calibPts = null;
+const $ = id => document.getElementById(id);
+
+async function api(path, body) {
+  const url = path + (path.includes('?') ? '&' : '?') + 'pin=' + PIN + (LOCAL ? '&local=1' : '') + '&t=' + Date.now();
+  const opt = body ? {method: 'POST', body: JSON.stringify(body), headers: {'Content-Type': 'application/json'}} : {};
+  const r = await fetch(url, opt);
+  if (r.status === 403) throw new Error('pin');
+  return r;
+}
+function cmd(o) { return api('/cmd', o).catch(() => {}); }
+
+async function login(pin) {
+  PIN = pin;
+  disconnected = false;
+  $('loginMsg').style.color = '';
+  try {
+    const r = await api('/status');
+    S = await r.json();
+    try { localStorage.setItem('wpPin', PIN); } catch (e) {}
+    $('login').style.display = 'none';
+    $('app').style.display = '';
+    setupCaps();
+    if (typeof keepAwake === 'function') keepAwake();
+    frameLoop();
+    statusLoop();
+  } catch (e) {
+    $('loginMsg').textContent = e.message === 'pin' ? 'Password errata' : 'iPhone della ripresa non raggiungibile: sei collegato al suo hotspot?';
+  }
+}
+$('pinBtn').onclick = () => login($('pinIn').value.trim());
+$('pinIn').addEventListener('keyup', e => { if (e.key === 'Enter') login($('pinIn').value.trim()); });
+// Dal QR code la password arriva nel link: si entra subito e la si toglie dalla barra degli indirizzi.
+try {
+  const qp = new URLSearchParams(location.search).get('pin');
+  if (qp) { PIN = qp; history.replaceState(null, '', location.pathname); }
+} catch (e) {}
+if (PIN) { $('pinIn').value = PIN; login(PIN); }
+
+let lastUrl = null;
+async function frameLoop() {
+  if (disconnected) return;
+  try {
+    const r = await api('/frame.jpg');
+    if (r.ok) {
+      const b = await r.blob();
+      const u = URL.createObjectURL(b);
+      $('view').src = u;
+      if (lastUrl) URL.revokeObjectURL(lastUrl);
+      lastUrl = u;
+    }
+  } catch (e) {}
+  setTimeout(frameLoop, 150);
+}
+
+async function statusLoop() {
+  if (disconnected) return;
+  try { S = await (await api('/status')).json(); render(); }
+  catch (e) { $('status').innerHTML = '<span class="bad">iPhone della ripresa non raggiungibile</span>'; }
+  setTimeout(statusLoop, 400);
+}
+
+function fmt(s) { const m = Math.floor(s / 60), x = s % 60; return m + ':' + String(x).padStart(2, '0'); }
+
+function render() {
+  const g = S.docked ? '<span class="ok">Gimbal collegato</span>' : '<span class="bad">' + (S.gimbal || 'Gimbal scollegato') + '</span>';
+  const bat = S.battery >= 0 ? (S.battery + '%' + (S.charging ? ' in carica' : '')) : '?';
+  const batCls = S.battery >= 0 && S.battery < 20 && !S.charging ? 'bad' : '';
+  const th = S.thermal === 'normale' || S.thermal === 'tiepido' ? S.thermal : '<span class="bad">' + S.thermal + '</span>';
+  const ball = S.ball ? '<span class="ok">vista</span>' : '<span class="warn">non vista</span>';
+  let h = g + ' · Zoom ' + S.zoom + '<br>Batteria <span class="' + batCls + '">' + bat + '</span> · Temperatura ' + th + '<br>Palla: ' + ball + ' · Campo ' + (S.corners && S.corners.length === 4 ? '<span class="ok">calibrato</span>' : '<span class="warn">da calibrare</span>');
+  if (S.lastSaved) h += '<br><span class="small">Ultima registrazione: ' + S.lastSaved + '</span>';
+  if (S.error) h += '<br><span class="bad">' + S.error + '</span>';
+  h += '<br><span class="small">Versione ' + S.version + '</span>';
+  $('status').innerHTML = h;
+  renderScan();
+  renderLive();
+  renderScore();
+  renderEnd();
+  renderBall();
+  renderGeo();
+  $('penL').classList.toggle('on', S.penalty === 'left');
+  $('penR').classList.toggle('on', S.penalty === 'right');
+  $('penL').textContent = S.penalty === 'left' ? '■ Fine rigore' : '◀ Rigore';
+  $('penR').textContent = S.penalty === 'right' ? 'Fine rigore ■' : 'Rigore ▶';
+  if (S.atLimit && !renderEnd.limitShown) { toast('Bordo del campo: il gimbal non va oltre', 1500); renderEnd.limitShown = true; }
+  if (!S.atLimit) renderEnd.limitShown = false;
+  const bc = v => v >= 0 && v < 20 ? 'bad' : '';
+  let sb = '<span class="chip" style="background:' + (S.auto ? '#1e8e3e' : S.assisted ? '#1565c0' : '#e07b00') + '">' + (S.auto ? 'AUTO' : S.assisted ? 'ASSISTITA' : 'MANUALE') + '</span>';
+  sb += '<span>' + (S.docked ? '<span class="ok">●</span>' : '<span class="bad">●</span>') + ' Gimbal</span>';
+  sb += '<span>' + (S.corners && S.corners.length === 4 ? '<span class="ok">●</span>' : '<span class="warn">●</span>') + ' Campo</span>';
+  sb += '<span class="' + bc(S.battery) + '">iPhone ' + (S.battery >= 0 ? S.battery + '%' : '?') + '</span>';
+  if (S.gimbalBattery >= 0) sb += '<span class="' + bc(S.gimbalBattery) + '">Gimbal ' + S.gimbalBattery + '%</span>';
+  if (S.thermal !== 'normale' && S.thermal !== 'tiepido') sb += '<span class="bad">Caldo</span>';
+  $('statusBar').innerHTML = sb;
+  $('modeTxt').textContent = S.mode || '';
+  $('autoBtn').style.background = S.auto ? '#1e8e3e' : 'rgba(0,0,0,.6)';
+  $('assistBtn').style.background = S.assisted ? '#1565c0' : 'rgba(0,0,0,.6)';
+  if (S.audio === false) { $('micIcon').textContent = '🎤'; $('micTxt').textContent = 'Mic n.d.'; $('micIcon').style.background = '#555'; }
+  else { $('micIcon').textContent = S.muted ? '🔇' : '🎤'; $('micTxt').textContent = S.muted ? 'Mic spento' : 'Mic'; $('micIcon').style.background = S.muted ? '#e07b00' : 'rgba(30,142,62,.9)'; }
+  $('rec').classList.toggle('on', !!S.rec);
+  $('recTime').textContent = S.rec ? 'REC ' + fmt(S.recSeconds) : 'REC';
+  if (document.activeElement !== $('homeCap')) $('homeCap').value = S.home;
+  if (document.activeElement !== $('awayCap')) $('awayCap').value = S.away;
+  drawOverlay();
+}
+
+function drawOverlay() {
+  const c = $('ov'), img = $('view');
+  const w = img.clientWidth, h = img.clientHeight;
+  if (c.width !== w) c.width = w;
+  if (c.height !== h) c.height = h;
+  const x = c.getContext('2d');
+  x.clearRect(0, 0, w, h);
+  const pts = calibPts || S.corners || [];
+  if (pts.length) {
+    x.strokeStyle = calibPts ? '#ffd400' : 'rgba(94,224,138,.9)';
+    x.fillStyle = x.strokeStyle;
+    x.lineWidth = 3;
+    x.beginPath();
+    pts.forEach((p, i) => { i ? x.lineTo(p[0] * w, p[1] * h) : x.moveTo(p[0] * w, p[1] * h); });
+    if (pts.length === 4) x.closePath();
+    x.stroke();
+    pts.forEach(p => {
+      const px = p[0] * w, py = p[1] * h;
+      x.lineWidth = 2;
+      x.fillStyle = 'rgba(0,0,0,.35)';
+      x.beginPath(); x.arc(px, py, 12, 0, 7); x.fill(); x.stroke();
+      x.fillStyle = '#ffffff';
+      x.beginPath(); x.arc(px, py, 2.5, 0, 7); x.fill();
+    });
+  }
+  if (!calibPts && pts.length === 4) drawLines(x, pts, w, h);
+  if (calibPts) return;
+  // Calottine riconosciute: azzurri = Azzurra, gialli = avversari, rossi = portieri.
+  (S.caps || []).forEach(cp => {
+    x.fillStyle = cp[2] === 2 ? 'rgba(255,60,60,.95)' : cp[2] === 1 ? 'rgba(60,170,255,.95)' : 'rgba(255,215,0,.95)';
+    x.strokeStyle = '#000'; x.lineWidth = 1.5;
+    x.beginPath(); x.arc(cp[0] * w, cp[1] * h, 5, 0, 7); x.fill(); x.stroke();
+  });
+  if (S.ball) {
+    lastBall = S.ball; lastBallT = Date.now();
+    x.strokeStyle = '#ff9f1a'; x.lineWidth = 4;
+    x.beginPath(); x.arc(S.ball[0] * w, S.ball[1] * h, 18, 0, 7); x.stroke();
+  } else if (lastBall) {
+    // Palla persa: cerchio tratteggiato grigio sull'ultima posizione nota.
+    const secs = Math.round((Date.now() - lastBallT) / 1000);
+    x.strokeStyle = 'rgba(200,200,200,.9)'; x.lineWidth = 3; x.setLineDash([6, 6]);
+    x.beginPath(); x.arc(lastBall[0] * w, lastBall[1] * h, 22, 0, 7); x.stroke();
+    x.setLineDash([]);
+    x.fillStyle = 'rgba(0,0,0,.6)'; x.fillRect(8, h - 34, 230, 26);
+    x.fillStyle = '#ffb347'; x.font = 'bold 16px sans-serif';
+    x.fillText('PALLA PERSA da ' + secs + ' s', 16, h - 15);
+  } else {
+    x.fillStyle = 'rgba(0,0,0,.6)'; x.fillRect(8, h - 34, 230, 26);
+    x.fillStyle = '#ffb347'; x.font = 'bold 16px sans-serif';
+    x.fillText('PALLA NON TROVATA', 16, h - 15);
+  }
+}
+
+// Prospettiva del campo: dal rettangolo 25 m (u lungo il campo, v in larghezza) all'immagine.
+const FIELD_LEN = 25;
+function homography(q) {
+  const [x0, y0] = q[0], [x1, y1] = q[1], [x2, y2] = q[2], [x3, y3] = q[3];
+  const dx1 = x1 - x2, dx2 = x3 - x2, dx3 = x0 - x1 + x2 - x3;
+  const dy1 = y1 - y2, dy2 = y3 - y2, dy3 = y0 - y1 + y2 - y3;
+  let a, b, c, d, e, f, g = 0, hh = 0;
+  if (Math.abs(dx3) < 1e-9 && Math.abs(dy3) < 1e-9) {
+    a = x1 - x0; b = x2 - x1; c = x0; d = y1 - y0; e = y2 - y1; f = y0;
+  } else {
+    const det = dx1 * dy2 - dx2 * dy1;
+    g = (dx3 * dy2 - dx2 * dy3) / det;
+    hh = (dx1 * dy3 - dx3 * dy1) / det;
+    a = x1 - x0 + g * x1; b = x3 - x0 + hh * x3; c = x0;
+    d = y1 - y0 + g * y1; e = y3 - y0 + hh * y3; f = y0;
+  }
+  return (u, v) => { const z = g * u + hh * v + 1; return [(a * u + b * v + c) / z, (d * u + e * v + f) / z]; };
+}
+// Linee come i birilli: 2 m rosso, 5 m rosso, 6 m giallo, metà campo bianco.
+const LINES = [[2, '#ff3b30', '2'], [5, '#ff3b30', '5'], [6, '#ffd400', '6']];
+function drawLines(x, q, w, h) {
+  const H = homography(q);
+  const line = (m, color, label) => {
+    const u = m / FIELD_LEN;
+    const p = H(u, 0), r = H(u, 1);
+    x.strokeStyle = color; x.lineWidth = 2; x.setLineDash([8, 6]);
+    x.beginPath(); x.moveTo(p[0] * w, p[1] * h); x.lineTo(r[0] * w, r[1] * h); x.stroke();
+    x.setLineDash([]);
+    x.fillStyle = color; x.font = 'bold 14px sans-serif';
+    x.fillText(label, p[0] * w + 4, p[1] * h - 6);
+  };
+  LINES.forEach(([m, col, lab]) => { line(m, col, lab); line(FIELD_LEN - m, col, lab); });
+  line(FIELD_LEN / 2, '#ffffff', '½');
+}
+
+// Calibrazione: 4 tocchi sull'anteprima
+const CALIB_STEPS = [
+  '1/4 · Linea di porta SINISTRA, lato VICINO (bordo in basso)',
+  '2/4 · Linea di porta DESTRA, lato VICINO (bordo in basso)',
+  '3/4 · Linea di porta DESTRA, lato LONTANO (bordo in alto)',
+  '4/4 · Linea di porta SINISTRA, lato LONTANO (bordo in alto)'
+];
+function calibHint() { $('calibHint').textContent = 'Tocca: ' + CALIB_STEPS[calibPts.length]; }
+$('calibManual').onclick = () => { calibPts = []; calibHint(); $('viewBox').classList.add('calib'); };
+$('calibBtn').onclick = null;
+$('calibClear').onclick = null;
+function hitCorner(e) {
+  const pts = calibPts || S.corners || [];
+  const r = $('view').getBoundingClientRect();
+  for (let i = 0; i < pts.length; i++) {
+    if (Math.hypot(e.clientX - r.left - pts[i][0] * r.width, e.clientY - r.top - pts[i][1] * r.height) < 26) return i;
+  }
+  return -1;
+}
+let learnLeft = 0;
+$('viewBox').addEventListener('click', e => {
+  if (G || touches.size > 0) return;
+  if (mouseDragged) { mouseDragged = false; return; }
+  if (learnLeft > 0) {
+    // Insegna il colore della palla: ogni tocco sulla palla è un campione.
+    const r = $('view').getBoundingClientRect();
+    cmd({a: 'ballLearn', x: (e.clientX - r.left) / r.width, y: (e.clientY - r.top) / r.height});
+    learnLeft--;
+    toast(learnLeft > 0 ? 'Bene. Tocca di nuovo la palla, in un altro punto (' + (3 - learnLeft) + '/3)' : 'Colore della palla imparato', 2500);
+    return;
+  }
+  const hit = hitCorner(e);
+  if (hit >= 0) { openLoupe(hit); return; }
+  if (!calibPts) return;
+  const r = $('view').getBoundingClientRect();
+  calibPts.push([(e.clientX - r.left) / r.width, (e.clientY - r.top) / r.height]);
+  if (calibPts.length < 4) calibHint();
+  drawOverlay();
+  if (calibPts.length === 4) {
+    cmd({a: 'calib', pts: calibPts});
+    S.corners = calibPts;
+    calibPts = null;
+    $('viewBox').classList.remove('calib');
+  }
+});
+
+// Lente d'ingrandimento sull'angolo
+const CORNER_NAMES = ['porta sinistra, lato vicino', 'porta destra, lato vicino', 'porta destra, lato lontano', 'porta sinistra, lato lontano'];
+let L = null;
+function openLoupe(i) {
+  const editing = !!calibPts;
+  const pts = (editing ? calibPts : (S.corners || [])).map(p => p.slice());
+  L = {i, editing, pts, size: 0.10};
+  $('loupeTitle').textContent = 'Angolo ' + (i + 1) + ' · ' + CORNER_NAMES[i];
+  $('loupe').style.display = 'flex';
+  loadLoupe();
+}
+async function loadLoupe() {
+  if (!L) return;
+  const p = L.pts[L.i];
+  // Centro del ritaglio tenuto dentro l'immagine (gli angoli possono stare vicino ai bordi).
+  const hx = L.size / 2, hy = L.size * 16 / 9 / 2;
+  L.center = [Math.min(Math.max(p[0], hx), 1 - hx), Math.min(Math.max(p[1], hy), 1 - hy)];
+  try {
+    const r = await api('/crop.jpg?x=' + L.center[0] + '&y=' + L.center[1] + '&s=' + L.size);
+    if (r.ok) {
+      const u = URL.createObjectURL(await r.blob());
+      const old = $('loupeImg').src;
+      $('loupeImg').src = u;
+      if (old.startsWith('blob:')) URL.revokeObjectURL(old);
+    }
+  } catch (e) {}
+  drawLoupe();
+}
+function drawLoupe() {
+  const c = $('loupeCv'), W = c.clientWidth;
+  c.width = W; c.height = W;
+  const x = c.getContext('2d');
+  // posizione del punto dentro il ritaglio (16:9: il lato vale size in larghezza e size*16/9 in altezza)
+  const p = L.pts[L.i];
+  const px = W / 2 + (p[0] - L.center[0]) / L.size * W;
+  const py = W / 2 + (p[1] - L.center[1]) / (L.size * 16 / 9) * W;
+  x.strokeStyle = '#ffd400'; x.lineWidth = 1.5;
+  x.beginPath(); x.moveTo(px, 0); x.lineTo(px, W); x.moveTo(0, py); x.lineTo(W, py); x.stroke();
+  x.lineWidth = 2; x.beginPath(); x.arc(px, py, 14, 0, 7); x.stroke();
+  x.fillStyle = '#ffffff'; x.beginPath(); x.arc(px, py, 3, 0, 7); x.fill();
+}
+$('loupeCv').addEventListener('click', e => {
+  if (!L) return;
+  const r = $('loupeCv').getBoundingClientRect();
+  const fx = (e.clientX - r.left) / r.width - 0.5, fy = (e.clientY - r.top) / r.height - 0.5;
+  L.pts[L.i] = [L.center[0] + fx * L.size, L.center[1] + fy * L.size * 16 / 9];
+  drawLoupe();
+});
+$('loupePlus').onclick = () => { L.size = Math.max(0.025, L.size / 1.6); loadLoupe(); };
+$('loupeMinus').onclick = () => { L.size = Math.min(0.3, L.size * 1.6); loadLoupe(); };
+$('loupeCancel').onclick = () => { L = null; $('loupe').style.display = 'none'; };
+$('loupeOk').onclick = () => {
+  if (L.editing) {
+    calibPts = L.pts;
+  } else if (L.pts.length === 4) {
+    S.corners = L.pts;
+    cmd({a: 'calib', pts: L.pts});
+  }
+  L = null; $('loupe').style.display = 'none';
+  drawOverlay();
+};
+
+// Gesti a due dita sull'anteprima: trascina = muovi, pizzico = zoom
+const touches = new Map();
+let G = null;
+function gMid() { const p = [...touches.values()]; return [(p[0][0] + p[1][0]) / 2, (p[0][1] + p[1][1]) / 2]; }
+function gDist() { const p = [...touches.values()]; return Math.hypot(p[0][0] - p[1][0], p[0][1] - p[1][1]); }
+const vb = $('viewBox');
+vb.addEventListener('pointerdown', e => {
+  if (e.pointerType !== 'touch') return;
+  touches.set(e.pointerId, [e.clientX, e.clientY]);
+  if (touches.size === 2) {
+    G = {mid: gMid(), dist: Math.max(gDist(), 1), zoom: S.zoomValue || 1, x: 0, y: 0, lastZoom: 0};
+    clearInterval(G.timer);
+    G.timer = setInterval(() => { if (G) cmd({a: 'move', x: G.x, y: G.y}); }, 120);
+  }
+});
+vb.addEventListener('pointermove', e => {
+  if (!touches.has(e.pointerId)) return;
+  touches.set(e.pointerId, [e.clientX, e.clientY]);
+  if (!G || touches.size !== 2) return;
+  const r = vb.getBoundingClientRect();
+  const m = gMid();
+  let dx = (m[0] - G.mid[0]) / (r.width / 3), dy = (m[1] - G.mid[1]) / (r.height / 3);
+  const d = Math.hypot(dx, dy); if (d > 1) { dx /= d; dy /= d; }
+  const k = v => Math.abs(v) < 0.08 ? 0 : Math.sign(v) * Math.pow((Math.abs(v) - 0.08) / 0.92, 2);
+  G.x = k(dx); G.y = k(dy);
+  const ratio = gDist() / G.dist;
+  if (Math.abs(ratio - 1) > 0.06) {
+    const z = Math.min(Math.max(G.zoom * ratio, 0.5), Math.min(S.maxZoom || 10, 10));
+    const now = Date.now();
+    if (now - G.lastZoom > 120) { G.lastZoom = now; cmd({a: 'zoom', v: z, fast: true}); }
+  }
+});
+function gEnd(e) {
+  if (!touches.has(e.pointerId)) return;
+  touches.delete(e.pointerId);
+  if (G && touches.size < 2) {
+    clearInterval(G.timer); G = null;
+    cmd({a: 'stop'}); setTimeout(() => cmd({a: 'stop'}), 150);
+  }
+}
+vb.addEventListener('pointerup', gEnd);
+vb.addEventListener('pointercancel', gEnd);
+vb.addEventListener('wheel', e => {
+  e.preventDefault();
+  const z = Math.min(Math.max((S.zoomValue || 1) * (e.deltaY < 0 ? 1.1 : 1 / 1.1), 0.5), Math.min(S.maxZoom || 10, 10));
+  S.zoomValue = z;
+  cmd({a: 'zoom', v: z, fast: true});
+}, {passive: false});
+
+// Diretta YouTube
+function renderLive() {
+  const L = S.live || {};
+  const on = L.state && L.state !== 'off';
+  const pill = $('liveBtn').querySelector('.rc');
+  pill.style.background = L.state === 'live' ? '#e53935' : (on ? '#e07b00' : 'rgba(0,0,0,.55)');
+  $('liveTime').textContent = L.state === 'live' ? fmt(L.seconds || 0) : (on ? 'collegamento…' : (L.state === 'error' ? 'errore' : 'spenta'));
+  $('liveTxt').textContent = L.message || (L.hasKey ? 'Pronta: ' + L.quality : 'Inserisci i dati della diretta');
+  if (document.activeElement !== $('rtmpUrl') && !$('rtmpUrl').value) $('rtmpUrl').value = L.url || '';
+  if (document.activeElement !== $('liveQ')) $('liveQ').value = L.quality || '1080p';
+  $('rtmpKey').placeholder = L.hasKey ? 'chiave già inserita (incolla per cambiarla)' : 'incolla la chiave';
+}
+$('liveBtn').onclick = () => {
+  const L = S.live || {};
+  if (L.state && L.state !== 'off') return;  // per fermarla si tiene premuto 2 secondi
+  if (!L.hasKey) { alert('Prima inserisci la chiave dello stream in Preparazione › Dati diretta.'); $('prep').style.display = 'flex'; return; }
+  if (confirm('Avviare la diretta su YouTube (' + (L.quality || '1080p') + ')?')) cmd({a: 'liveStart'});
+};
+$('liveSave').onclick = () => {
+  cmd({a: 'liveConfig', url: $('rtmpUrl').value.trim(), key: $('rtmpKey').value.trim(), quality: $('liveQ').value});
+  $('rtmpKey').value = '';
+};
+
+// Giro di calibrazione e revisione del rettangolo
+let RV = null, rvDrag = -1;
+function renderScan() {
+  const sc = S.scan || {};
+  if (sc.phase === 'running') $('modeTxt').textContent = 'CALIBRAZIONE: ' + sc.step + ' · ' + sc.elapsed + ' s';
+  const box = $('review');
+  if (sc.phase === 'review' && S.review) {
+    if (!RV || RV.v !== S.review.v) {
+      RV = {v: S.review.v, c: S.review.corners.map(p => p.slice())};
+      $('revImg').onload = drawReview;
+      $('revImg').src = '/pano.jpg?pin=' + PIN + '&v=' + RV.v;
+    }
+    box.style.display = 'flex';
+  } else {
+    box.style.display = 'none';
+    RV = null;
+  }
+}
+function drawReview() {
+  if (!RV) return;
+  const c = $('revCv'), img = $('revImg');
+  c.width = img.clientWidth; c.height = img.clientHeight;
+  const x = c.getContext('2d'), w = c.width, h = c.height, q = RV.c;
+  x.clearRect(0, 0, w, h);
+  x.strokeStyle = '#3ddc84'; x.lineWidth = 3; x.beginPath();
+  q.forEach((p, i) => i ? x.lineTo(p[0] * w, p[1] * h) : x.moveTo(p[0] * w, p[1] * h));
+  x.closePath(); x.stroke();
+  drawLines(x, q, w, h);
+  q.forEach((p, i) => {
+    const r = rvDrag === i ? 18 : 14;
+    x.fillStyle = 'rgba(0,0,0,.35)'; x.strokeStyle = '#ffd400'; x.lineWidth = 3;
+    x.beginPath(); x.arc(p[0] * w, p[1] * h, r, 0, 7); x.fill(); x.stroke();
+    x.fillStyle = '#fff'; x.beginPath(); x.arc(p[0] * w, p[1] * h, 3, 0, 7); x.fill();
+  });
+}
+const rw = $('revWrap');
+function rvPos(e) { const r = $('revCv').getBoundingClientRect(); return [(e.clientX - r.left) / r.width, (e.clientY - r.top) / r.height, r]; }
+rw.addEventListener('pointerdown', e => {
+  if (!RV) return;
+  const [px, py, r] = rvPos(e);
+  let best = 60; rvDrag = -1;
+  RV.c.forEach((p, i) => { const d = Math.hypot((p[0] - px) * r.width, (p[1] - py) * r.height); if (d < best) { best = d; rvDrag = i; } });
+  if (rvDrag >= 0) { rw.setPointerCapture(e.pointerId); drawReview(); }
+});
+rw.addEventListener('pointermove', e => {
+  if (!RV || rvDrag < 0) return;
+  const [px, py] = rvPos(e);
+  RV.c[rvDrag] = [Math.min(Math.max(px, 0), 1), Math.min(Math.max(py, 0), 1)];
+  drawReview();
+});
+rw.addEventListener('pointerup', () => { rvDrag = -1; drawReview(); });
+$('revSave').onclick = () => { if (RV) cmd({a: 'reviewSave', pts: RV.c}); };
+$('revRedo').onclick = () => cmd({a: 'scanStart'});
+$('revCancel').onclick = () => cmd({a: 'reviewCancel'});
+window.addEventListener('resize', drawReview);
+
+// Palla
+function renderBall() {
+  const sel = $('ballSel');
+  const list = S.ballColors || [];
+  if (sel.dataset.k !== list.join()) {
+    sel.dataset.k = list.join();
+    sel.innerHTML = list.map(c => '<option value="' + c + '">' + (c === 'imparato' ? 'imparato (toccando la palla)' : c) + '</option>').join('');
+  }
+  if (document.activeElement !== sel) sel.value = S.ballColor || 'arancione';
+  $('ballMsg').textContent = S.ballLearn || '';
+  $('ballWarn').textContent = S.ballWarn || '';
+}
+$('lidarBtn').onclick = () => cmd({a: 'lidar'});
+$('zOut').onclick = () => { const z = Math.max(0.5, (S.zoomValue || 1) / 1.3); S.zoomValue = z; cmd({a: 'zoom', v: z}); };
+$('zIn').onclick = () => { const z = Math.min(Math.min(S.maxZoom || 10, 10), (S.zoomValue || 1) * 1.3); S.zoomValue = z; cmd({a: 'zoom', v: z}); };
+function renderGeo() {
+  // Durante calibrazione, mappatura e misura dell'altezza la barra dei gol non serve e intralcia.
+  $('sbBar').style.visibility = (S.busyGeo || calibPts) ? 'hidden' : '';
+  $('portraitBanner').style.display = S.portrait ? 'block' : 'none';
+  const l = S.level;
+  const t = $('levelTxt');
+  if (l === undefined || l > 900) { t.textContent = ''; }
+  else if (Math.abs(l) <= 1) { t.textContent = 'iPhone in bolla nel supporto (' + l.toFixed(1) + '°)'; t.style.color = '#7CFC9A'; }
+  else { t.textContent = 'iPhone storto nel supporto di ' + l.toFixed(1) + '°: ruotalo nel porta-telefono finché arriva a 0'; t.style.color = '#ffb300'; }
+  if (S.levelAlarm) {
+    const now = Date.now();
+    if (!renderGeo.lastAlarm || now - renderGeo.lastAlarm > 15000) {
+      renderGeo.lastAlarm = now;
+      toast('iPhone scivolato nel supporto (' + l.toFixed(1) + '°): rimettilo in bolla e ricalibra il campo', 5000);
+    }
+  }
+  $('lidarBox').style.display = S.lidar ? 'block' : 'none';
+  const busy = S.rec || (S.live && S.live.state && S.live.state !== 'off');
+  const b = $('lidarBtn');
+  b.disabled = !!busy;
+  b.style.opacity = busy ? '.4' : '1';
+  b.textContent = busy ? 'Misura altezza: ferma prima registrazione e diretta' : 'Misura altezza (LiDAR)';
+  $('lidarMsg').textContent = (S.lidarMsg || '') + (S.lidarDbg ? ' · ' + S.lidarDbg : '');
+  $('geoTxt').textContent = S.geo || '';
+}
+$('ballSel').onchange = e => cmd({a: 'ballColor', name: e.target.value});
+$('learnBtn').onclick = () => {
+  cmd({a: 'ballLearnReset'});
+  learnLeft = 3;
+  $('prep').style.display = 'none';
+  toast('Tocca la palla sull\'immagine (1/3)', 3000);
+};
+
+// Calottine
+function setupCaps() {
+  ['homeCap', 'awayCap'].forEach(id => {
+    const s = $(id);
+    s.innerHTML = (S.capColors || []).map(c => '<option>' + c + '</option>').join('');
+    s.onchange = () => cmd({a: 'caps', home: $('homeCap').value, away: $('awayCap').value});
+  });
+}
+
+$('micBtn').onclick = () => cmd({a: 'mute', on: !S.muted});
+$('autoBtn').onclick = () => cmd({a: 'auto', on: !S.auto});
+$('assistBtn').onclick = () => {
+  const on = !S.assisted;
+  cmd({a: 'assisted', on});
+  toast(on ? 'Assistita: muovi tu il gimbal, lo zoom resta automatico' : 'Assistita spenta', 2500);
+};
+
+// Registrazione
+$('rec').onclick = () => {
+  if (S.rec) return;  // per fermarla si tiene premuto 2 secondi
+  cmd({a: 'rec', on: true});
+};
+
+// Tabellone
+const PALETTE = ['#1E88E5','#0D47A1','#4FC3F7','#E53935','#B71C1C','#FDD835','#FB8C00','#43A047','#1B5E20','#8E24AA','#212121','#FFFFFF'];
+function tmStyle(el, t) {
+  el.textContent = t.short;
+  el.style.background = t.color;
+  const c = t.color.replace('#', ''); const r = parseInt(c.substr(0,2),16), g = parseInt(c.substr(2,2),16), b = parseInt(c.substr(4,2),16);
+  el.style.color = (0.299*r + 0.587*g + 0.114*b) / 255 > 0.6 ? '#000' : '#fff';
+}
+let teamsBuilt = '';
+function renderScore() {
+  const b = S.sb; if (!b) return;
+  tmStyle($('hTag'), b.home); tmStyle($('aTag'), b.away);
+  // I "+" hanno il colore della squadra: si capisce subito da che parte si segna.
+  [['hPlus', b.home], ['aPlus', b.away]].forEach(([id, t]) => {
+    const c = t.color.replace('#', ''), r = parseInt(c.substr(0,2),16), g = parseInt(c.substr(2,2),16), bl = parseInt(c.substr(4,2),16);
+    $(id).style.background = t.color;
+    $(id).style.color = (0.299*r + 0.587*g + 0.114*bl) / 255 > 0.6 ? '#000' : '#fff';
+  });
+  $('hScore').textContent = b.hs; $('aScore').textContent = b.as;
+  placeBar();
+  $('sbClock').textContent = b.period + '° ' + fmt(b.clock) + (b.running ? ' ⏸' : ' ▶');
+  $('sbClock').style.background = b.running ? '#1e8e3e' : '#244a7a';
+  $('sbVis').checked = b.visible;
+  $('azOn').checked = S.autoZoom;
+  $('heatTxt').textContent = S.heatSaver ? 'attivo' : 'anteprima accesa';
+  if (document.activeElement !== $('azzDir')) $('azzDir').value = S.azzDir || '';
+  $('sbClkOn').checked = b.clockOn;
+  $('sbFull').checked = b.full;
+  if (document.activeElement !== $('sbTitle')) $('sbTitle').value = b.title;
+  if (document.activeElement !== $('sbLen')) $('sbLen').value = String(b.len);
+  const key = JSON.stringify([b.home, b.away, S.teams]);
+  if (key !== teamsBuilt && !document.activeElement.closest('.teamBox')) { teamsBuilt = key; buildTeam('home', b.home); buildTeam('away', b.away); }
+}
+function buildTeam(side, t) {
+  const box = $('tb_' + side);
+  const opts = (S.teams || []).map(x => '<option value="' + x.id + '">' + x.name.replace(/</g, '') + '</option>').join('');
+  box.innerHTML = '<b>' + (side === 'home' ? 'Casa' : 'Ospiti') + '</b>' +
+    '<label>Dalla libreria<select data-k="lib"><option value="">— scegli una squadra salvata —</option>' + opts + '</select></label>' +
+    '<label>Nome<input class="txt" data-k="name" maxlength="30"></label>' +
+    '<label>Sigla (max 4)<input class="txt" data-k="short" maxlength="4" style="text-transform:uppercase"></label>' +
+    '<div style="margin-top:6px">Colori standard</div><div class="swatches">' +
+    PALETTE.map(c => '<span class="sw" data-c="' + c + '" style="background:' + c + '"></span>').join('') + '</div>' +
+    '<label style="margin-top:6px">Mixer colori (qualsiasi colore) <input type="color" data-k="color"></label>' +
+    '<label>Logo ' + (t.logo ? '✓ caricato' : '(nessuno)') + '<input type="file" accept="image/*" data-k="logo"></label>' +
+    '<div class="row" style="margin-top:6px"><button class="btn2" data-k="save">Salva in libreria</button>' + (t.logo ? '<button class="btn2" data-k="nologo">Togli logo</button>' : '') + '</div>';
+  const q = k => box.querySelector('[data-k="' + k + '"]');
+  q('name').value = t.name; q('short').value = t.short; q('color').value = t.color.toLowerCase();
+  q('lib').onchange = e => { if (e.target.value) cmd({a: 'sbLoadTeam', side, id: e.target.value}); };
+  q('name').onchange = e => cmd({a: 'sbTeam', side, name: e.target.value});
+  q('short').onchange = e => cmd({a: 'sbTeam', side, short: e.target.value});
+  q('color').onchange = e => cmd({a: 'sbTeam', side, color: e.target.value.toUpperCase()});
+  box.querySelectorAll('.sw').forEach(sw => sw.onclick = () => cmd({a: 'sbTeam', side, color: sw.dataset.c}));
+  q('save').onclick = () => cmd({a: 'sbSaveTeam', side});
+  if (q('nologo')) q('nologo').onclick = () => cmd({a: 'sbNoLogo', side});
+  q('logo').onchange = e => { const f = e.target.files[0]; if (f) uploadLogo(side, f); };
+}
+// Il logo viene ridotto nel browser (max 256 px) e mandato all'iPhone.
+function uploadLogo(side, file) {
+  const img = new Image();
+  img.onload = () => {
+    const s = Math.min(1, 256 / Math.max(img.width, img.height));
+    const c = document.createElement('canvas'); c.width = Math.round(img.width * s); c.height = Math.round(img.height * s);
+    c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+    c.toBlob(b => { fetch('/logo?side=' + side + '&pin=' + PIN, {method: 'POST', body: b}).then(() => { teamsBuilt = ''; }); }, 'image/png');
+    URL.revokeObjectURL(img.src);
+  };
+  img.src = URL.createObjectURL(file);
+}
+// La barra dei gol sta in basso al centro, ma non copre il tabellone che vedono i genitori:
+// se lo toccherebbe, si sposta a destra quanto serve (su schermi stretti, fino a Larga | Auto).
+function placeBar() {
+  const bar = $('sbBar'), r = S.sbRect;
+  if (window.matchMedia('(orientation:portrait) and (max-width:600px)').matches) { bar.style.left = ''; bar.style.bottom = ''; bar.style.transform = ''; return; }
+  bar.style.left = ''; bar.style.bottom = ''; bar.style.transform = '';
+  if (!r || r[2] <= r[0]) return;
+  const f = $('frame').getBoundingClientRect(), b = bar.getBoundingClientRect(), seg = $('seg').getBoundingClientRect();
+  const tabRight = f.left + r[2] * f.width, tabTop = f.top + r[1] * f.height;
+  if (b.left >= tabRight + 8 || b.top >= f.bottom) return;
+  const newLeft = tabRight + 12;
+  if (newLeft + b.width <= seg.left - 12) {
+    bar.style.left = newLeft + 'px'; bar.style.transform = 'none';
+  } else {
+    // Schermo stretto: il più a destra possibile, accanto a Larga | Auto.
+    bar.style.left = Math.max(8, seg.left - 12 - b.width) + 'px'; bar.style.transform = 'none';
+  }
+}
+window.addEventListener('resize', placeBar);
+// Rigore: inquadratura su porta, portiere, tiratore e linea dei 5 m; torna alla regia dopo il tiro.
+function penalty(side) {
+  if (!S.directorReady) { toast('Serve il campo calibrato e lo zoom automatico acceso'); return; }
+  if (S.penalty === side) { cmd({a: 'penalty', side: 'off'}); toast('Fine rigore'); return; }
+  cmd({a: 'penalty', side}); toast('Rigore ' + (side === 'left' ? 'a sinistra' : 'a destra'));
+}
+$('penL').onclick = () => penalty('left');
+$('penR').onclick = () => penalty('right');
+$('hPlus').onclick = () => goal('home');
+$('hMinus').onclick = () => cmd({a: 'sbScore', side: 'home', d: -1});
+$('aPlus').onclick = () => goal('away');
+$('aMinus').onclick = () => cmd({a: 'sbScore', side: 'away', d: -1});
+$('sbClock').onclick = () => cmd({a: 'sbClock', op: 'toggle'});
+$('pPlus').onclick = () => cmd({a: 'sbPeriod', d: 1});
+$('pMinus').onclick = () => cmd({a: 'sbPeriod', d: -1});
+$('sbLen').onchange = e => cmd({a: 'sbLen', m: parseInt(e.target.value)});
+$('azzDir').onchange = e => cmd({a: 'azzDir', d: e.target.value});
+$('azOn').onchange = e => cmd({a: 'autoZoom', on: e.target.checked});
+$('sbVis').onchange = e => cmd({a: 'sbVisible', on: e.target.checked});
+$('sbTitle').onchange = e => cmd({a: 'sbTitle', text: e.target.value});
+$('sbFull').onchange = e => cmd({a: 'sbFull', on: e.target.checked});
+$('sbClkOn').onchange = e => cmd({a: 'sbClockOn', on: e.target.checked});
+$('sbSwap').onclick = () => cmd({a: 'sbSwap'});
+$('sbReset').onclick = null;
+$('clkSet').onclick = () => {
+  const v = prompt('Tempo che manca (minuti:secondi), es. 5:32');
+  if (!v) return;
+  const p = v.split(':'); const sec = (parseInt(p[0]) || 0) * 60 + (parseInt(p[1]) || 0);
+  cmd({a: 'sbClock', op: 'set', s: sec});
+};
+
+// Larga, preparazione
+$('largaBtn').onclick = () => cmd({a: 'larga'});
+$('prepBtn').onclick = () => { $('prep').style.display = 'flex'; };
+$('prepClose').onclick = () => { $('prep').style.display = 'none'; };
+$('prep').addEventListener('click', e => { if (e.target === $('prep')) $('prep').style.display = 'none'; });
+
+// PC: trascina col mouse sull'anteprima per muovere la telecamera
+let M = null, mouseDragged = false;
+// Telefono: un dito trascinato sull'anteprima muove la telecamera (due dita: pizzico = zoom).
+vb.addEventListener('pointerdown', e => {
+  if (e.pointerType === 'touch') {
+    if (touches.size > 1) { mouseEnd(); return; }
+    if (calibPts || learnLeft > 0) return;
+  } else if (e.pointerType !== 'mouse' || e.button !== 0 || calibPts) return;
+  M = {x: e.clientX, y: e.clientY, on: false, vx: 0, vy: 0, t: null};
+  mouseDragged = false;
+});
+vb.addEventListener('pointermove', e => {
+  if (!M || (e.pointerType !== 'mouse' && e.pointerType !== 'touch')) return;
+  if (e.pointerType === 'touch' && touches.size > 1) { mouseEnd(); return; }
+  const r = vb.getBoundingClientRect();
+  let dx = (e.clientX - M.x) / (r.width / 3), dy = (e.clientY - M.y) / (r.height / 3);
+  if (!M.on && Math.hypot(e.clientX - M.x, e.clientY - M.y) > 8) {
+    M.on = true; mouseDragged = true; vb.setPointerCapture(e.pointerId);
+    M.t = setInterval(() => { if (M) cmd({a: 'move', x: M.vx, y: M.vy}); }, 120);
+  }
+  if (!M.on) return;
+  const d = Math.hypot(dx, dy); if (d > 1) { dx /= d; dy /= d; }
+  const k = v => Math.abs(v) < 0.08 ? 0 : Math.sign(v) * Math.pow((Math.abs(v) - 0.08) / 0.92, 2);
+  M.vx = k(dx); M.vy = k(dy);
+});
+function mouseEnd() {
+  if (!M) return;
+  if (M.on) { clearInterval(M.t); cmd({a: 'stop'}); setTimeout(() => cmd({a: 'stop'}), 150); }
+  M = null;
+}
+vb.addEventListener('pointerup', mouseEnd);
+vb.addEventListener('pointercancel', mouseEnd);
+window.addEventListener('blur', mouseEnd);
+
+// ---- Ergonomia a bordo vasca ----
+function toast(msg, ms) {
+  const t = $('toast'); t.textContent = msg; t.style.display = 'block';
+  clearTimeout(toast.h); toast.h = setTimeout(() => { t.style.display = 'none'; }, ms || 1800);
+}
+// Lampo di conferma su ogni pulsante premuto.
+document.addEventListener('pointerdown', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  b.classList.add('flash'); setTimeout(() => b.classList.remove('flash'), 220);
+});
+// Gol con "Annulla" per 5 secondi.
+let undoSide = null;
+function goal(side) {
+  cmd({a: 'sbScore', side, d: 1});
+  undoSide = side;
+  const b = S.sb ? (side === 'home' ? S.sb.home : S.sb.away) : null;
+  $('undoBtn').textContent = '↶ Annulla gol ' + (b ? b.short : '');
+  $('undoBtn').style.display = 'block';
+  clearTimeout(goal.h); goal.h = setTimeout(() => { $('undoBtn').style.display = 'none'; undoSide = null; }, 5000);
+}
+$('undoBtn').onclick = () => {
+  if (undoSide) cmd({a: 'sbScore', side: undoSide, d: -1});
+  undoSide = null; $('undoBtn').style.display = 'none'; toast('Gol annullato');
+};
+// Azioni critiche: tenere premuto 2 secondi.
+function hold(el, needed, msg, action) {
+  el.classList.add('hold');
+  let st = 0, raf = 0;
+  const stop = () => { st = 0; cancelAnimationFrame(raf); el.style.setProperty('--hold', 0); };
+  const step = () => {
+    if (!st) return;
+    const p = Math.min(1, (Date.now() - st) / 2000);
+    el.style.setProperty('--hold', p);
+    if (p >= 1) { stop(); action(); toast('Fatto'); return; }
+    raf = requestAnimationFrame(step);
+  };
+  el.addEventListener('pointerdown', e => {
+    if (!needed()) return;
+    st = Date.now(); toast('Tieni premuto per ' + msg, 2200); step();
+  });
+  ['pointerup', 'pointerleave', 'pointercancel'].forEach(ev => el.addEventListener(ev, () => {
+    if (st && Date.now() - st < 2000) toast('Non fatto: tieni premuto 2 secondi per ' + msg);
+    stop();
+  }));
+}
+hold($('liveBtn'), () => S.live && S.live.state && S.live.state !== 'off', 'fermare la diretta', () => cmd({a: 'liveStop'}));
+hold($('rec'), () => !!S.rec, 'fermare la registrazione', () => cmd({a: 'rec', on: false}));
+hold($('calibBtn'), () => true, 'ricalibrare il campo', () => { $('prep').style.display = 'none'; cmd({a: 'scanStart'}); });
+hold($('calibClear'), () => true, 'cancellare la calibrazione', () => { calibPts = null; $('viewBox').classList.remove('calib'); cmd({a: 'calibClear'}); });
+hold($('sbReset'), () => true, 'azzerare la partita', () => cmd({a: 'sbReset'}));
+// Scollega il monitor: smette di chiedere immagini e stato, dimentica la password.
+hold($('endBtn'), () => true, 'terminare la partita', () => { $('prep').style.display = 'none'; cmd({a: 'endMatch'}); });
+let endHidden = '';
+$('endBanner').onclick = () => { endHidden = (S.end || {}).message || ''; $('endBanner').style.display = 'none'; };
+function renderEnd() {
+  const e = S.end || {}, b = $('endBanner');
+  if (!e.state || e.message === endHidden) { b.style.display = 'none'; return; }
+  b.style.display = 'block';
+  b.textContent = (e.state === 'saving' ? '⏳ ' : e.state === 'done' ? '✓ ' : '⚠ ') + e.message;
+  b.style.background = e.state === 'done' ? 'rgba(30,142,62,.92)' : e.state === 'error' ? 'rgba(198,40,40,.92)' : 'rgba(0,0,0,.85)';
+}
+if (LOCAL) {
+  $('nativeCard').style.display = '';
+  $('logoutCard').style.display = 'none';
+  $('nativeBtn').onclick = () => {
+    try { window.webkit.messageHandlers.wp.postMessage('native'); } catch (e) {}
+  };
+}
+hold($('logoutBtn'), () => true, 'scollegare il monitor', () => {
+  disconnected = true;
+  try { localStorage.removeItem('wpPin'); wakeLock && wakeLock.release(); } catch (e) {}
+  wakeLock = null; PIN = '';
+  $('prep').style.display = 'none';
+  $('app').style.display = 'none';
+  $('pinIn').value = '';
+  $('loginMsg').style.color = '#5ee08a';
+  $('loginMsg').textContent = 'Monitor scollegato. Per ricollegarti inquadra il QR code o inserisci la password.';
+  $('login').style.display = 'flex';
+});
+
+// Schermo del regista sempre acceso.
+async function keepAwake() {
+  try { if ('wakeLock' in navigator && document.visibilityState === 'visible') wakeLock = await navigator.wakeLock.request('screen'); } catch (e) {}
+}
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') keepAwake(); });
+document.addEventListener('pointerdown', () => { if (!wakeLock) keepAwake(); }, {once: true});
+keepAwake();
+
+// Tasti rapidi dal PC.
+document.addEventListener('keydown', e => {
+  if ($('app').style.display === 'none') return;
+  const tag = (document.activeElement && document.activeElement.tagName) || '';
+  if (tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA') return;
+  const zoomBy = f => {
+    const z = Math.min(Math.max((S.zoomValue || 1) * f, 0.5), Math.min(S.maxZoom || 10, 10));
+    S.zoomValue = z; cmd({a: 'zoom', v: z, fast: true});
+  };
+  switch (e.key) {
+    case ' ': e.preventDefault(); cmd({a: 'sbClock', op: 'toggle'}); toast('Orologio'); break;
+    case '1': goal('home'); toast('Gol casa'); break;
+    case '2': goal('away'); toast('Gol ospiti'); break;
+    case 'r': case 'R': cmd({a: 'larga'}); toast('Larga'); break;
+    case 'ArrowUp': e.preventDefault(); zoomBy(1.15); break;
+    case 'ArrowDown': e.preventDefault(); zoomBy(1 / 1.15); break;
+  }
+});
+</script>
+</body>
+</html>

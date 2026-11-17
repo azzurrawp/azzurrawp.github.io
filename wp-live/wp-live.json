@@ -1,6 +1,6 @@
 {
-  "latestVersion": "0.8.4",
-  "releaseNotes": "0.8.4: link del monitor cliccabile anche su WhatsApp; regia completa sull'iPhone finché non si collega un monitor del regista.",
+  "latestVersion": "0.8.5",
+  "releaseNotes": "0.8.5: monitor dal telefono: un dito sull'immagine muove la telecamera, pulsanti − / + per lo zoom, pulsanti più in alto in Safari orizzontale, schermo intero con 'Aggiungi alla schermata Home'; avviso iPhone in verticale; misura LiDAR più sicura; barra dei gol nascosta durante calibrazione e misura; pagina del monitor aggiornabile senza reinstallare.",
   "params": {
     "gimbalSpeed": 0.3,
     "zoomRampRate": 1.5
