@@ -27,10 +27,13 @@ input,textarea{-webkit-user-select:text;user-select:text}
 /* Due fasi: preparazione (solo il necessario per montare e calibrare) e partita. */
 body.phPrep #sbBar, body.phPrep #penBox, body.phPrep #liveBtn, body.phPrep #recWrap, body.phPrep #micBtn, body.phPrep #undoBtn{display:none !important}
 body.phMatch #ckBox{display:none}
+body.phPrep #seg{display:none}
+#ckBox.mini .ck,#ckBox.mini .sub,#ckBox.mini #ckDone{display:none}
+#ckBox .sub{font-size:12px;opacity:.75;margin:-2px 0 4px}
 body.phMatch:not(.penOn) #penBox{display:none}
 body.phMatch:not(.sbOn) #sbBar{display:none}
 body:not(.manual) #seg .zb{display:none !important}
-#ckBox{position:absolute;left:12px;top:96px;width:270px;max-width:46vw;background:rgba(11,20,32,.88);border:2px solid #ffd400;border-radius:14px;padding:10px;font-size:14px;z-index:5}
+#ckBox{position:absolute;left:max(12px,env(safe-area-inset-left));top:96px;width:270px;max-width:46vw;background:rgba(11,20,32,.88);border:2px solid #ffd400;border-radius:14px;padding:10px;font-size:14px;z-index:5}
 #ckBox .ck{display:flex;gap:8px;align-items:center;width:100%;margin:4px 0;padding:8px;border-radius:10px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.06);color:#fff;font-size:14px;text-align:left;cursor:pointer}
 #ckBox .ck b{width:22px;text-align:center}
 #ckBox .ck.ok{border-color:#1e8e3e}
@@ -67,7 +70,7 @@ img{-webkit-user-drag:none}
 .rb{display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:0;color:#fff;font-size:12px;padding:0;cursor:pointer}
 .rc{width:64px;height:64px;border-radius:50%;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;font-size:22px}
 .rl{background:rgba(0,0,0,.5);padding:1px 6px;border-radius:6px}
-#prepBtn{position:absolute;left:12px;top:10px}
+#prepBtn{position:absolute;left:max(12px,env(safe-area-inset-left));top:10px}
 #liveBtn{position:absolute;right:12px;top:10px}
 #liveBtn .rc{width:auto;padding:0 18px;border-radius:32px;font-size:16px;font-weight:800;border:2px solid #e53935}
 #recWrap{position:absolute;right:12px;top:50%;transform:translateY(-50%)}
@@ -75,7 +78,7 @@ img{-webkit-user-drag:none}
 #recDot{width:56px;height:56px;border-radius:50%;background:#e53935}
 #rec.on #recDot{width:26px;height:26px;border-radius:6px}
 #micBtn{position:absolute;right:112px;top:50%;transform:translateY(-50%)}
-#seg{position:absolute;right:12px;bottom:12px;display:flex;border-radius:14px;overflow:hidden}
+#seg{position:absolute;right:max(12px,env(safe-area-inset-right));bottom:12px;display:flex;border-radius:14px;overflow:hidden}
 #seg button{border:0;color:#fff;font-size:16px;font-weight:800;min-height:64px;padding:0 20px;background:rgba(0,0,0,.7);cursor:pointer}
 #seg button + button{border-left:2px solid #0b1420}
 #hint{position:absolute;left:12px;bottom:12px;font-size:12px;background:rgba(0,0,0,.5);padding:4px 8px;border-radius:8px;max-width:45%;pointer-events:none}
@@ -86,7 +89,7 @@ img{-webkit-user-drag:none}
 .tm{display:flex;align-items:center;padding:0 8px;height:44px;border-radius:10px;font-weight:800;font-size:17px}
 .sc{min-width:30px;text-align:center;font-size:28px;font-weight:800}
 #sbClock{min-width:96px;height:56px;white-space:nowrap;font-size:17px !important;background:#244a7a}
-#penBox{position:absolute;left:12px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:16px}
+#penBox{position:absolute;left:max(12px,env(safe-area-inset-left));top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:16px}
 #penBox button{min-width:112px;min-height:60px;border:2px solid rgba(255,255,255,.4);border-radius:14px;background:rgba(0,0,0,.65);color:#fff;font-size:16px;font-weight:800;cursor:pointer}
 #penBox button.on{background:#ffd400;color:#000;border-color:#fff}
 #undoBtn{position:absolute;left:50%;transform:translateX(-50%);bottom:96px;display:none;min-height:64px;padding:0 22px;border:3px solid #fff;border-radius:16px;background:#e07b00;color:#fff;font-size:18px;font-weight:800}
@@ -299,7 +302,8 @@ select{width:100%;padding:8px;border-radius:8px;background:#0b1420;color:#fff;bo
     <button class="rb" id="micBtn"><span class="rc" id="micIcon">🎤</span><span class="rl" id="micTxt">Mic</span></button>
     <div id="seg"><button id="zOut" class="zb" title="Allarga">−</button><button id="zIn" class="zb" title="Stringi">+</button><button id="largaBtn">Larga</button><button id="assistBtn">Assistita</button><button id="autoBtn">Auto</button></div>
     <div id="ckBox">
-      <div style="font-weight:800;color:#ffd400">Preparazione</div>
+      <div id="ckTitle" style="font-weight:800;color:#ffd400;cursor:pointer">Preparazione <span id="ckArrow">▾</span></div>
+      <div class="sub">Tocca una voce per farla</div>
       <button class="ck" id="ck1"><b>○</b><span>iPhone orizzontale e in bolla</span></button>
       <button class="ck" id="ck2"><b>○</b><span>Altezza della telecamera</span></button>
       <button class="ck" id="ck3"><b>○</b><span>Campo calibrato</span></button>
@@ -805,10 +809,22 @@ function renderPhase() {
   set('ck3', (S.corners || []).length === 4, 'Campo calibrato');
   set('ck4', capsSeen, 'Calottine e palla');
 }
-$('ck1').onclick = () => openCard('campoCard');
-$('ck2').onclick = () => openCard('campoCard');
-$('ck3').onclick = () => openCard('campoCard');
+// Ogni voce fa partire subito il suo passo; se è già fatta, si rifà tenendo premuto.
+const hDone = () => /^Altezza/.test(S.geo || '');
+const cDone = () => (S.corners || []).length === 4;
+function doLidar() { if (S.busyGeo) { toast('Misura già in corso', 2000); return; } cmd({a: 'lidar'}); toast('Misuro l\'altezza: la camera si inclina verso il pavimento', 3500); }
+function doCalib() {
+  if (S.busyGeo) { toast('Aspetta che finisca la misura in corso', 2500); return; }
+  if (S.docked) { cmd({a: 'scanStart'}); toast('Calibrazione automatica: il gimbal fa un giro del campo', 3500); }
+  else { calibPts = []; calibHint(); $('viewBox').classList.add('calib'); toast('Gimbal scollegato: tocca i 4 angoli del campo sull\'immagine', 4000); }
+}
+$('ck1').onclick = () => toast(S.portrait ? 'Premi 2 volte Switch sul gimbal per metterlo orizzontale' : 'Raddrizza l\'iPhone nel supporto finché la voce diventa verde', 3500);
+$('ck2').onclick = () => { if (!hDone()) doLidar(); };
+$('ck3').onclick = () => { if (!cDone()) doCalib(); };
+hold($('ck2'), hDone, 'rifare la misura dell\'altezza', doLidar);
+hold($('ck3'), cDone, 'rifare la calibrazione', doCalib);
 $('ck4').onclick = () => openCard('capsCard');
+$('ckTitle').onclick = () => { const m = $('ckBox').classList.toggle('mini'); $('ckArrow').textContent = m ? '▸' : '▾'; };
 $('ckDone').onclick = () => { $('sbAsk').style.display = 'flex'; };
 $('sbAskYes').onclick = () => { $('sbAsk').style.display = 'none'; cmd({a: 'sbVisible', on: true}); setPhase('match'); openCard('teamsCard'); };
 $('sbAskNo').onclick = () => { $('sbAsk').style.display = 'none'; cmd({a: 'sbVisible', on: false}); setPhase('match'); };
@@ -818,6 +834,8 @@ function renderGeo() {
   renderPhase();
   // Durante calibrazione, mappatura e misura dell'altezza la barra dei gol non serve e intralcia.
   $('sbBar').style.visibility = (S.busyGeo || calibPts) ? 'hidden' : '';
+  // Mentre si toccano o spostano gli angoli la lista non deve coprire il campo.
+  $('ckBox').style.visibility = (S.busyGeo || calibPts || dragPts) ? 'hidden' : '';
   $('portraitBanner').style.display = S.portrait ? 'block' : 'none';
   const l = S.level;
   const t = $('levelTxt');
