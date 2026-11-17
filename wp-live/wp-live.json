@@ -1,6 +1,6 @@
 {
-  "latestVersion": "0.8.1",
-  "releaseNotes": "0.8.1: ripresa ASSISTITA (il regista muove il gimbal, lo zoom resta automatico senza tagliare la palla); link del monitor con password da condividere al PC.",
+  "latestVersion": "0.8.2",
+  "releaseNotes": "0.8.2: link del monitor cliccabile (sull'iPhone e nei messaggi condivisi); in casa senza hotspot QR e link usano il Wi-Fi. 0.8.1: ripresa Assistita.",
   "params": {
     "gimbalSpeed": 0.3,
     "zoomRampRate": 1.5
