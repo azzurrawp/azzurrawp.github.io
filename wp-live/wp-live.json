@@ -1,6 +1,6 @@
 {
-  "latestVersion": "0.7.4",
-  "releaseNotes": "0.7.4: calottina blu dell'Azzurra riconosciuta anche da lontano (quadri bianchi e blu). 0.7.3: colore della palla a scelta o imparato toccando la palla; controllo taglia 5.",
+  "latestVersion": "0.7.5",
+  "releaseNotes": "0.7.5: calottine Azzurra (blu o bianche, sempre a scacchi sopra) riconosciute anche da lontano; non confuse con avversari blu o bianchi. 0.7.3: colore della palla a scelta o imparato.",
   "params": {
     "gimbalSpeed": 0.3,
     "zoomRampRate": 1.5
