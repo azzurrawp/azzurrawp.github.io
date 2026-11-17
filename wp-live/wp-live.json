@@ -1,6 +1,6 @@
 {
-  "latestVersion": "0.8.2",
-  "releaseNotes": "0.8.2: link del monitor cliccabile (sull'iPhone e nei messaggi condivisi); in casa senza hotspot QR e link usano il Wi-Fi. 0.8.1: ripresa Assistita.",
+  "latestVersion": "0.8.4",
+  "releaseNotes": "0.8.4: link del monitor cliccabile anche su WhatsApp; regia completa sull'iPhone finché non si collega un monitor del regista.",
   "params": {
     "gimbalSpeed": 0.3,
     "zoomRampRate": 1.5
