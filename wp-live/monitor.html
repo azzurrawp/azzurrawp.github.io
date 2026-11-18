@@ -28,6 +28,7 @@ input,textarea{-webkit-user-select:text;user-select:text}
 body.phPrep #sbBar, body.phPrep #penBox, body.phPrep #liveBtn, body.phPrep #recWrap, body.phPrep #micBtn, body.phPrep #undoBtn{display:none !important}
 body.phMatch #ckBox{display:none}
 body.phPrep #seg{display:none}
+body.geoEdit #seg,body.geoEdit #liveBtn,body.geoEdit #recWrap,body.geoEdit #micBtn,body.geoEdit #undoBtn,body.geoEdit #sbBar,body.geoEdit #penBox{display:none !important}
 #ckBox.mini .ck,#ckBox.mini .sub,#ckBox.mini #ckDone{display:none}
 #ckBox .sub{font-size:12px;opacity:.75;margin:-2px 0 4px}
 body.phMatch:not(.penOn) #penBox{display:none}
@@ -330,7 +331,7 @@ let S = {};
 let wakeLock = null;
 let disconnected = false;
 let lastBall = null, lastBallT = 0;
-let calibPts = null;
+let calibPts = null, dragPts = null;
 const $ = id => document.getElementById(id);
 
 async function api(path, body) {
@@ -438,6 +439,8 @@ function render() {
 }
 
 function drawOverlay() {
+  // Mentre si regola il campo spariscono registra, microfono, diretta e modalità.
+  document.body.classList.toggle('geoEdit', !!(calibPts || dragPts || S.busyGeo));
   const c = $('ov'), img = $('view');
   const w = img.clientWidth, h = img.clientHeight;
   if (c.width !== w) c.width = w;
@@ -537,6 +540,8 @@ $('calibManual').onclick = () => { calibPts = []; calibHint(); $('viewBox').clas
 $('calibBtn').onclick = null;
 $('calibClear').onclick = null;
 function hitCorner(e) {
+  // In partita gli angoli non si spostano per sbaglio: si regolano solo in Preparazione.
+  if (!calibPts && phase !== 'prep') return -1;
   const pts = calibPts || S.corners || [];
   const r = $('view').getBoundingClientRect();
   for (let i = 0; i < pts.length; i++) {
@@ -1020,7 +1025,7 @@ $('prep').addEventListener('click', e => { if (e.target === $('prep')) $('prep')
 let M = null, mouseDragged = false;
 // Vertici del campo: si trascinano direttamente sull'immagine; una lente lontana dal dito mostra
 // il punto preciso ingrandito (immagine a piena risoluzione dall'iPhone).
-let dragPts = null, VD = null;
+let VD = null;
 const CORNER_SHORT = ['1 · porta sx, vicino', '2 · porta dx, vicino', '3 · porta dx, lontano', '4 · porta sx, lontano'];
 function placeFLoupe(px, py) {
   const fl = $('fLoupe'), W = 230;
