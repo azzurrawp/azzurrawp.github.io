@@ -65,8 +65,15 @@ body.phStart #seg,body.phStart #liveBtn,body.phStart #recWrap,body.phStart #micB
 #wzNav{display:flex;justify-content:space-between;margin-top:4px}
 #wzNav button{background:none;border:0;color:#9fc3ff;font-size:14px;padding:6px 2px}
 #ckBox.mini #wzBody,#ckBox.mini #wzNav{display:none}
-#ckBox.campo{width:250px;padding:8px}
-#ckBox.campo #wzBody button{min-height:40px;font-size:14px;margin:3px 0}
+/* Passo Campo: nessun riquadro, i comandi stanno al centro della vasca (lontano da tutti gli angoli). */
+body.wzCampo #ckBox{display:none !important}
+#fieldBtns{position:absolute;z-index:6;display:none;transform:translate(-50%,-50%);align-items:center;gap:10px}
+body.wzCampo #fieldBtns{display:flex}
+body.geoEdit #fieldBtns{display:none !important}
+#fieldBtns button{border:0;color:#fff;font-weight:900;box-shadow:0 4px 14px rgba(0,0,0,.55)}
+#fbDone{width:88px;height:88px;border-radius:50%;background:#1e8e3e;font-size:17px;line-height:1.1}
+#fbRedo{min-height:46px;padding:0 14px;border-radius:23px;background:rgba(36,74,122,.95);font-size:14px}
+#fbCalib{min-height:60px;padding:0 24px;border-radius:30px;background:#1e8e3e;font-size:18px}
 #flowBar{display:none;position:sticky;top:0;z-index:2}
 #flowBar button{width:100%;min-height:52px;border:0;border-radius:12px;background:#1e8e3e;color:#fff;font-size:17px;font-weight:800}
 #sbAsk{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:20;display:none;align-items:center;justify-content:center}
@@ -158,7 +165,7 @@ img{-webkit-user-drag:none}
   #seg{bottom:182px}
   #undoBtn{left:8px;transform:none;bottom:84px}
 }
-#toast{position:fixed;left:50%;top:70px;transform:translateX(-50%);background:rgba(0,0,0,.85);color:#ffd400;font-weight:800;padding:10px 16px;border-radius:12px;display:none;z-index:30;white-space:nowrap}
+#toast{position:fixed;left:50%;top:70px;transform:translateX(-50%);background:rgba(0,0,0,.85);color:#ffd400;font-weight:800;padding:10px 16px;border-radius:12px;display:none;z-index:30;white-space:nowrap;pointer-events:none;max-width:94vw;overflow:hidden;text-overflow:ellipsis}
 .swatches{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
 .sw{width:26px;height:26px;border-radius:50%;border:2px solid #fff;cursor:pointer}
 .teamBox{border-top:1px solid #244a7a;padding-top:8px;margin-top:8px}
@@ -358,6 +365,7 @@ select{width:100%;padding:8px;border-radius:8px;background:#0b1420;color:#fff;bo
       <div id="wzBody"></div>
       <div id="wzNav"><button id="wzBack">‹ Indietro</button><button id="wzSkip">Salta ›</button></div>
     </div>
+    <div id="fieldBtns"><button id="fbDone">✓<br>Fatto</button><button id="fbRedo">↺ Rifai</button><button id="fbCalib">Calibra il campo</button></div>
     <button id="goBtn">▶ Inizia</button>
     <button id="finBtn">■ Fine partita</button>
     <div id="penBox"><button id="penL">◀ Rigore</button><button id="penR">Rigore ▶</button></div>
@@ -539,6 +547,7 @@ function render() {
 }
 
 function drawOverlay() {
+  if (document.body.classList.contains('wzCampo')) renderFieldBtns();
   // Mentre si regola il campo spariscono registra, microfono, diretta e modalità.
   document.body.classList.toggle('geoEdit', !!(calibPts || dragPts || S.busyGeo));
   const c = $('ov'), img = $('view');
@@ -901,7 +910,7 @@ function setPhase(p) {
 let wz = 0, OK = {};
 try { wz = +(sessionStorage.getItem('wpWz') || 0); OK = JSON.parse(sessionStorage.getItem('wpOk') || '{}'); } catch (e) {}
 function saveWz() { try { sessionStorage.setItem('wpWz', wz); sessionStorage.setItem('wpOk', JSON.stringify(OK)); } catch (e) {} }
-function goStep(i) { wz = Math.max(0, Math.min(4, i)); wzLidar = wzCalib = false; okSince = 0; saveWz(); renderWizard(); }
+function goStep(i) { wz = Math.max(0, Math.min(4, i)); wzLidar = wzCalib = false; okSince = 0; saveWz(); renderWizard(); renderFieldBtns(); }
 let wzLidar = false, wzCalib = false, okSince = 0, sbHiding = false, wzHtml = '';
 const esc = t => String(t == null ? '' : t).replace(/[&<>"]/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c]));
 function dlg(o) {
@@ -939,20 +948,29 @@ function hManual() {
 }
 const STEP_NAMES = ['iPhone in bolla', 'Altezza', 'Campo', 'Calottine e palla', 'Controllo finale'];
 function line(cls, txt, val) { return '<div class="rowc"><span>' + txt + '</span><span class="' + cls + '">' + val + '</span></div>'; }
-// Nel passo del campo il riquadro si sposta dove non copre nessun angolo (di solito al centro).
-function placeCk() {
-  const box = $('ckBox'), on = curPhase() === 'prep' && wz === 2;
-  box.classList.toggle('campo', on);
-  if (!on) { box.style.left = box.style.top = ''; return; }
-  const W = innerWidth, H = innerHeight, w = box.offsetWidth, h = box.offsetHeight;
-  const r = $('view').getBoundingClientRect();
-  const pts = (S.corners || []).map(p => [r.left + p[0] * r.width, r.top + p[1] * r.height]);
-  const cands = [[(W - w) / 2, (H - h) / 2], [(W - w) / 2, 70], [(W - w) / 2, H - h - 12], [12, (H - h) / 2], [W - w - 12, (H - h) / 2]];
-  const clear = c => pts.every(p => p[0] < c[0] - 50 || p[0] > c[0] + w + 50 || p[1] < c[1] - 50 || p[1] > c[1] + h + 50);
-  const c = cands.find(clear) || cands[0];
-  box.style.left = Math.max(0, c[0]) + 'px'; box.style.top = Math.max(0, c[1]) + 'px';
+let campoToastStep = -1;
+function renderFieldBtns() {
+  const on = curPhase() === 'prep' && wz === 2;
+  document.body.classList.toggle('wzCampo', on);
+  if (!on) { campoToastStep = -1; return; }
+  const done = cDone(), busy = !!S.busyGeo;
+  $('fbDone').style.display = done && !busy ? '' : 'none';
+  $('fbRedo').style.display = done && !busy ? '' : 'none';
+  $('fbCalib').style.display = !done && !busy && !calibPts ? '' : 'none';
+  const r = $('view').getBoundingClientRect(), c = S.corners || [];
+  let x = r.left + r.width / 2, y = r.top + r.height / 2;
+  if (done) { x = r.left + r.width * c.reduce((a, p) => a + p[0], 0) / 4; y = r.top + r.height * c.reduce((a, p) => a + p[1], 0) / 4; }
+  const fb = $('fieldBtns'); fb.style.left = x + 'px'; fb.style.top = y + 'px';
+  if (campoToastStep !== wz) {
+    campoToastStep = wz;
+    toast('Passo 3 di 5 · ' + (done ? 'campo verde sulla vasca? Trascina i pallini, poi Fatto' : 'tocca "Calibra il campo"'), 4500);
+  }
 }
+$('fbDone').onclick = () => { OK.c = true; saveWz(); goStep(3); renderFieldBtns(); };
+$('fbRedo').onclick = () => { OK.c = false; saveWz(); doCalib(); };
+$('fbCalib').onclick = () => doCalib();
 function renderWizard() {
+  renderFieldBtns();
   if (curPhase() !== 'prep') return;
   $('ckStep').textContent = '· passo ' + (wz + 1) + ' di 5';
   let h = '<div style="font-weight:800;font-size:15px;margin-top:4px">' + STEP_NAMES[wz] + '</div>';
@@ -1012,7 +1030,6 @@ function renderWizard() {
     h += B('done', 'Preparazione finita ▶', true);
   }
   if (h !== wzHtml) { wzHtml = h; $('wzBody').innerHTML = h; }
-  placeCk();
   $('wzBack').style.visibility = wz > 0 ? '' : 'hidden';
   $('wzSkip').style.visibility = wz < 4 ? '' : 'hidden';
 }
@@ -1125,6 +1142,7 @@ function renderPhase() {
   $('startBox').style.display = ph === 'start' && !modal ? 'flex' : 'none';
   // Prima di "Preparazione finita" il tabellone non va in sovrimpressione: si decide alla domanda.
   if (ph !== 'match' && S.sb && S.sb.visible) { if (!sbHiding) { sbHiding = true; cmd({a: 'sbVisible', on: false}); } } else sbHiding = false;
+  renderFieldBtns();
   if (ph === 'prep') renderWizard();
   checkEnd();
 }
