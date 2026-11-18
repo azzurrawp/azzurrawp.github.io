@@ -368,7 +368,7 @@ select{width:100%;padding:8px;border-radius:8px;background:#0b1420;color:#fff;bo
     <button class="rb" id="liveBtn"><span class="rc">● LIVE</span><span class="rl" id="liveTime">spenta</span></button>
     <div id="recWrap"><button class="rb" id="rec"><span class="rc"><span id="recDot"></span></span><span class="rl" id="recTime">REC</span></button></div>
     <button class="rb" id="micBtn"><span class="rc" id="micIcon">🎤</span><span class="rl" id="micTxt">Mic</span></button>
-    <div id="seg"><button id="zOut" class="zb" title="Allarga">−</button><button id="zIn" class="zb" title="Stringi">+</button><button id="largaBtn">Larga</button><button id="assistBtn">Assistita</button><button id="autoBtn">Auto</button></div>
+    <div id="seg"><button id="zOut" class="zb" title="Allarga">−</button><button id="zIn" class="zb" title="Stringi">+</button><button id="largaBtn">Larga</button><button id="assistBtn">Assistita</button><button id="autoBtn">Auto <span style="font-size:10px;opacity:.75">prova</span></button></div>
     <div id="ckBox">
       <div id="ckTitle" style="font-weight:800;color:#ffd400;cursor:pointer">Preparazione <span id="ckStep" style="color:#fff;font-weight:600"></span> <span id="ckArrow">▾</span></div>
       <div id="wzBody"></div>
@@ -1179,7 +1179,7 @@ $('goBtn').onclick = () => {
   if (hk) b.push({t: 'Diretta + registrazione', cls: 'pri', cb: () => countdown(true)});
   b.push({t: 'Solo registrazione', cls: hk ? '' : 'pri', cb: () => countdown(false)});
   b.push({t: 'Annulla'});
-  dlg({msg: '<b>Si parte?</b><br>La ripresa va in Auto.' + (hk ? '' : '<br><span class="small">Chiave YouTube non inserita: solo registrazione.</span>'), buttons: b});
+  dlg({msg: '<b>Si parte?</b><br>La ripresa va in Assistita: muovi tu, lo zoom è automatico.' + (hk ? '' : '<br><span class="small">Chiave YouTube non inserita: solo registrazione.</span>'), buttons: b});
 };
 function countdown(live) {
   let n = 5;
@@ -1190,7 +1190,8 @@ function countdown(live) {
     n--;
     if (n > 0) { $('cdNum').textContent = n; return; }
     clearInterval(cdTimer); $('cdBox').style.display = 'none';
-    if (!S.auto) cmd({a: 'auto', on: true});
+    // Per la prima partita si parte in Assistita (l'Auto completo è ancora in prova).
+    if (!S.assisted) cmd({a: 'assisted', on: true});
     cmd({a: 'rec', on: true});
     if (live) cmd({a: 'liveStart'});
     matchStart = Date.now();
@@ -1282,7 +1283,11 @@ function setupCaps() {
 }
 
 $('micBtn').onclick = () => cmd({a: 'mute', on: !S.muted});
-$('autoBtn').onclick = () => cmd({a: 'auto', on: !S.auto});
+$('autoBtn').onclick = () => {
+  if (S.auto && !S.assisted) { cmd({a: 'auto', on: false}); return; }
+  dlg({msg: '<b>Auto in prova</b><br>La ripresa completamente automatica non è ancora stata provata in partita. Accenderla lo stesso?',
+    buttons: [{t: 'Accendi Auto', cls: 'red', cb: () => { if (S.assisted) cmd({a: 'assisted', on: false}); cmd({a: 'auto', on: true}); }}, {t: 'Resta com\'è', cls: 'pri'}]});
+};
 $('assistBtn').onclick = () => {
   const on = !S.assisted;
   cmd({a: 'assisted', on});
