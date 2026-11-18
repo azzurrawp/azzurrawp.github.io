@@ -26,6 +26,9 @@ input,textarea{-webkit-user-select:text;user-select:text}
 }
 /* Due fasi: preparazione (solo il necessario per montare e calibrare) e partita. */
 body.phPrep #sbBar, body.phPrep #penBox, body.phPrep #liveBtn, body.phPrep #recWrap, body.phPrep #micBtn, body.phPrep #undoBtn{display:none !important}
+/* Margini per la Dynamic Island: sull'iPhone che riprende vale da entrambi i lati, perché può essere girato in tutti e due i versi. */
+:root{--sl:env(safe-area-inset-left,0px);--sr:env(safe-area-inset-right,0px)}
+@media (orientation:landscape){body.local{--sl:max(59px,env(safe-area-inset-left,0px));--sr:max(59px,env(safe-area-inset-right,0px))}}
 body.phMatch #ckBox{display:none}
 body.phPrep #seg{display:none}
 body.geoEdit #seg,body.geoEdit #liveBtn,body.geoEdit #recWrap,body.geoEdit #micBtn,body.geoEdit #undoBtn,body.geoEdit #sbBar,body.geoEdit #penBox{display:none !important}
@@ -34,7 +37,7 @@ body.geoEdit #seg,body.geoEdit #liveBtn,body.geoEdit #recWrap,body.geoEdit #micB
 body.phMatch:not(.penOn) #penBox{display:none}
 body.phMatch:not(.sbOn) #sbBar{display:none}
 body:not(.manual) #seg .zb{display:none !important}
-#ckBox{position:absolute;left:max(12px,env(safe-area-inset-left));top:96px;width:270px;max-width:46vw;background:rgba(11,20,32,.88);border:2px solid #ffd400;border-radius:14px;padding:10px;font-size:14px;z-index:5}
+#ckBox{position:absolute;left:max(12px,var(--sl));top:96px;width:270px;max-width:46vw;background:rgba(11,20,32,.88);border:2px solid #ffd400;border-radius:14px;padding:10px;font-size:14px;z-index:5}
 #ckBox .ck{display:flex;gap:8px;align-items:center;width:100%;margin:4px 0;padding:8px;border-radius:10px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.06);color:#fff;font-size:14px;text-align:left;cursor:pointer}
 #ckBox .ck b{width:22px;text-align:center}
 #ckBox .ck.ok{border-color:#1e8e3e}
@@ -71,18 +74,18 @@ img{-webkit-user-drag:none}
 .rb{display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:0;color:#fff;font-size:12px;padding:0;cursor:pointer}
 .rc{width:64px;height:64px;border-radius:50%;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;font-size:22px}
 .rl{background:rgba(0,0,0,.5);padding:1px 6px;border-radius:6px}
-#prepBtn{position:absolute;left:max(12px,env(safe-area-inset-left));top:10px}
-#liveBtn{position:absolute;right:12px;top:10px}
+#prepBtn{position:absolute;left:max(12px,var(--sl));top:10px}
+#liveBtn{position:absolute;right:max(12px,var(--sr));top:10px}
 #liveBtn .rc{width:auto;padding:0 18px;border-radius:32px;font-size:16px;font-weight:800;border:2px solid #e53935}
-#recWrap{position:absolute;right:12px;top:50%;transform:translateY(-50%)}
+#recWrap{position:absolute;right:max(12px,var(--sr));top:50%;transform:translateY(-50%)}
 #rec .rc{width:80px;height:80px;border:4px solid #fff;background:rgba(0,0,0,.25)}
 #recDot{width:56px;height:56px;border-radius:50%;background:#e53935}
 #rec.on #recDot{width:26px;height:26px;border-radius:6px}
-#micBtn{position:absolute;right:112px;top:50%;transform:translateY(-50%)}
-#seg{position:absolute;right:max(12px,env(safe-area-inset-right));bottom:12px;display:flex;border-radius:14px;overflow:hidden}
+#micBtn{position:absolute;right:calc(100px + max(12px,var(--sr)));top:50%;transform:translateY(-50%)}
+#seg{position:absolute;right:max(12px,var(--sr));bottom:12px;display:flex;border-radius:14px;overflow:hidden}
 #seg button{border:0;color:#fff;font-size:16px;font-weight:800;min-height:64px;padding:0 20px;background:rgba(0,0,0,.7);cursor:pointer}
 #seg button + button{border-left:2px solid #0b1420}
-#hint{position:absolute;left:12px;bottom:12px;font-size:12px;background:rgba(0,0,0,.5);padding:4px 8px;border-radius:8px;max-width:45%;pointer-events:none}
+#hint{position:absolute;left:max(12px,var(--sl));bottom:12px;font-size:12px;background:rgba(0,0,0,.5);padding:4px 8px;border-radius:8px;max-width:45%;pointer-events:none}
 #sbBar{position:absolute;left:50%;transform:translateX(-50%);bottom:12px;display:flex;align-items:center;gap:12px;background:rgba(0,0,0,.75);padding:6px 10px;border-radius:16px;border:1px solid rgba(255,255,255,.25)}
 #sbBar button{border:2px solid rgba(255,255,255,.35);border-radius:12px;color:#fff;font-weight:800;font-size:22px;cursor:pointer}
 #hPlus,#aPlus{min-width:64px;height:64px;background:#1e8e3e;font-size:30px}
@@ -90,7 +93,7 @@ img{-webkit-user-drag:none}
 .tm{display:flex;align-items:center;padding:0 8px;height:44px;border-radius:10px;font-weight:800;font-size:17px}
 .sc{min-width:30px;text-align:center;font-size:28px;font-weight:800}
 #sbClock{min-width:96px;height:56px;white-space:nowrap;font-size:17px !important;background:#244a7a}
-#penBox{position:absolute;left:max(12px,env(safe-area-inset-left));top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:16px}
+#penBox{position:absolute;left:max(12px,var(--sl));top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:16px}
 #penBox button{min-width:112px;min-height:60px;border:2px solid rgba(255,255,255,.4);border-radius:14px;background:rgba(0,0,0,.65);color:#fff;font-size:16px;font-weight:800;cursor:pointer}
 #penBox button.on{background:#ffd400;color:#000;border-color:#fff}
 #undoBtn{position:absolute;left:50%;transform:translateX(-50%);bottom:96px;display:none;min-height:64px;padding:0 22px;border:3px solid #fff;border-radius:16px;background:#e07b00;color:#fff;font-size:18px;font-weight:800}
@@ -134,7 +137,7 @@ img{-webkit-user-drag:none}
 .teamBox{border-top:1px solid #244a7a;padding-top:8px;margin-top:8px}
 input.txt{width:100%;padding:8px;border-radius:8px;background:#0b1420;color:#fff;border:1px solid #2a8cff}
 #prep{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;z-index:12;justify-content:flex-start}
-#prepPanel{width:min(420px,92vw);height:100%;overflow-y:auto;background:#0b1420;padding:14px;display:flex;flex-direction:column;gap:10px}
+#prepPanel{width:min(calc(420px + var(--sl)),92vw);height:100%;overflow-y:auto;background:#0b1420;padding:14px;padding-left:max(14px,calc(var(--sl) + 6px));display:flex;flex-direction:column;gap:10px}
 .card{background:#132235;border-radius:12px;padding:10px}
 #status{font-size:14px;line-height:1.5}
 .row{display:flex;gap:6px;flex-wrap:wrap}
@@ -327,6 +330,7 @@ try { PIN = localStorage.getItem('wpPin') || ''; } catch (e) {}
 // Regia sullo schermo dell'iPhone che riprende (app WP Live): non conta come monitor collegato.
 let LOCAL = false;
 try { LOCAL = new URLSearchParams(location.search).get('local') === '1' || sessionStorage.getItem('wpLocal') === '1'; if (LOCAL) sessionStorage.setItem('wpLocal', '1'); } catch (e) {}
+if (LOCAL) document.body.classList.add('local');
 let S = {};
 let wakeLock = null;
 let disconnected = false;
