@@ -1,6 +1,6 @@
 {
-  "latestVersion": "0.9.2",
-  "releaseNotes": "0.9.2: misura dell'altezza col LiDAR che ignora mobili e ostacoli davanti e usa il pavimento. Include tutto della 0.9.1.",
+  "latestVersion": "0.9.3",
+  "releaseNotes": "0.9.3: misura dell'altezza che prova ad allargare l'inclinazione del gimbal verso il basso; link del regista solo con password e istruzioni per lo schermo intero; righe del campo solo in preparazione (in partita dal menu).",
   "params": {
     "gimbalSpeed": 0.3,
     "zoomRampRate": 1.5

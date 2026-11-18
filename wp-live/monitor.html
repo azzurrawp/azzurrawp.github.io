@@ -101,6 +101,8 @@ img{-webkit-user-drag:none}
 #viewBox.calib{outline:4px solid #ffd400;outline-offset:-4px}
 #calibHint{position:absolute;left:0;right:0;top:44px;padding:8px;background:rgba(0,0,0,.7);color:#ffd400;font-weight:700;text-align:center;display:none;z-index:3}
 #viewBox.calib #calibHint{display:block}
+#mapCancelBtn{position:absolute;left:50%;transform:translateX(-50%);bottom:12px;z-index:7;display:none;min-height:46px;padding:0 18px;border:0;border-radius:23px;background:rgba(138,28,28,.95);color:#fff;font-weight:800;font-size:15px}
+#viewBox.mapping #mapCancelBtn{display:block}
 #hud{position:absolute;inset:0;pointer-events:none;z-index:4}
 #hud > *{pointer-events:auto}
 .ok{color:#5ee08a}.warn{color:#ffb347}.bad{color:#ff6b6b}
@@ -249,6 +251,7 @@ select{width:100%;padding:8px;border-radius:8px;background:#0b1420;color:#fff;bo
     <div class="card" id="phaseCard">
       <button class="btn2" id="backPrep" style="width:100%">Torna alla preparazione (checklist)</button>
       <button class="btn2" id="addReg" style="width:100%;margin-top:8px">Collega un regista (QR e link)</button>
+      <label style="display:flex;align-items:center;gap:8px;margin-top:10px"><input type="checkbox" id="linesOn"> Mostra le righe del campo durante la partita</label>
       <button class="btn2" id="autoBtn" style="width:100%;margin-top:8px">Ripresa automatica (in prova)</button>
       <label style="display:flex;gap:8px;align-items:center;margin-top:8px"><input type="checkbox" id="penOn"> Mostra i pulsanti Rigore</label>
     </div>
@@ -348,7 +351,8 @@ select{width:100%;padding:8px;border-radius:8px;background:#0b1420;color:#fff;bo
     <button id="regYes" class="pri">Sì</button><button id="regNo">No, faccio da qui</button>
   </div>
   <div id="regShow" style="display:none">
-    <div style="margin-top:8px">Il regista inquadra il QR con la fotocamera, oppure gli mandi il link.</div>
+    <div style="margin-top:8px">Il regista inquadra il QR con la Fotocamera, oppure gli mandi il link (password già dentro).</div>
+    <div class="small" style="margin-top:6px;text-align:left">Schermo intero: in Safari tocca <b>Condividi</b> › <b>Aggiungi alla schermata Home</b>, poi apri la regia dall'icona <b>WP Regia</b>.</div>
     <img id="regQR" alt="QR" onerror="this.style.display='none'">
     <div><button id="regShare">Manda il link</button><button id="regDone" class="pri">Fatto ▶</button></div>
   </div>
@@ -361,6 +365,7 @@ select{width:100%;padding:8px;border-radius:8px;background:#0b1420;color:#fff;bo
   <div id="viewBox">
     <div id="frame"><img id="view" draggable="false" alt="Anteprima"><canvas id="ov"></canvas></div>
     <div id="calibHint"></div>
+    <button id="mapCancelBtn">Annulla calibrazione</button>
   </div>
   <div id="hud">
     <div id="statusBar"></div>
@@ -602,7 +607,10 @@ function drawOverlay() {
     x.strokeRect(0, 0, w, h); x.setLineDash([]);
   }
   const pts = dragPts || calibPts || S.corners || [];
-  if (pts.length) {
+  // Le righe del campo servono in preparazione; in partita solo se richieste dal menu.
+  let linesOn = false; try { linesOn = localStorage.getItem('wpLines') === '1'; } catch (e) {}
+  const showField = curPhase() !== 'match' || linesOn || !!calibPts || !!dragPts;
+  if (pts.length && showField) {
     x.strokeStyle = calibPts ? '#ffd400' : 'rgba(94,224,138,.9)';
     x.fillStyle = x.strokeStyle;
     x.lineWidth = 3;
@@ -619,7 +627,7 @@ function drawOverlay() {
       x.beginPath(); x.arc(px, py, 2.5, 0, 7); x.fill();
     });
   }
-  if (!calibPts && pts.length === 4) drawLines(x, pts, w, h);
+  if (!calibPts && pts.length === 4 && showField) drawLines(x, pts, w, h);
   if (calibPts) return;
   // Calottine riconosciute: azzurri = Azzurra, gialli = avversari, rossi = portieri.
   (S.caps || []).forEach(cp => {
@@ -695,6 +703,7 @@ $('calibBtn').onclick = null;
 $('calibClear').onclick = null;
 function hitCorner(e) {
   // In partita gli angoli non si spostano per sbaglio: si regolano solo in Preparazione.
+  if (mapping) return -1;
   if (!calibPts && curPhase() !== 'prep') return -1;
   const pts = calibPts || S.corners || [];
   const r = $('view').getBoundingClientRect();
@@ -713,6 +722,12 @@ $('viewBox').addEventListener('click', e => {
     cmd({a: 'ballLearn', x: (e.clientX - r.left) / r.width, y: (e.clientY - r.top) / r.height});
     learnLeft--;
     toast(learnLeft > 0 ? 'Bene. Tocca di nuovo la palla, in un altro punto (' + (3 - learnLeft) + '/3)' : 'Colore della palla imparato', 2500);
+    return;
+  }
+  if (mapping) {
+    const r = $('view').getBoundingClientRect();
+    cmd({a: 'mapMark', x: (e.clientX - r.left) / r.width, y: (e.clientY - r.top) / r.height});
+    toast('Angolo segnato', 1200);
     return;
   }
   if (hitCorner(e) >= 0) { toast('Trascina il pallino: la lente mostra il punto preciso', 2200); return; }
@@ -983,8 +998,31 @@ function doCalib(auto) {
   if (S.busyGeo) { toast('Aspetta che finisca la misura in corso', 2500); return; }
   wzCalib = true;
   if (auto && S.docked) { cmd({a: 'scanStart'}); toast('Calibrazione automatica: il gimbal fa un giro del campo', 3500); }
-  else { calibPts = []; calibHint(); $('viewBox').classList.add('calib'); toast('Tocca i 4 angoli del campo sull\'immagine', 4000); }
+  else {
+    // Un angolo alla volta: lo zoom va al più largo, poi ogni tocco viene registrato con la posizione
+    // del gimbal di quel momento, così tra un angolo e l'altro si può girare la camera col dito.
+    cmd({a: 'larga'});
+    cmd({a: 'mapStart'});
+    mapping = true;
+    $('viewBox').classList.add('calib', 'mapping');
+    toast('Tocca gli angoli uno alla volta; se non li vedi, muovi la camera col dito', 4500);
+  }
 }
+let mapping = false, mapSeen = false;
+function renderMapping() {
+  const idx = typeof S.mapIndex === 'number' ? S.mapIndex : -1;
+  if (idx >= 0) mapSeen = true;
+  if (mapping && mapSeen && idx < 0) {
+    // Finito (o annullato): il campo verde compare con Fatto / Rifai.
+    mapping = false; mapSeen = false;
+    $('viewBox').classList.remove('calib', 'mapping');
+  }
+  if (idx >= 0) {
+    if (!mapping) { mapping = true; $('viewBox').classList.add('calib', 'mapping'); }
+    $('calibHint').textContent = 'Angolo ' + (idx + 1) + ' di 4 · tocca: ' + (S.mapName || '') + ' · se non lo vedi, muovi la camera col dito';
+  }
+}
+$('mapCancelBtn').onclick = () => { cmd({a: 'mapCancel'}); mapping = false; mapSeen = false; $('viewBox').classList.remove('calib', 'mapping'); };
 function hManual() {
   dlg({msg: 'Altezza della telecamera dal pavimento, in metri (es. 1.43)', input: true, ph: '1.43', buttons: [{t: 'Salva', cls: 'pri', cb: v => {
     const h = parseFloat((v || '').replace(',', '.'));
@@ -1003,7 +1041,7 @@ function renderFieldBtns() {
   $('fbDone').style.display = done && !busy ? '' : 'none';
   $('fbRedo').style.display = done && !busy ? '' : 'none';
   $('fbCalib').style.display = !done && !busy && !calibPts ? '' : 'none';
-  $('fbScan').style.display = !done && !busy && !calibPts && S.docked ? '' : 'none';
+  $('fbScan').style.display = 'none';  // il giro automatico resta solo nel menu
   const r = $('view').getBoundingClientRect(), c = S.corners || [];
   let x = r.left + r.width / 2, y = r.top + r.height / 2;
   if (done) { x = r.left + r.width * c.reduce((a, p) => a + p[0], 0) / 4; y = r.top + r.height * c.reduce((a, p) => a + p[1], 0) / 4; }
@@ -1152,6 +1190,8 @@ function showRegista() {
   $('regAsk').style.display = ''; $('regShow').style.display = 'none';
   $('regBox').style.display = 'flex';
 }
+try { $('linesOn').checked = localStorage.getItem('wpLines') === '1'; } catch (e) {}
+$('linesOn').onchange = () => { try { localStorage.setItem('wpLines', $('linesOn').checked ? '1' : '0'); } catch (e) {} drawOverlay(); };
 $('addReg').onclick = () => { $('prep').style.display = 'none'; showQR(); };
 $('regYes').onclick = () => {
   $('regAsk').style.display = 'none'; $('regShow').style.display = '';
@@ -1234,6 +1274,7 @@ function renderPhase() {
   $('startBox').style.display = ph === 'start' && !modal ? 'flex' : 'none';
   // Prima di "Preparazione finita" il tabellone non va in sovrimpressione: si decide alla domanda.
   if (ph !== 'match' && S.sb && S.sb.visible) { if (!sbHiding) { sbHiding = true; cmd({a: 'sbVisible', on: false}); } } else sbHiding = false;
+  renderMapping();
   renderFieldBtns();
   if (ph === 'prep') renderWizard();
   checkEnd();
