@@ -246,6 +246,7 @@ select{width:100%;padding:8px;border-radius:8px;background:#0b1420;color:#fff;bo
     </div>
     <div class="card" id="phaseCard">
       <button class="btn2" id="backPrep" style="width:100%">Torna alla preparazione (checklist)</button>
+      <button class="btn2" id="addReg" style="width:100%;margin-top:8px">Collega un regista (QR e link)</button>
       <label style="display:flex;gap:8px;align-items:center;margin-top:8px"><input type="checkbox" id="penOn"> Mostra i pulsanti Rigore</label>
     </div>
     <div class="card" id="campoCard">
@@ -326,9 +327,15 @@ select{width:100%;padding:8px;border-radius:8px;background:#0b1420;color:#fff;bo
 </div></div>
 <div id="startBox"><div>
   <div style="font-size:20px;font-weight:800">WP Live</div>
-  <div style="margin-top:8px">Cosa fai?</div>
-  <button id="stNew" class="pri">Nuova partita</button><button id="stResume">Riprendi la partita</button>
-  <div class="small" style="margin-top:10px">"Riprendi" serve se l'app si è chiusa a metà gara: tiene punteggio e calibrazione.</div>
+  <div id="stWho">
+    <div style="margin-top:8px">Chi comanda la ripresa?</div>
+    <button id="stIphone" class="pri">Questo iPhone</button><button id="stRegista">Un regista<br><span class="small">altro telefono o PC</span></button>
+  </div>
+  <div id="stWhat" style="display:none">
+    <div style="margin-top:8px">Cosa fai?</div>
+    <button id="stNew" class="pri">Nuova partita</button><button id="stResume">Riprendi la partita</button>
+    <div class="small" style="margin-top:10px">"Riprendi" serve se l'app si è chiusa a metà gara: tiene punteggio, calibrazione e password del regista.</div>
+  </div>
 </div></div>
 <div id="dlg"><div><div id="dlgMsg"></div><input id="dlgIn"><div id="dlgBtns"></div></div></div>
 <div id="regBox"><div>
@@ -1056,27 +1063,70 @@ $('wzBack').onclick = () => goStep(wz - 1);
 $('wzSkip').onclick = () => goStep(wz + 1);
 $('ckTitle').onclick = () => { const m = $('ckBox').classList.toggle('mini'); $('ckArrow').textContent = m ? '▸' : '▾'; };
 
-// Avvio: nuova partita o ripresa dopo una chiusura dell'app.
-$('stNew').onclick = () => { cmd({a: 'sbReset'}); OK = {}; wz = 0; saveWz(); setPhase('prep'); };
-$('stResume').onclick = () => setPhase('match');
+// Avvio. Sull'iPhone che riprende: prima chi comanda (questo iPhone o un regista), poi nuova o ripresa.
+// Il regista collegato da fuori vede solo la seconda domanda.
+let ctl = '';
+try { ctl = sessionStorage.getItem('wpCtl') || ''; } catch (e) {}
+function showWhat() { $('stWho').style.display = 'none'; $('stWhat').style.display = ''; }
+if (!LOCAL) showWhat();
+$('stIphone').onclick = () => { ctl = 'iphone'; try { sessionStorage.setItem('wpCtl', ctl); } catch (e) {} showWhat(); };
+$('stRegista').onclick = () => { ctl = 'regista'; try { sessionStorage.setItem('wpCtl', ctl); } catch (e) {} showWhat(); };
+// Dopo la scelta, se comanda un regista l'iPhone mostra subito QR e link (con la password della partita).
+function afterStart() {
+  if (LOCAL && ctl === 'regista') {
+    try { sessionStorage.setItem('wpShowQR', '1'); } catch (e) {}
+    showQR();
+  }
+}
+function showQR() {
+  $('regBox').style.display = 'flex';
+  $('regAsk').style.display = 'none'; $('regShow').style.display = '';
+  const q = $('regQR');
+  q.style.display = '';
+  q.src = '/qr.png?pin=' + PIN + (LOCAL ? '&local=1' : '') + '&t=' + Date.now();
+}
+// La regia dell'iPhone si ricarica quando cambia la password: il QR va rimostrato.
+try { if (LOCAL && sessionStorage.getItem('wpShowQR') === '1') setTimeout(showQR, 800); } catch (e) {}
+$('stNew').onclick = async () => {
+  OK = {}; wz = 0; saveWz();
+  // La regia dell'iPhone si ricarica con la password nuova: il QR va mostrato anche dopo.
+  if (LOCAL && ctl === 'regista') { try { sessionStorage.setItem('wpShowQR', '1'); } catch (e) {} }
+  // Nuova partita = password nuova: i link delle partite precedenti non valgono più.
+  try {
+    const j = await (await api('/cmd', {a: 'newMatch'})).json();
+    if (j.newPin) {
+      PIN = j.newPin;
+      try { localStorage.setItem('wpPin', PIN); } catch (e) {}
+      if (WS) { try { WS.close(); } catch (e) {} }
+    }
+  } catch (e) {}
+  setPhase('prep');
+  afterStart();
+};
+$('stResume').onclick = () => { setPhase('match'); afterStart(); };
 
 // Tabellone, poi regista.
 let flowNext = false;
 $('sbAskYes').onclick = () => { $('sbAsk').style.display = 'none'; cmd({a: 'sbVisible', on: true}); flowNext = true; $('flowBar').style.display = 'block'; openCard('teamsCard'); };
-$('sbAskNo').onclick = () => { $('sbAsk').style.display = 'none'; cmd({a: 'sbVisible', on: false}); showRegista(); };
-$('flowNext').onclick = () => { flowNext = false; $('flowBar').style.display = 'none'; $('prep').style.display = 'none'; showRegista(); };
+$('sbAskNo').onclick = () => { $('sbAsk').style.display = 'none'; cmd({a: 'sbVisible', on: false}); setPhase('match'); };
+$('flowNext').onclick = () => { flowNext = false; $('flowBar').style.display = 'none'; $('prep').style.display = 'none'; setPhase('match'); };
 function showRegista() {
   $('regAsk').style.display = ''; $('regShow').style.display = 'none';
   $('regBox').style.display = 'flex';
 }
+$('addReg').onclick = () => { $('prep').style.display = 'none'; showQR(); };
 $('regYes').onclick = () => {
   $('regAsk').style.display = 'none'; $('regShow').style.display = '';
   const q = $('regQR');
   q.style.display = S.share ? '' : 'none';
   if (S.share) q.src = '/qr.png?pin=' + PIN + (LOCAL ? '&local=1' : '') + '&t=' + Date.now();
 };
-$('regNo').onclick = () => { $('regBox').style.display = 'none'; setPhase('match'); };
-$('regDone').onclick = () => { $('regBox').style.display = 'none'; setPhase('match'); };
+$('regNo').onclick = () => { $('regBox').style.display = 'none'; };
+$('regDone').onclick = () => {
+  $('regBox').style.display = 'none';
+  try { sessionStorage.removeItem('wpShowQR'); } catch (e) {}
+  if (curPhase() === 'start') setPhase('match');
+};
 $('regShare').onclick = () => {
   if (LOCAL) { try { window.webkit.messageHandlers.wp.postMessage('pair'); return; } catch (e) {} }
   const text = 'Regia WP Live: ' + (S.share || location.href);
