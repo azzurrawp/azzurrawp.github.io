@@ -787,15 +787,17 @@ $('zOut').onclick = () => { const z = Math.max(0.5, (S.zoomValue || 1) / 1.3); S
 $('zIn').onclick = () => { const z = Math.min(Math.min(S.maxZoom || 10, 10), (S.zoomValue || 1) * 1.3); S.zoomValue = z; cmd({a: 'zoom', v: z}); };
 // ---- Fasi: preparazione e partita ----
 let phase = 'prep';
-try { phase = localStorage.getItem('wpPhase') || 'prep'; } catch (e) {}
+try { phase = sessionStorage.getItem('wpPhase') || 'prep'; } catch (e) {}
+// Ogni avvio dell'app riparte dalla preparazione (si cancella il vecchio valore salvato).
+try { localStorage.removeItem('wpPhase'); localStorage.removeItem('wpCaps'); } catch (e) {}
 let sbHiding = false;
 let capsSeen = false;
-try { capsSeen = localStorage.getItem('wpCaps') === '1'; } catch (e) {}
-function setPhase(p) { phase = p; try { localStorage.setItem('wpPhase', p); } catch (e) {} renderPhase(); }
+try { capsSeen = sessionStorage.getItem('wpCaps') === '1'; } catch (e) {}
+function setPhase(p) { phase = p; try { sessionStorage.setItem('wpPhase', p); } catch (e) {} renderPhase(); }
 function openCard(id) {
   $('prep').style.display = 'flex';
   setTimeout(() => { const c = $(id); if (c) c.scrollIntoView({block: 'start', behavior: 'smooth'}); }, 50);
-  if (id === 'capsCard') { capsSeen = true; try { localStorage.setItem('wpCaps', '1'); } catch (e) {} }
+  if (id === 'capsCard') { capsSeen = true; try { sessionStorage.setItem('wpCaps', '1'); } catch (e) {} }
 }
 function renderPhase() {
   // Con registrazione o diretta in corso si è per forza in partita.
