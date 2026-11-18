@@ -1,6 +1,6 @@
 {
-  "latestVersion": "0.8.9",
-  "releaseNotes": "0.8.9: anteprima del regista fluida (fino a 25 immagini al secondo mentre muove, 15 da ferma), più tutto della 0.8.8: canale veloce, regia guidata, controllo finale, QR regista, Inizia e Fine partita.",
+  "latestVersion": "0.9.0",
+  "releaseNotes": "0.9.0: la password del monitor resta sempre la stessa (il link del regista vale anche se l'app si riavvia); riconnessione automatica del regista. Include tutto della 0.8.8 e 0.8.9.",
   "params": {
     "gimbalSpeed": 0.3,
     "zoomRampRate": 1.5

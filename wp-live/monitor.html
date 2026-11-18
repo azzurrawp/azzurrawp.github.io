@@ -497,7 +497,10 @@ async function statusLoop() {
   if (disconnected) return;
   if (wsOK && Date.now() - wsStatusT < 1500) { setTimeout(statusLoop, 400); return; }
   try { S = await (await api('/status')).json(); render(); }
-  catch (e) { $('status').innerHTML = '<span class="bad">iPhone della ripresa non raggiungibile</span>'; }
+  catch (e) {
+    $('status').innerHTML = '<span class="bad">iPhone della ripresa non raggiungibile</span>';
+    toast('Collegamento perso: riprovo da solo. Controlla il Wi-Fi (hotspot dell\'iPhone).', 1500);
+  }
   setTimeout(statusLoop, 400);
 }
 
