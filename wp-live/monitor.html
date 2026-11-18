@@ -249,6 +249,7 @@ select{width:100%;padding:8px;border-radius:8px;background:#0b1420;color:#fff;bo
     <div class="card" id="phaseCard">
       <button class="btn2" id="backPrep" style="width:100%">Torna alla preparazione (checklist)</button>
       <button class="btn2" id="addReg" style="width:100%;margin-top:8px">Collega un regista (QR e link)</button>
+      <button class="btn2" id="autoBtn" style="width:100%;margin-top:8px">Ripresa automatica (in prova)</button>
       <label style="display:flex;gap:8px;align-items:center;margin-top:8px"><input type="checkbox" id="penOn"> Mostra i pulsanti Rigore</label>
     </div>
     <div class="card" id="campoCard">
@@ -368,7 +369,7 @@ select{width:100%;padding:8px;border-radius:8px;background:#0b1420;color:#fff;bo
     <button class="rb" id="liveBtn"><span class="rc">● LIVE</span><span class="rl" id="liveTime">spenta</span></button>
     <div id="recWrap"><button class="rb" id="rec"><span class="rc"><span id="recDot"></span></span><span class="rl" id="recTime">REC</span></button></div>
     <button class="rb" id="micBtn"><span class="rc" id="micIcon">🎤</span><span class="rl" id="micTxt">Mic</span></button>
-    <div id="seg"><button id="zOut" class="zb" title="Allarga">−</button><button id="zIn" class="zb" title="Stringi">+</button><button id="largaBtn">Larga</button><button id="assistBtn">Assistita</button><button id="autoBtn">Auto <span style="font-size:10px;opacity:.75">prova</span></button></div>
+    <div id="seg"><button id="zOut" class="zb" title="Allarga">−</button><button id="zIn" class="zb" title="Stringi">+</button><button id="largaBtn">Larga</button><button id="manBtn">Manuale</button><button id="assistBtn">Assistita</button></div>
     <div id="ckBox">
       <div id="ckTitle" style="font-weight:800;color:#ffd400;cursor:pointer">Preparazione <span id="ckStep" style="color:#fff;font-weight:600"></span> <span id="ckArrow">▾</span></div>
       <div id="wzBody"></div>
@@ -547,7 +548,8 @@ function render() {
   if (S.thermal !== 'normale' && S.thermal !== 'tiepido') sb += '<span class="bad">Caldo</span>';
   $('statusBar').innerHTML = sb;
   $('modeTxt').textContent = S.mode || '';
-  $('autoBtn').style.background = S.auto ? '#1e8e3e' : 'rgba(0,0,0,.6)';
+  $('autoBtn').style.background = S.auto ? '#1e8e3e' : '';
+  $('manBtn').style.background = !S.auto && !S.assisted ? '#e67e00' : 'rgba(0,0,0,.6)';
   $('assistBtn').style.background = S.assisted ? '#1565c0' : 'rgba(0,0,0,.6)';
   if (S.audio === false) { $('micIcon').textContent = '🎤'; $('micTxt').textContent = 'Mic n.d.'; $('micIcon').style.background = '#555'; }
   else { $('micIcon').textContent = S.muted ? '🔇' : '🎤'; $('micTxt').textContent = S.muted ? 'Mic spento' : 'Mic'; $('micIcon').style.background = S.muted ? '#e07b00' : 'rgba(30,142,62,.9)'; }
@@ -1284,14 +1286,21 @@ function setupCaps() {
 
 $('micBtn').onclick = () => cmd({a: 'mute', on: !S.muted});
 $('autoBtn').onclick = () => {
+  $('prep').style.display = 'none';
   if (S.auto && !S.assisted) { cmd({a: 'auto', on: false}); return; }
   dlg({msg: '<b>Auto in prova</b><br>La ripresa completamente automatica non è ancora stata provata in partita. Accenderla lo stesso?',
     buttons: [{t: 'Accendi Auto', cls: 'red', cb: () => { if (S.assisted) cmd({a: 'assisted', on: false}); cmd({a: 'auto', on: true}); }}, {t: 'Resta com\'è', cls: 'pri'}]});
 };
+// Due modalità per ora: Manuale (il regista muove e zooma) e Assistita (il regista muove, zoom automatico).
 $('assistBtn').onclick = () => {
-  const on = !S.assisted;
-  cmd({a: 'assisted', on});
-  toast(on ? 'Assistita: muovi tu il gimbal, lo zoom resta automatico' : 'Assistita spenta', 2500);
+  if (S.assisted) return;
+  cmd({a: 'assisted', on: true});
+  toast('Assistita: muovi tu il gimbal, lo zoom è automatico', 2500);
+};
+$('manBtn').onclick = () => {
+  if (S.assisted) cmd({a: 'assisted', on: false});
+  if (S.auto || S.assisted) cmd({a: 'auto', on: false});
+  toast('Manuale: muovi e zoomi tu (tasti − e + o due dita)', 2500);
 };
 
 // Registrazione
