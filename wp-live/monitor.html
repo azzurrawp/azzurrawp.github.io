@@ -74,6 +74,7 @@ body.geoEdit #fieldBtns{display:none !important}
 #fbDone{width:88px;height:88px;border-radius:50%;background:#1e8e3e;font-size:17px;line-height:1.1}
 #fbRedo{min-height:46px;padding:0 14px;border-radius:23px;background:rgba(36,74,122,.95);font-size:14px}
 #fbCalib{min-height:60px;padding:0 24px;border-radius:30px;background:#1e8e3e;font-size:18px}
+#fbScan{min-height:46px;padding:0 14px;border-radius:23px;background:rgba(36,74,122,.95);font-size:14px}
 #flowBar{display:none;position:sticky;top:0;z-index:2}
 #flowBar button{width:100%;min-height:52px;border:0;border-radius:12px;background:#1e8e3e;color:#fff;font-size:17px;font-weight:800}
 #sbAsk{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:20;display:none;align-items:center;justify-content:center}
@@ -96,6 +97,7 @@ button,select{font:inherit;touch-action:manipulation}
 #view{display:block;width:100%;height:100%;background:#000;-webkit-user-drag:none;user-select:none}
 img{-webkit-user-drag:none}
 #ov{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+#frame{transform-origin:50% 50%;transition:transform .25s}
 #viewBox.calib{outline:4px solid #ffd400;outline-offset:-4px}
 #calibHint{position:absolute;left:0;right:0;top:44px;padding:8px;background:rgba(0,0,0,.7);color:#ffd400;font-weight:700;text-align:center;display:none;z-index:3}
 #viewBox.calib #calibHint{display:block}
@@ -372,7 +374,7 @@ select{width:100%;padding:8px;border-radius:8px;background:#0b1420;color:#fff;bo
       <div id="wzBody"></div>
       <div id="wzNav"><button id="wzBack">‹ Indietro</button><button id="wzSkip">Salta ›</button></div>
     </div>
-    <div id="fieldBtns"><button id="fbDone">✓<br>Fatto</button><button id="fbRedo">↺ Rifai</button><button id="fbCalib">Calibra il campo</button></div>
+    <div id="fieldBtns"><button id="fbDone">✓<br>Fatto</button><button id="fbRedo">↺ Rifai</button><button id="fbCalib">Tocca i 4 angoli</button><button id="fbScan">Giro automatico col gimbal</button></div>
     <button id="goBtn">▶ Inizia</button>
     <button id="finBtn">■ Fine partita</button>
     <div id="penBox"><button id="penL">◀ Rigore</button><button id="penR">Rigore ▶</button></div>
@@ -556,16 +558,47 @@ function render() {
   drawOverlay();
 }
 
+// Passo Campo: se un angolo è fuori dall'immagine, l'immagine si rimpicciolisce e si vede tutto il campo,
+// con gli angoli nella fascia scura intorno, così si possono trascinare.
+let fitK = 1;
+function fitView() {
+  const on = document.body.classList.contains('wzCampo') || !!dragPts;
+  const pts = on ? (dragPts || S.corners || []) : [];
+  let x0 = 0, x1 = 1, y0 = 0, y1 = 1;
+  pts.forEach(p => { x0 = Math.min(x0, p[0]); x1 = Math.max(x1, p[0]); y0 = Math.min(y0, p[1]); y1 = Math.max(y1, p[1]); });
+  const out = x0 < 0 || y0 < 0 || x1 > 1 || y1 > 1;
+  // Durante il trascinamento la vista non cambia (il dito resterebbe fuori posto).
+  if (VD && fitK !== 1) return;
+  const m = 0.05;
+  const k = out ? Math.min(1, 1 / (x1 - x0 + 2 * m), 1 / (y1 - y0 + 2 * m)) : 1;
+  const f = $('frame');
+  if (k === 1) { f.style.transform = ''; fitK = 1; return; }
+  const w = f.clientWidth, h = f.clientHeight;
+  const tx = (0.5 - (x0 + x1) / 2) * w * k, ty = (0.5 - (y0 + y1) / 2) * h * k;
+  f.style.transform = 'translate(' + tx + 'px,' + ty + 'px) scale(' + k + ')';
+  fitK = k;
+}
 function drawOverlay() {
   if (document.body.classList.contains('wzCampo')) renderFieldBtns();
+  fitView();
   // Mentre si regola il campo spariscono registra, microfono, diretta e modalità.
   document.body.classList.toggle('geoEdit', !!(calibPts || dragPts || S.busyGeo));
   const c = $('ov'), img = $('view');
   const w = img.clientWidth, h = img.clientHeight;
-  if (c.width !== w) c.width = w;
-  if (c.height !== h) c.height = h;
+  // Tela grande il triplo quando la vista è rimpicciolita: gli angoli fuori dall'immagine si vedono.
+  const big = fitK < 1, F = big ? 3 : 1;
+  c.style.left = c.style.top = big ? '-100%' : '0';
+  c.style.width = c.style.height = (F * 100) + '%';
+  if (c.width !== w * F) c.width = w * F;
+  if (c.height !== h * F) c.height = h * F;
   const x = c.getContext('2d');
-  x.clearRect(0, 0, w, h);
+  x.setTransform(1, 0, 0, 1, 0, 0);
+  x.clearRect(0, 0, w * F, h * F);
+  if (big) {
+    x.setTransform(1, 0, 0, 1, w, h);
+    x.strokeStyle = 'rgba(255,255,255,.5)'; x.lineWidth = 2; x.setLineDash([6, 6]);
+    x.strokeRect(0, 0, w, h); x.setLineDash([]);
+  }
   const pts = dragPts || calibPts || S.corners || [];
   if (pts.length) {
     x.strokeStyle = calibPts ? '#ffd400' : 'rgba(94,224,138,.9)';
@@ -660,7 +693,7 @@ $('calibBtn').onclick = null;
 $('calibClear').onclick = null;
 function hitCorner(e) {
   // In partita gli angoli non si spostano per sbaglio: si regolano solo in Preparazione.
-  if (!calibPts && phase !== 'prep') return -1;
+  if (!calibPts && curPhase() !== 'prep') return -1;
   const pts = calibPts || S.corners || [];
   const r = $('view').getBoundingClientRect();
   for (let i = 0; i < pts.length; i++) {
@@ -943,11 +976,12 @@ function openCard(id) {
 const hDone = () => /^Altezza/.test(S.geo || '');
 const cDone = () => (S.corners || []).length === 4;
 function doLidar() { if (S.busyGeo) { toast('Misura già in corso', 2000); return; } wzLidar = true; cmd({a: 'lidar'}); toast('Misuro l\'altezza: la camera si inclina verso il pavimento', 3500); }
-function doCalib() {
+// Calibrazione a mano (predefinita): si toccano i 4 angoli; il giro automatico del gimbal resta a scelta.
+function doCalib(auto) {
   if (S.busyGeo) { toast('Aspetta che finisca la misura in corso', 2500); return; }
   wzCalib = true;
-  if (S.docked) { cmd({a: 'scanStart'}); toast('Calibrazione automatica: il gimbal fa un giro del campo', 3500); }
-  else { calibPts = []; calibHint(); $('viewBox').classList.add('calib'); toast('Gimbal scollegato: tocca i 4 angoli del campo sull\'immagine', 4000); }
+  if (auto && S.docked) { cmd({a: 'scanStart'}); toast('Calibrazione automatica: il gimbal fa un giro del campo', 3500); }
+  else { calibPts = []; calibHint(); $('viewBox').classList.add('calib'); toast('Tocca i 4 angoli del campo sull\'immagine', 4000); }
 }
 function hManual() {
   dlg({msg: 'Altezza della telecamera dal pavimento, in metri (es. 1.43)', input: true, ph: '1.43', buttons: [{t: 'Salva', cls: 'pri', cb: v => {
@@ -967,18 +1001,20 @@ function renderFieldBtns() {
   $('fbDone').style.display = done && !busy ? '' : 'none';
   $('fbRedo').style.display = done && !busy ? '' : 'none';
   $('fbCalib').style.display = !done && !busy && !calibPts ? '' : 'none';
+  $('fbScan').style.display = !done && !busy && !calibPts && S.docked ? '' : 'none';
   const r = $('view').getBoundingClientRect(), c = S.corners || [];
   let x = r.left + r.width / 2, y = r.top + r.height / 2;
   if (done) { x = r.left + r.width * c.reduce((a, p) => a + p[0], 0) / 4; y = r.top + r.height * c.reduce((a, p) => a + p[1], 0) / 4; }
   const fb = $('fieldBtns'); fb.style.left = x + 'px'; fb.style.top = y + 'px';
   if (campoToastStep !== wz) {
     campoToastStep = wz;
-    toast('Passo 3 di 5 · ' + (done ? 'campo verde sulla vasca? Trascina i pallini, poi Fatto' : 'tocca "Calibra il campo"'), 4500);
+    toast('Passo 3 di 5 · ' + (done ? 'campo verde sulla vasca? Trascina i pallini, poi Fatto' : 'tocca "Tocca i 4 angoli"'), 4500);
   }
 }
 $('fbDone').onclick = () => { OK.c = true; saveWz(); goStep(3); renderFieldBtns(); };
 $('fbRedo').onclick = () => { OK.c = false; saveWz(); doCalib(); };
-$('fbCalib').onclick = () => doCalib();
+$('fbCalib').onclick = () => doCalib(false);
+$('fbScan').onclick = () => doCalib(true);
 function renderWizard() {
   renderFieldBtns();
   if (curPhase() !== 'prep') return;
@@ -1442,7 +1478,8 @@ vb.addEventListener('pointermove', e => {
   if (!VD || e.pointerId !== VD.id) return;
   e.stopImmediatePropagation();
   const r = $('view').getBoundingClientRect();
-  VD.pts[VD.i] = [Math.min(1, Math.max(0, (e.clientX - r.left) / r.width)), Math.min(1, Math.max(0, (e.clientY - r.top) / r.height))];
+  // Gli angoli possono stare anche fuori dall'immagine (vista rimpicciolita nel passo Campo).
+  VD.pts[VD.i] = [Math.min(2, Math.max(-1, (e.clientX - r.left) / r.width)), Math.min(2, Math.max(-1, (e.clientY - r.top) / r.height))];
   VD.moved = true; VD.lastMove = Date.now();
   placeFLoupe(e.clientX, e.clientY);
   drawOverlay(); drawFLoupe();
