@@ -1,6 +1,6 @@
 {
-  "latestVersion": "0.8.8",
-  "releaseNotes": "0.8.8: comandi del regista e immagini in tempo reale (canale veloce), avvio Nuova partita/Riprendi, preparazione guidata a passi con controllo finale (batteria, spazio, internet, velocità), QR del regista, pulsanti Inizia e Fine partita.",
+  "latestVersion": "0.8.9",
+  "releaseNotes": "0.8.9: anteprima del regista fluida (fino a 25 immagini al secondo mentre muove, 15 da ferma), più tutto della 0.8.8: canale veloce, regia guidata, controllo finale, QR regista, Inizia e Fine partita.",
   "params": {
     "gimbalSpeed": 0.3,
     "zoomRampRate": 1.5

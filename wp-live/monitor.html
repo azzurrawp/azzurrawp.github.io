@@ -408,16 +408,28 @@ function wsConnect() {
       S = o; wsStatusT = Date.now(); render();
     } else {
       wsFrameT = Date.now();
-      const u = URL.createObjectURL(ev.data);
-      $('view').src = u;
-      if (lastFrameUrl) URL.revokeObjectURL(lastFrameUrl);
-      lastFrameUrl = u;
+      // Si mostra sempre l'ultima immagine arrivata; se il telefono è indietro, le intermedie si saltano.
+      pendingFrame = ev.data;
+      if (!frameBusy) showNextFrame();
     }
   };
   WS.onclose = () => { wsOK = false; WS = null; wsFails++; setTimeout(wsConnect, wsFails > 5 ? 15000 : 2000); };
   WS.onerror = () => {};
 }
 setInterval(() => { if (wsOK) { try { WS.send('{"a":"ping"}'); } catch (e) {} } }, 1000);
+let pendingFrame = null, frameBusy = false;
+function showNextFrame() {
+  if (!pendingFrame) return;
+  const b = pendingFrame; pendingFrame = null; frameBusy = true;
+  const u = URL.createObjectURL(b), im = $('view');
+  const done = () => {
+    im.removeEventListener('load', done); im.removeEventListener('error', done);
+    if (lastFrameUrl && lastFrameUrl !== u) URL.revokeObjectURL(lastFrameUrl);
+    lastFrameUrl = u; frameBusy = false; showNextFrame();
+  };
+  im.addEventListener('load', done); im.addEventListener('error', done);
+  im.src = u;
+}
 // Movimento: col canale veloce 20 comandi al secondo, altrimenti come prima (uno ogni 120 ms).
 let lastHttpMove = 0;
 function moveTick() {
