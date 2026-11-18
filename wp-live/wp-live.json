@@ -1,6 +1,6 @@
 {
-  "latestVersion": "0.9.1",
-  "releaseNotes": "0.9.1: all'avvio si sceglie chi comanda (iPhone o regista) e poi Nuova partita o Riprendi; password del regista nuova a ogni partita e uguale per tutta la gara; palla riconosciuta anche in ombra sotto la cupola; misura dell'altezza che torna nella posizione di partenza; anteprima del regista fino a 30 immagini al secondo.",
+  "latestVersion": "0.9.2",
+  "releaseNotes": "0.9.2: misura dell'altezza col LiDAR che ignora mobili e ostacoli davanti e usa il pavimento. Include tutto della 0.9.1.",
   "params": {
     "gimbalSpeed": 0.3,
     "zoomRampRate": 1.5
