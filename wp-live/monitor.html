@@ -50,7 +50,7 @@ body:not(.manual) #seg .zb{display:none !important}
 #cdBox{z-index:30;flex-direction:column;color:#fff}
 #cdNum{font-size:120px;font-weight:900;line-height:1}
 #cdBox button{margin-top:20px;min-height:52px;min-width:160px;border:0;border-radius:12px;font-size:17px;font-weight:800;background:#3a3f4b;color:#fff}
-#goBtn{position:absolute;left:50%;bottom:calc(14px + env(safe-area-inset-bottom));transform:translateX(-50%);min-height:64px;padding:0 34px;border:0;border-radius:32px;background:#1e8e3e;color:#fff;font-size:22px;font-weight:900;box-shadow:0 4px 16px rgba(0,0,0,.5);display:none;z-index:6}
+#goBtn{position:absolute;left:max(16px,calc(var(--sl) + 12px));bottom:calc(14px + env(safe-area-inset-bottom));min-height:64px;padding:0 34px;border:0;border-radius:32px;background:#1e8e3e;color:#fff;font-size:22px;font-weight:900;box-shadow:0 4px 16px rgba(0,0,0,.5);display:none;z-index:6}
 body.phMatch.idle #goBtn{display:block}
 body.phMatch.idle #sbBar,body.phMatch.idle #undoBtn{display:none !important}
 #finBtn{position:absolute;right:calc(110px + max(12px,var(--sr)));top:10px;min-height:52px;padding:0 14px;border:0;border-radius:14px;background:#8a1c1c;color:#fff;font-size:15px;font-weight:800;display:none}
@@ -177,6 +177,12 @@ input.txt{width:100%;padding:8px;border-radius:8px;background:#0b1420;color:#fff
 #prep{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;z-index:12;justify-content:flex-start}
 #prepPanel{width:min(calc(420px + var(--sl)),92vw);height:100%;overflow-y:auto;background:#0b1420;padding:14px;padding-left:max(14px,calc(var(--sl) + 6px));display:flex;flex-direction:column;gap:10px}
 .card{background:#132235;border-radius:12px;padding:10px}
+details.sec{background:#0f1c2c;border-radius:12px}
+details.sec>summary{list-style:none;cursor:pointer;padding:12px 14px;font-size:16px;font-weight:800;display:flex;justify-content:space-between}
+details.sec>summary::-webkit-details-marker{display:none}
+details.sec>summary::after{content:'▸';opacity:.7}
+details.sec[open]>summary::after{content:'▾'}
+details.sec>.card{margin:0 6px 8px}
 #status{font-size:14px;line-height:1.5}
 .row{display:flex;gap:6px;flex-wrap:wrap}
 details summary{cursor:pointer;font-weight:700;padding:4px 0}
@@ -248,19 +254,26 @@ select{width:100%;padding:8px;border-radius:8px;background:#0b1420;color:#fff;bo
       <div class="small" style="margin-top:6px">Ripresa, registrazione e diretta sull'iPhone continuano: fermale prima, se la partita è finita. Per ricollegarti: QR code o password.</div>
       <div class="small" id="homeTip" style="margin-top:8px;color:#7fd3ff">Su iPhone, per avere il monitor a schermo intero senza le barre di Safari: tasto Condividi › "Aggiungi alla schermata Home", poi aprilo dall'icona "WP Regia" (la password va scritta una volta).</div>
     </div>
+    <details class="sec" open id="secPartita"><summary>Partita</summary>
     <div class="card" id="phaseCard">
       <button class="btn2" id="backPrep" style="width:100%">Torna alla preparazione (checklist)</button>
       <button class="btn2" id="addReg" style="width:100%;margin-top:8px">Collega un regista (QR e link)</button>
-      <label style="display:flex;align-items:center;gap:8px;margin-top:10px"><input type="checkbox" id="linesOn"> Mostra le righe del campo durante la partita</label>
-      <button class="btn2" id="autoBtn" style="width:100%;margin-top:8px">Ripresa automatica (in prova)</button>
-      <label style="display:flex;gap:8px;align-items:center;margin-top:8px"><input type="checkbox" id="penOn"> Mostra i pulsanti Rigore</label>
     </div>
+    <div class="card" id="presetCard">
+      <div class="small">Posizioni (dal campo calibrato): la camera va lì da sola, con lo zoom giusto.</div>
+      <div class="row" style="margin-top:6px">
+        <button class="btn2" data-preset="sinistra">◀ Porta sinistra</button>
+        <button class="btn2" data-preset="centro">Tutto il campo</button>
+        <button class="btn2" data-preset="destra">Porta destra ▶</button>
+      </div>
+      <div class="small" style="margin-top:6px">Pulsanti del gimbal: scatto = avvia la registrazione (si ferma solo con Fine partita); cambio camera = Manuale ⇄ Assistita; rotella = zoom. <span id="gbTxt"></span></div>
+    </div>
+    </details>
+    <details class="sec" id="secCampo"><summary>Campo</summary>
     <div class="card" id="campoCard">
-      <div style="font-weight:700;margin-bottom:6px">Campo</div>
-      <div class="small">Giro automatico: il gimbal percorre il campo e propone il rettangolo. A mano: tocca i 4 angoli sulle linee di porta; tocca un angolo per la lente.</div>
+      <div class="small">Angolo per angolo: lo zoom va al più largo; giri la camera verso ogni angolo delle linee di porta e lo tocchi.</div>
       <div class="row" style="margin-top:8px">
-        <button class="btn2" id="calibBtn">Calibra (giro automatico)</button>
-        <button class="btn2" id="calibManual">Calibra a mano</button>
+        <button class="btn2" id="calibManual" style="background:#1e8e3e">Calibra angolo per angolo</button>
         <button class="btn2" id="calibClear">Cancella</button>
       </div>
       <div class="small" id="levelTxt" style="margin-top:8px"></div>
@@ -276,16 +289,9 @@ select{width:100%;padding:8px;border-radius:8px;background:#0b1420;color:#fff;bo
         <div class="small" id="geoTxt" style="margin-top:4px;color:#7fd3ff"></div>
       </div>
     </div>
-    <div class="card">
-      <div style="font-weight:700;margin-bottom:6px">Ripresa automatica</div>
-      <label style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="azOn"> Zoom automatico (regole della pallanuoto)</label>
-      <div style="font-size:12px;opacity:.75;margin-top:6px">Risparmio calore: con questo monitor collegato, dopo 2 minuti senza tocchi sull'iPhone l'anteprima si spegne e lo schermo va al minimo; un tocco sull'iPhone la riaccende (<span id="heatTxt">…</span>).</div>
-      <label style="margin-top:6px">L'Azzurra attacca verso (1° e 2° tempo)<select id="azzDir"><option value="">Non impostato</option><option value="sinistra">Sinistra</option><option value="destra">Destra</option></select></label>
-      <div style="font-size:12px;opacity:.75">Dal 3° tempo il verso si inverte da solo (cambio campo). Pallini sull'anteprima: azzurri = Azzurra, gialli = avversari, rossi = portieri.</div>
-      <div style="font-size:12px;opacity:.75">Serve il campo calibrato. Transizione larga, attacco sulla metà vasca, zona dei 6 metri; dopo un gol (+1) inquadratura ferma e poi larga verso il centro.</div>
-    </div>
+    </details>
+    <details class="sec" id="secTeams"><summary>Squadre e tabellone</summary>
     <div class="card" id="teamsCard">
-      <div style="font-weight:700;margin-bottom:6px">Squadre e tabellone</div>
       <label>Nome della partita<input class="txt" id="sbTitle" maxlength="60" placeholder="Campionato regionale FIN - Allievi"></label>
       <label style="display:flex;gap:8px;align-items:center;margin-top:6px"><input type="checkbox" id="sbFull"> Nomi delle squadre per intero</label>
       <label style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="sbVis"> Tabellone in diretta e registrazione</label>
@@ -303,8 +309,9 @@ select{width:100%;padding:8px;border-radius:8px;background:#0b1420;color:#fff;bo
       <div class="teamBox" id="tb_home"></div>
       <div class="teamBox" id="tb_away"></div>
     </div>
+    </details>
+    <details class="sec" id="secCaps"><summary>Calottine e palla</summary>
     <div class="card" id="capsCard">
-      <div style="font-weight:700;margin-bottom:6px">Calottine e palla</div>
       <label>Azzurra<select id="homeCap"></select></label>
       <label>Avversari<select id="awayCap"></select></label>
       <label style="margin-top:8px">Palla (taglia 5)<select id="ballSel"></select></label>
@@ -312,8 +319,9 @@ select{width:100%;padding:8px;border-radius:8px;background:#0b1420;color:#fff;bo
       <div class="small" id="ballMsg" style="margin-top:4px"></div>
       <div class="small" id="ballWarn" style="margin-top:4px;color:#ffb300"></div>
     </div>
+    </details>
+    <details class="sec" id="secLive"><summary>Dati diretta</summary>
     <div class="card" id="liveCard">
-      <div style="font-weight:700;margin-bottom:6px">Dati diretta (RTMP)</div>
       <div id="liveTxt" class="small"></div>
       <label>URL dello stream<input id="rtmpUrl" style="width:100%;padding:8px;border-radius:8px;background:#0b1420;color:#fff;border:1px solid #2a8cff" autocomplete="off"></label>
       <label>Chiave dello stream<input id="rtmpKey" type="password" placeholder="incolla la chiave" style="width:100%;padding:8px;border-radius:8px;background:#0b1420;color:#fff;border:1px solid #2a8cff" autocomplete="off"></label>
@@ -321,6 +329,22 @@ select{width:100%;padding:8px;border-radius:8px;background:#0b1420;color:#fff;bo
       <button class="btn2" id="liveSave" style="margin-top:8px;width:100%">Salva dati diretta</button>
       <div class="small" style="margin-top:4px">La chiave resta sull'iPhone della ripresa.</div>
     </div>
+    </details>
+    <details class="sec" id="secAdv"><summary>Avanzate</summary>
+    <div class="card">
+      <label style="display:flex;align-items:center;gap:8px"><input type="checkbox" id="linesOn"> Mostra le righe del campo durante la partita</label>
+      <label style="display:flex;gap:8px;align-items:center;margin-top:8px"><input type="checkbox" id="penOn"> Mostra i pulsanti Rigore</label>
+      <button class="btn2" id="calibBtn" style="width:100%;margin-top:8px">Calibra col giro automatico del gimbal (tieni premuto)</button>
+      <button class="btn2" id="autoBtn" style="width:100%;margin-top:8px">Ripresa automatica (in prova)</button>
+    </div>
+    <div class="card" id="autoCard">
+      <label style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="azOn"> Zoom automatico (regole della pallanuoto)</label>
+      <div style="font-size:12px;opacity:.75;margin-top:6px">Risparmio calore: con questo monitor collegato, dopo 2 minuti senza tocchi sull'iPhone l'anteprima si spegne e lo schermo va al minimo; un tocco sull'iPhone la riaccende (<span id="heatTxt">…</span>).</div>
+      <label style="margin-top:6px">L'Azzurra attacca verso (1° e 2° tempo)<select id="azzDir"><option value="">Non impostato</option><option value="sinistra">Sinistra</option><option value="destra">Destra</option></select></label>
+      <div style="font-size:12px;opacity:.75">Dal 3° tempo il verso si inverte da solo (cambio campo). Pallini sull'anteprima: azzurri = Azzurra, gialli = avversari, rossi = portieri.</div>
+      <div style="font-size:12px;opacity:.75">Serve il campo calibrato. Transizione larga, attacco sulla metà vasca, zona dei 6 metri; dopo un gol (+1) inquadratura ferma e poi larga verso il centro.</div>
+    </div>
+    </details>
     <div class="card" id="status">Collegamento…</div>
   </div>
 </div>
@@ -410,7 +434,15 @@ const $ = id => document.getElementById(id);
 async function api(path, body) {
   const url = path + (path.includes('?') ? '&' : '?') + 'pin=' + PIN + (LOCAL ? '&local=1' : '') + '&t=' + Date.now();
   const opt = body ? {method: 'POST', body: JSON.stringify(body), headers: {'Content-Type': 'application/json'}} : {};
-  const r = await fetch(url, opt);
+  // Prova del 19/11: ogni tanto un collegamento resta appeso 5–8 s. Dopo 3 s si riprova (fino a 3 volte).
+  let r = null, err = null;
+  for (let i = 0; i < 3 && !r; i++) {
+    const ac = window.AbortController ? new AbortController() : null;
+    const tm = ac ? setTimeout(() => ac.abort(), 3000) : 0;
+    try { r = await fetch(url, ac ? Object.assign({signal: ac.signal}, opt) : opt); } catch (e) { err = e; }
+    clearTimeout(tm);
+  }
+  if (!r) throw err || new Error('rete');
   if (r.status === 403) throw new Error('pin');
   return r;
 }
@@ -552,7 +584,10 @@ function render() {
   if (S.gimbalBattery >= 0) sb += '<span class="' + bc(S.gimbalBattery) + '">Gimbal ' + S.gimbalBattery + '%</span>';
   if (S.thermal !== 'normale' && S.thermal !== 'tiepido') sb += '<span class="bad">Caldo</span>';
   $('statusBar').innerHTML = sb;
-  $('modeTxt').textContent = S.mode || '';
+  renderButtons();
+  // La modalità è già nel riquadro in alto: qui solo il dettaglio (es. "palla persa"), senza ripeterla.
+  const md = (S.mode || '').replace(/^(MANUALE|ASSISTITA|AUTOMATICO)( · )?/, '');
+  $('modeTxt').textContent = md; $('modeTxt').style.display = md ? '' : 'none';
   $('autoBtn').style.background = S.auto ? '#1e8e3e' : '';
   $('manBtn').style.background = !S.auto && !S.assisted ? '#e67e00' : 'rgba(0,0,0,.6)';
   $('assistBtn').style.background = S.assisted ? '#1565c0' : 'rgba(0,0,0,.6)';
@@ -637,21 +672,24 @@ function drawOverlay() {
   });
   if (S.ball) {
     lastBall = S.ball; lastBallT = Date.now();
+    if (!S.auto && !S.assisted) return;
     x.strokeStyle = '#ff9f1a'; x.lineWidth = 4;
     x.beginPath(); x.arc(S.ball[0] * w, S.ball[1] * h, 18, 0, 7); x.stroke();
+  } else if (!S.auto && !S.assisted) {
+    // In Manuale la palla non serve: niente scritte.
   } else if (lastBall) {
     // Palla persa: cerchio tratteggiato grigio sull'ultima posizione nota.
     const secs = Math.round((Date.now() - lastBallT) / 1000);
     x.strokeStyle = 'rgba(200,200,200,.9)'; x.lineWidth = 3; x.setLineDash([6, 6]);
     x.beginPath(); x.arc(lastBall[0] * w, lastBall[1] * h, 22, 0, 7); x.stroke();
     x.setLineDash([]);
-    x.fillStyle = 'rgba(0,0,0,.6)'; x.fillRect(8, h - 34, 230, 26);
-    x.fillStyle = '#ffb347'; x.font = 'bold 16px sans-serif';
-    x.fillText('PALLA PERSA da ' + secs + ' s', 16, h - 15);
+    x.fillStyle = 'rgba(0,0,0,.6)'; x.fillRect(w / 2 - 115, 64, 230, 26);
+    x.fillStyle = '#ffb347'; x.font = 'bold 16px sans-serif'; x.textAlign = 'center';
+    x.fillText('PALLA PERSA da ' + secs + ' s', w / 2, 83); x.textAlign = 'start';
   } else {
-    x.fillStyle = 'rgba(0,0,0,.6)'; x.fillRect(8, h - 34, 230, 26);
-    x.fillStyle = '#ffb347'; x.font = 'bold 16px sans-serif';
-    x.fillText('PALLA NON TROVATA', 16, h - 15);
+    x.fillStyle = 'rgba(0,0,0,.6)'; x.fillRect(w / 2 - 115, 64, 230, 26);
+    x.fillStyle = '#ffb347'; x.font = 'bold 16px sans-serif'; x.textAlign = 'center';
+    x.fillText('PALLA NON TROVATA', w / 2, 83); x.textAlign = 'start';
   }
 }
 
@@ -698,7 +736,19 @@ const CALIB_STEPS = [
   '4/4 · Linea di porta SINISTRA, lato LONTANO (bordo in alto)'
 ];
 function calibHint() { $('calibHint').textContent = 'Tocca: ' + CALIB_STEPS[calibPts.length]; }
-$('calibManual').onclick = () => { calibPts = []; calibHint(); $('viewBox').classList.add('calib'); };
+$('calibManual').onclick = () => { $('prep').style.display = 'none'; doCalib(false); };
+document.querySelectorAll('[data-preset]').forEach(b => b.onclick = () => {
+  if ((S.corners || []).length !== 4) { toast('Prima calibra il campo', 2500); return; }
+  $('prep').style.display = 'none';
+  cmd({a: 'preset', name: b.dataset.preset});
+  toast(b.textContent.replace(/[◀▶]/g, '').trim(), 1500);
+});
+let lastBtnMsg = '';
+function renderButtons() {
+  const g = $('gbTxt'); if (g) g.textContent = S.gimbalButton ? 'Ultimo pulsante: ' + S.gimbalButton : '';
+  if (S.buttonMsg && S.buttonMsg !== lastBtnMsg) toast(S.buttonMsg, 2500);
+  lastBtnMsg = S.buttonMsg || '';
+}
 $('calibBtn').onclick = null;
 $('calibClear').onclick = null;
 function hitCorner(e) {
@@ -988,6 +1038,7 @@ function dlg(o) {
 }
 function openCard(id) {
   $('prep').style.display = 'flex';
+  const d = $(id) && $(id).closest('details'); if (d) d.open = true;
   setTimeout(() => { const c = $(id); if (c) c.scrollIntoView({block: 'start', behavior: 'smooth'}); }, 50);
 }
 const hDone = () => /^Altezza/.test(S.geo || '');
@@ -1291,7 +1342,7 @@ function renderGeo() {
   const t = $('levelTxt');
   if (l === undefined || l > 900) { t.textContent = ''; }
   else if (Math.abs(l) <= 1) { t.textContent = 'iPhone in bolla nel supporto (' + l.toFixed(1) + '°)'; t.style.color = '#7CFC9A'; }
-  else { t.textContent = 'iPhone storto nel supporto di ' + l.toFixed(1) + '°: ruotalo nel porta-telefono finché arriva a 0'; t.style.color = '#ffb300'; }
+  else { t.textContent = 'iPhone inclinato di ' + l.toFixed(1) + '°: raddrizzalo nel supporto (gimbal in modalità AUTO) finché arriva a 0'; t.style.color = '#ffb300'; }
   if (S.levelAlarm) {
     const now = Date.now();
     if (!renderGeo.lastAlarm || now - renderGeo.lastAlarm > 15000) {
@@ -1394,7 +1445,7 @@ function buildTeam(side, t) {
     PALETTE.map(c => '<span class="sw" data-c="' + c + '" style="background:' + c + '"></span>').join('') + '</div>' +
     '<label style="margin-top:6px">Mixer colori (qualsiasi colore) <input type="color" data-k="color"></label>' +
     '<label>Logo ' + (t.logo ? '✓ caricato' : '(nessuno)') + '<input type="file" accept="image/*" data-k="logo"></label>' +
-    '<div class="row" style="margin-top:6px"><button class="btn2" data-k="save">Salva in libreria</button>' + (t.logo ? '<button class="btn2" data-k="nologo">Togli logo</button>' : '') + '</div>';
+    '<div class="row" style="margin-top:6px"><button class="btn2" data-k="save">Salva in libreria</button><button class="btn2" data-k="del">Togli dalla libreria…</button>' + (t.logo ? '<button class="btn2" data-k="nologo">Togli logo</button>' : '') + '</div>';
   const q = k => box.querySelector('[data-k="' + k + '"]');
   q('name').value = t.name; q('short').value = t.short; q('color').value = t.color.toLowerCase();
   q('lib').onchange = e => { if (e.target.value) cmd({a: 'sbLoadTeam', side, id: e.target.value}); };
@@ -1403,6 +1454,15 @@ function buildTeam(side, t) {
   q('color').onchange = e => cmd({a: 'sbTeam', side, color: e.target.value.toUpperCase()});
   box.querySelectorAll('.sw').forEach(sw => sw.onclick = () => cmd({a: 'sbTeam', side, color: sw.dataset.c}));
   q('save').onclick = () => cmd({a: 'sbSaveTeam', side});
+  q('del').onclick = () => {
+    const list = S.teams || [];
+    if (!list.length) { toast('Libreria vuota', 2000); return; }
+    dlg({msg: 'Quale squadra togli dalla libreria? (la partita in corso non cambia)', buttons:
+      list.map(x => ({t: x.name.replace(/</g, ''), cb: () => dlg({msg: 'Togliere "' + x.name.replace(/</g, '') + '"?', buttons: [
+        {t: 'Togli', cls: 'pri', cb: () => { cmd({a: 'sbDeleteTeam', id: x.id}); toast('Tolta: ' + x.name, 2500); }}, {t: 'Annulla'}]})}))
+      .concat([{t: 'Annulla'}])});
+  };
+
   if (q('nologo')) q('nologo').onclick = () => cmd({a: 'sbNoLogo', side});
   q('logo').onchange = e => { const f = e.target.files[0]; if (f) uploadLogo(side, f); };
 }
@@ -1645,8 +1705,13 @@ hold($('sbReset'), () => true, 'azzerare la partita', () => cmd({a: 'sbReset'}))
 hold($('endBtn'), () => true, 'terminare la partita', () => { $('prep').style.display = 'none'; cmd({a: 'endMatch'}); });
 let endHidden = '';
 $('endBanner').onclick = () => { endHidden = (S.end || {}).message || ''; $('endBanner').style.display = 'none'; };
+let endSeen = '', endSeenT = 0;
 function renderEnd() {
   const e = S.end || {}, b = $('endBanner');
+  if (e.message !== endSeen) { endSeen = e.message; endSeenT = Date.now(); }
+  // "Video salvato" sparisce da solo dopo 10 s (resta l'informazione nel menu, in fondo).
+  if (e.state === 'done' && Date.now() - endSeenT > 10000) endHidden = e.message;
+  if (curPhase() === 'prep' || curPhase() === 'start') endHidden = e.message;
   if (!e.state || e.message === endHidden) { b.style.display = 'none'; return; }
   b.style.display = 'block';
   b.textContent = (e.state === 'saving' ? '⏳ ' : e.state === 'done' ? '✓ ' : '⚠ ') + e.message;

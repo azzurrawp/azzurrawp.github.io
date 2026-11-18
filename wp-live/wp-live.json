@@ -1,6 +1,6 @@
 {
-  "latestVersion": "0.9.3",
-  "releaseNotes": "0.9.3: misura dell'altezza che prova ad allargare l'inclinazione del gimbal verso il basso; link del regista solo con password e istruzioni per lo schermo intero; righe del campo solo in preparazione (in partita dal menu).",
+  "latestVersion": "0.9.4",
+  "releaseNotes": "0.9.4: pulsanti del gimbal (scatto = avvia registrazione, cambio camera = Manuale/Assistita, rotella = zoom); posizioni Porta sinistra / Tutto il campo / Porta destra; togliendo Assistita si torna in Manuale; avviso \"iPhone scivolato\" solo con la camera al centro; menu a sezioni; si possono togliere squadre dalla libreria.",
   "params": {
     "gimbalSpeed": 0.3,
     "zoomRampRate": 1.5
