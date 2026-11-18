@@ -65,6 +65,8 @@ body.phStart #seg,body.phStart #liveBtn,body.phStart #recWrap,body.phStart #micB
 #wzNav{display:flex;justify-content:space-between;margin-top:4px}
 #wzNav button{background:none;border:0;color:#9fc3ff;font-size:14px;padding:6px 2px}
 #ckBox.mini #wzBody,#ckBox.mini #wzNav{display:none}
+#ckBox.campo{width:250px;padding:8px}
+#ckBox.campo #wzBody button{min-height:40px;font-size:14px;margin:3px 0}
 #flowBar{display:none;position:sticky;top:0;z-index:2}
 #flowBar button{width:100%;min-height:52px;border:0;border-radius:12px;background:#1e8e3e;color:#fff;font-size:17px;font-weight:800}
 #sbAsk{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:20;display:none;align-items:center;justify-content:center}
@@ -937,6 +939,19 @@ function hManual() {
 }
 const STEP_NAMES = ['iPhone in bolla', 'Altezza', 'Campo', 'Calottine e palla', 'Controllo finale'];
 function line(cls, txt, val) { return '<div class="rowc"><span>' + txt + '</span><span class="' + cls + '">' + val + '</span></div>'; }
+// Nel passo del campo il riquadro si sposta dove non copre nessun angolo (di solito al centro).
+function placeCk() {
+  const box = $('ckBox'), on = curPhase() === 'prep' && wz === 2;
+  box.classList.toggle('campo', on);
+  if (!on) { box.style.left = box.style.top = ''; return; }
+  const W = innerWidth, H = innerHeight, w = box.offsetWidth, h = box.offsetHeight;
+  const r = $('view').getBoundingClientRect();
+  const pts = (S.corners || []).map(p => [r.left + p[0] * r.width, r.top + p[1] * r.height]);
+  const cands = [[(W - w) / 2, (H - h) / 2], [(W - w) / 2, 70], [(W - w) / 2, H - h - 12], [12, (H - h) / 2], [W - w - 12, (H - h) / 2]];
+  const clear = c => pts.every(p => p[0] < c[0] - 50 || p[0] > c[0] + w + 50 || p[1] < c[1] - 50 || p[1] > c[1] + h + 50);
+  const c = cands.find(clear) || cands[0];
+  box.style.left = Math.max(0, c[0]) + 'px'; box.style.top = Math.max(0, c[1]) + 'px';
+}
 function renderWizard() {
   if (curPhase() !== 'prep') return;
   $('ckStep').textContent = '· passo ' + (wz + 1) + ' di 5';
@@ -965,7 +980,7 @@ function renderWizard() {
     if (S.busyGeo) h += '<div class="st warn">Calibrazione in corso…</div>';
     else {
       if (wzCalib && cDone() && !calibPts && !OK.c) { OK.c = true; saveWz(); }
-      if (OK.c && cDone()) h += '<div class="st okt">✓ Campo pronto.</div><div class="st small">Se un pallino non è sull\'angolo, trascinalo: la lente mostra il punto preciso.</div>' + B('next', 'Avanti ▶', true) + B('calib', 'Rifai la calibrazione');
+      if (OK.c && cDone()) h += '<div class="st okt">✓ Campo pronto.</div><div class="st small">Se serve, trascina i pallini sugli angoli.</div>' + B('next', 'Avanti ▶', true) + B('calib', 'Rifai la calibrazione');
       else if (cDone()) h += '<div class="st">Il campo verde coincide con la vasca?</div>' + B('cok', 'Sì, coincide', true) + B('calib', 'No, rifai la calibrazione');
       else h += '<div class="st">' + (S.docked ? 'Il gimbal fa un giro del campo e trova gli angoli.' : 'Gimbal scollegato: toccherai i 4 angoli sull\'immagine.') + '</div>' + B('calib', 'Calibra il campo', true);
     }
@@ -997,6 +1012,7 @@ function renderWizard() {
     h += B('done', 'Preparazione finita ▶', true);
   }
   if (h !== wzHtml) { wzHtml = h; $('wzBody').innerHTML = h; }
+  placeCk();
   $('wzBack').style.visibility = wz > 0 ? '' : 'hidden';
   $('wzSkip').style.visibility = wz < 4 ? '' : 'hidden';
 }
