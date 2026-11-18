@@ -32,16 +32,41 @@ body.phPrep #sbBar, body.phPrep #penBox, body.phPrep #liveBtn, body.phPrep #recW
 body.phMatch #ckBox{display:none}
 body.phPrep #seg{display:none}
 body.geoEdit #seg,body.geoEdit #liveBtn,body.geoEdit #recWrap,body.geoEdit #micBtn,body.geoEdit #undoBtn,body.geoEdit #sbBar,body.geoEdit #penBox{display:none !important}
-#ckBox.mini .ck,#ckBox.mini .sub,#ckBox.mini #ckDone{display:none}
 #ckBox .sub{font-size:12px;opacity:.75;margin:-2px 0 4px}
 body.phMatch:not(.penOn) #penBox{display:none}
 body.phMatch:not(.sbOn) #sbBar{display:none}
 body:not(.manual) #seg .zb{display:none !important}
-#ckBox{position:absolute;left:max(12px,var(--sl));top:96px;width:270px;max-width:46vw;background:rgba(11,20,32,.88);border:2px solid #ffd400;border-radius:14px;padding:10px;font-size:14px;z-index:5}
+#ckBox{position:absolute;left:max(12px,var(--sl));top:96px;width:300px;max-height:calc(100vh - 110px);overflow-y:auto;max-width:46vw;background:rgba(11,20,32,.88);border:2px solid #ffd400;border-radius:14px;padding:10px;font-size:14px;z-index:5}
 #ckBox .ck{display:flex;gap:8px;align-items:center;width:100%;margin:4px 0;padding:8px;border-radius:10px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.06);color:#fff;font-size:14px;text-align:left;cursor:pointer}
 #ckBox .ck b{width:22px;text-align:center}
 #ckBox .ck.ok{border-color:#1e8e3e}
-#ckDone{width:100%;margin-top:6px;min-height:48px;border:0;border-radius:12px;background:#1e8e3e;color:#fff;font-size:16px;font-weight:800}
+#startBox,#dlg,#regBox,#cdBox{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:22;display:none;align-items:center;justify-content:center}
+#startBox > div,#dlg > div,#regBox > div{background:#132235;border:2px solid #2a8cff;border-radius:16px;padding:18px;max-width:min(460px,92vw);max-height:92vh;overflow-y:auto;text-align:center}
+#startBox button,#dlg button,#regBox button{min-height:52px;min-width:130px;margin:10px 6px 0;border:0;border-radius:12px;font-size:17px;font-weight:800;color:#fff;background:#3a3f4b}
+#startBox .pri,#dlg .pri,#regBox .pri{background:#1e8e3e}
+#dlg .red{background:#b3261e}
+#dlgIn{width:100%;margin-top:10px;padding:10px;font-size:18px;border-radius:10px;border:1px solid #2a8cff;background:#0b1420;color:#fff}
+#regQR{width:min(200px,40vh);height:min(200px,40vh);image-rendering:pixelated;background:#fff;border-radius:8px;margin-top:10px}
+#cdBox{z-index:30;flex-direction:column;color:#fff}
+#cdNum{font-size:120px;font-weight:900;line-height:1}
+#cdBox button{margin-top:20px;min-height:52px;min-width:160px;border:0;border-radius:12px;font-size:17px;font-weight:800;background:#3a3f4b;color:#fff}
+#goBtn{position:absolute;left:50%;bottom:calc(14px + env(safe-area-inset-bottom));transform:translateX(-50%);min-height:64px;padding:0 34px;border:0;border-radius:32px;background:#1e8e3e;color:#fff;font-size:22px;font-weight:900;box-shadow:0 4px 16px rgba(0,0,0,.5);display:none;z-index:6}
+body.phMatch.idle #goBtn{display:block}
+body.phMatch.idle #sbBar,body.phMatch.idle #undoBtn{display:none !important}
+#finBtn{position:absolute;right:calc(110px + max(12px,var(--sr)));top:10px;min-height:52px;padding:0 14px;border:0;border-radius:14px;background:#8a1c1c;color:#fff;font-size:15px;font-weight:800;display:none}
+body.running #finBtn{display:block}
+body.geoEdit #finBtn,body.geoEdit #goBtn{display:none !important}
+body.phStart #seg,body.phStart #liveBtn,body.phStart #recWrap,body.phStart #micBtn,body.phStart #undoBtn,body.phStart #sbBar,body.phStart #penBox,body.phStart #ckBox{display:none !important}
+#wzBody .st{margin:6px 0;font-size:14px;line-height:1.35}
+#wzBody .okt{color:#7CFC9A}#wzBody .bad{color:#ff8a80}#wzBody .warn{color:#ffd54f}
+#wzBody button{width:100%;margin:4px 0;min-height:44px;border:0;border-radius:10px;background:#244a7a;color:#fff;font-size:15px;font-weight:700}
+#wzBody button.pri{background:#1e8e3e}
+#wzBody .rowc{display:flex;justify-content:space-between;gap:6px;font-size:13px;padding:3px 0;border-bottom:1px solid rgba(255,255,255,.08)}
+#wzNav{display:flex;justify-content:space-between;margin-top:4px}
+#wzNav button{background:none;border:0;color:#9fc3ff;font-size:14px;padding:6px 2px}
+#ckBox.mini #wzBody,#ckBox.mini #wzNav{display:none}
+#flowBar{display:none;position:sticky;top:0;z-index:2}
+#flowBar button{width:100%;min-height:52px;border:0;border-radius:12px;background:#1e8e3e;color:#fff;font-size:17px;font-weight:800}
 #sbAsk{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:20;display:none;align-items:center;justify-content:center}
 #sbAsk > div{background:#132235;border:2px solid #2a8cff;border-radius:16px;padding:18px;max-width:420px;text-align:center}
 #sbAsk button{min-height:52px;min-width:120px;margin:10px 6px 0;border:0;border-radius:12px;font-size:17px;font-weight:800;color:#fff}
@@ -192,6 +217,7 @@ select{width:100%;padding:8px;border-radius:8px;background:#0b1420;color:#fff;bo
 
 <div id="prep">
   <div id="prepPanel">
+    <div id="flowBar"><button id="flowNext">Avanti ▶</button></div>
     <div style="display:flex;justify-content:space-between;align-items:center">
       <div style="font-size:18px;font-weight:700">Preparazione</div>
       <button class="btn2" id="prepClose">Chiudi</button>
@@ -270,7 +296,7 @@ select{width:100%;padding:8px;border-radius:8px;background:#0b1420;color:#fff;bo
       <div class="small" id="ballMsg" style="margin-top:4px"></div>
       <div class="small" id="ballWarn" style="margin-top:4px;color:#ffb300"></div>
     </div>
-    <div class="card">
+    <div class="card" id="liveCard">
       <div style="font-weight:700;margin-bottom:6px">Dati diretta (RTMP)</div>
       <div id="liveTxt" class="small"></div>
       <label>URL dello stream<input id="rtmpUrl" style="width:100%;padding:8px;border-radius:8px;background:#0b1420;color:#fff;border:1px solid #2a8cff" autocomplete="off"></label>
@@ -289,6 +315,26 @@ select{width:100%;padding:8px;border-radius:8px;background:#0b1420;color:#fff;bo
   <div style="margin-top:8px">Vuoi il tabellone in sovrimpressione (nomi delle squadre e punteggio) nella diretta e nella registrazione?</div>
   <button id="sbAskYes" style="background:#1e8e3e">Sì</button><button id="sbAskNo" style="background:#3a3f4b">No</button>
 </div></div>
+<div id="startBox"><div>
+  <div style="font-size:20px;font-weight:800">WP Live</div>
+  <div style="margin-top:8px">Cosa fai?</div>
+  <button id="stNew" class="pri">Nuova partita</button><button id="stResume">Riprendi la partita</button>
+  <div class="small" style="margin-top:10px">"Riprendi" serve se l'app si è chiusa a metà gara: tiene punteggio e calibrazione.</div>
+</div></div>
+<div id="dlg"><div><div id="dlgMsg"></div><input id="dlgIn"><div id="dlgBtns"></div></div></div>
+<div id="regBox"><div>
+  <div style="font-size:19px;font-weight:800">Regista</div>
+  <div id="regAsk">
+    <div style="margin-top:8px">Vuoi un regista su un altro telefono o PC?</div>
+    <button id="regYes" class="pri">Sì</button><button id="regNo">No, faccio da qui</button>
+  </div>
+  <div id="regShow" style="display:none">
+    <div style="margin-top:8px">Il regista inquadra il QR con la fotocamera, oppure gli mandi il link.</div>
+    <img id="regQR" alt="QR" onerror="this.style.display='none'">
+    <div><button id="regShare">Manda il link</button><button id="regDone" class="pri">Fatto ▶</button></div>
+  </div>
+</div></div>
+<div id="cdBox"><div style="font-size:20px;font-weight:800" id="cdTxt">Si parte tra</div><div id="cdNum">5</div><button id="cdCancel">Annulla</button></div>
 <div id="fLoupe"><img id="fLoupeImg" alt=""><canvas id="fLoupeCv"></canvas><div id="fLoupeTxt"></div></div>
 <div id="portraitBanner">iPhone in verticale sul gimbal: premi 2 volte il pulsante Switch del gimbal per tornare in orizzontale</div>
 <div id="endBanner" title="Tocca per nascondere" style="display:none;cursor:pointer;position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:25;max-width:90vw;padding:18px 22px;border-radius:16px;color:#fff;font-size:18px;font-weight:800;text-align:center"></div>
@@ -306,14 +352,12 @@ select{width:100%;padding:8px;border-radius:8px;background:#0b1420;color:#fff;bo
     <button class="rb" id="micBtn"><span class="rc" id="micIcon">🎤</span><span class="rl" id="micTxt">Mic</span></button>
     <div id="seg"><button id="zOut" class="zb" title="Allarga">−</button><button id="zIn" class="zb" title="Stringi">+</button><button id="largaBtn">Larga</button><button id="assistBtn">Assistita</button><button id="autoBtn">Auto</button></div>
     <div id="ckBox">
-      <div id="ckTitle" style="font-weight:800;color:#ffd400;cursor:pointer">Preparazione <span id="ckArrow">▾</span></div>
-      <div class="sub">Tocca una voce per farla</div>
-      <button class="ck" id="ck1"><b>○</b><span>iPhone orizzontale e in bolla</span></button>
-      <button class="ck" id="ck2"><b>○</b><span>Altezza della telecamera</span></button>
-      <button class="ck" id="ck3"><b>○</b><span>Campo calibrato</span></button>
-      <button class="ck" id="ck4"><b>○</b><span>Calottine e palla</span></button>
-      <button id="ckDone">Preparazione finita ▶</button>
+      <div id="ckTitle" style="font-weight:800;color:#ffd400;cursor:pointer">Preparazione <span id="ckStep" style="color:#fff;font-weight:600"></span> <span id="ckArrow">▾</span></div>
+      <div id="wzBody"></div>
+      <div id="wzNav"><button id="wzBack">‹ Indietro</button><button id="wzSkip">Salta ›</button></div>
     </div>
+    <button id="goBtn">▶ Inizia</button>
+    <button id="finBtn">■ Fine partita</button>
     <div id="penBox"><button id="penL">◀ Rigore</button><button id="penR">Rigore ▶</button></div>
     <button id="undoBtn">↶ Annulla gol</button>
     <div id="sbBar">
@@ -345,7 +389,42 @@ async function api(path, body) {
   if (r.status === 403) throw new Error('pin');
   return r;
 }
-function cmd(o) { return api('/cmd', o).catch(() => {}); }
+function cmd(o) {
+  if (wsOK) { try { WS.send(JSON.stringify(o)); return Promise.resolve(); } catch (e) {} }
+  return api('/cmd', o).catch(() => {});
+}
+// Canale veloce con l'iPhone (WebSocket, porta 8081): comandi immediati, stato e immagini spinti.
+// Se non c'è (app vecchia o rete che lo blocca) si resta sulle richieste normali.
+let WS = null, wsOK = false, wsFrameT = 0, wsStatusT = 0, wsFails = 0, lastFrameUrl = null;
+function wsConnect() {
+  if (disconnected || WS) return;
+  try { WS = new WebSocket('ws://' + (location.hostname || '127.0.0.1') + ':8081/'); } catch (e) { WS = null; return; }
+  WS.binaryType = 'blob';
+  WS.onopen = () => { try { WS.send(JSON.stringify({pin: PIN, local: LOCAL})); } catch (e) {} };
+  WS.onmessage = ev => {
+    if (typeof ev.data === 'string') {
+      let o; try { o = JSON.parse(ev.data); } catch (e) { return; }
+      if (o.ok === true && Object.keys(o).length === 1) { wsOK = true; wsFails = 0; return; }
+      S = o; wsStatusT = Date.now(); render();
+    } else {
+      wsFrameT = Date.now();
+      const u = URL.createObjectURL(ev.data);
+      $('view').src = u;
+      if (lastFrameUrl) URL.revokeObjectURL(lastFrameUrl);
+      lastFrameUrl = u;
+    }
+  };
+  WS.onclose = () => { wsOK = false; WS = null; wsFails++; setTimeout(wsConnect, wsFails > 5 ? 15000 : 2000); };
+  WS.onerror = () => {};
+}
+setInterval(() => { if (wsOK) { try { WS.send('{"a":"ping"}'); } catch (e) {} } }, 1000);
+// Movimento: col canale veloce 20 comandi al secondo, altrimenti come prima (uno ogni 120 ms).
+let lastHttpMove = 0;
+function moveTick() {
+  if (wsOK) return true;
+  const n = Date.now(); if (n - lastHttpMove < 115) return false;
+  lastHttpMove = n; return true;
+}
 
 async function login(pin) {
   PIN = pin;
@@ -361,6 +440,7 @@ async function login(pin) {
     if (typeof keepAwake === 'function') keepAwake();
     frameLoop();
     statusLoop();
+    wsConnect();
   } catch (e) {
     $('loginMsg').textContent = e.message === 'pin' ? 'Password errata' : 'iPhone della ripresa non raggiungibile: sei collegato al suo hotspot?';
   }
@@ -377,6 +457,7 @@ if (PIN) { $('pinIn').value = PIN; login(PIN); }
 let lastUrl = null;
 async function frameLoop() {
   if (disconnected) return;
+  if (wsOK && Date.now() - wsFrameT < 1500) { setTimeout(frameLoop, 400); return; }
   try {
     const r = await api('/frame.jpg');
     if (r.ok) {
@@ -392,6 +473,7 @@ async function frameLoop() {
 
 async function statusLoop() {
   if (disconnected) return;
+  if (wsOK && Date.now() - wsStatusT < 1500) { setTimeout(statusLoop, 400); return; }
   try { S = await (await api('/status')).json(); render(); }
   catch (e) { $('status').innerHTML = '<span class="bad">iPhone della ripresa non raggiungibile</span>'; }
   setTimeout(statusLoop, 400);
@@ -653,7 +735,7 @@ vb.addEventListener('pointerdown', e => {
   if (touches.size === 2) {
     G = {mid: gMid(), dist: Math.max(gDist(), 1), zoom: S.zoomValue || 1, x: 0, y: 0, lastZoom: 0};
     clearInterval(G.timer);
-    G.timer = setInterval(() => { if (G) cmd({a: 'move', x: G.x, y: G.y}); }, 120);
+    G.timer = setInterval(() => { if (G && moveTick()) cmd({a: 'move', x: G.x, y: G.y}); }, 50);
   }
 });
 vb.addEventListener('pointermove', e => {
@@ -705,8 +787,8 @@ function renderLive() {
 $('liveBtn').onclick = () => {
   const L = S.live || {};
   if (L.state && L.state !== 'off') return;  // per fermarla si tiene premuto 2 secondi
-  if (!L.hasKey) { alert('Prima inserisci la chiave dello stream in Preparazione › Dati diretta.'); $('prep').style.display = 'flex'; return; }
-  if (confirm('Avviare la diretta su YouTube (' + (L.quality || '1080p') + ')?')) cmd({a: 'liveStart'});
+  if (!L.hasKey) { dlg({msg: 'Prima inserisci la chiave dello stream (Dati diretta).', buttons: [{t: 'Inserisci', cls: 'pri', cb: () => openCard('liveCard')}, {t: 'Chiudi'}]}); return; }
+  dlg({msg: 'Avviare la diretta su YouTube (' + (L.quality || '1080p') + ')?', buttons: [{t: 'Avvia', cls: 'pri', cb: () => cmd({a: 'liveStart'})}, {t: 'Annulla'}]});
 };
 $('liveSave').onclick = () => {
   cmd({a: 'liveConfig', url: $('rtmpUrl').value.trim(), key: $('rtmpKey').value.trim(), quality: $('liveQ').value});
@@ -789,60 +871,235 @@ $('hSet').onclick = () => {
 };
 $('zOut').onclick = () => { const z = Math.max(0.5, (S.zoomValue || 1) / 1.3); S.zoomValue = z; cmd({a: 'zoom', v: z}); };
 $('zIn').onclick = () => { const z = Math.min(Math.min(S.maxZoom || 10, 10), (S.zoomValue || 1) * 1.3); S.zoomValue = z; cmd({a: 'zoom', v: z}); };
-// ---- Fasi: preparazione e partita ----
+// ---- Fasi: avvio, preparazione guidata, partita ----
+// La fase sta sull'iPhone (app 0.8.8+), così telefono del regista e iPhone che riprende la vedono uguale.
 let phase = 'prep';
-try { phase = sessionStorage.getItem('wpPhase') || 'prep'; } catch (e) {}
-// Ogni avvio dell'app riparte dalla preparazione (si cancella il vecchio valore salvato).
-try { localStorage.removeItem('wpPhase'); localStorage.removeItem('wpCaps'); } catch (e) {}
-let sbHiding = false;
-let capsSeen = false;
-try { capsSeen = sessionStorage.getItem('wpCaps') === '1'; } catch (e) {}
-function setPhase(p) { phase = p; try { sessionStorage.setItem('wpPhase', p); } catch (e) {} renderPhase(); }
+try { phase = sessionStorage.getItem('wpPhase') || 'prep'; localStorage.removeItem('wpPhase'); localStorage.removeItem('wpCaps'); } catch (e) {}
+const srvPhase = () => typeof S.phase === 'string';
+function curPhase() { return srvPhase() ? S.phase : phase; }
+function setPhase(p) {
+  phase = p;
+  try { sessionStorage.setItem('wpPhase', p); } catch (e) {}
+  if (srvPhase() && S.phase !== p) { S.phase = p; cmd({a: 'phase', p}); }
+  renderPhase();
+}
+// Passo della preparazione e conferme di questa partita (per questo telefono).
+let wz = 0, OK = {};
+try { wz = +(sessionStorage.getItem('wpWz') || 0); OK = JSON.parse(sessionStorage.getItem('wpOk') || '{}'); } catch (e) {}
+function saveWz() { try { sessionStorage.setItem('wpWz', wz); sessionStorage.setItem('wpOk', JSON.stringify(OK)); } catch (e) {} }
+function goStep(i) { wz = Math.max(0, Math.min(4, i)); wzLidar = wzCalib = false; okSince = 0; saveWz(); renderWizard(); }
+let wzLidar = false, wzCalib = false, okSince = 0, sbHiding = false, wzHtml = '';
+const esc = t => String(t == null ? '' : t).replace(/[&<>"]/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c]));
+function dlg(o) {
+  const b = $('dlg'), inp = $('dlgIn');
+  $('dlgMsg').innerHTML = o.msg;
+  inp.style.display = o.input ? '' : 'none'; inp.value = o.def || ''; inp.placeholder = o.ph || '';
+  const bt = $('dlgBtns'); bt.innerHTML = '';
+  (o.buttons || [{t: 'OK'}]).forEach(x => {
+    const e = document.createElement('button'); e.textContent = x.t; if (x.cls) e.className = x.cls;
+    e.onclick = () => { b.style.display = 'none'; if (x.cb) x.cb(inp.value); };
+    bt.appendChild(e);
+  });
+  b.style.display = 'flex';
+  if (o.input) setTimeout(() => inp.focus(), 60);
+}
 function openCard(id) {
   $('prep').style.display = 'flex';
   setTimeout(() => { const c = $(id); if (c) c.scrollIntoView({block: 'start', behavior: 'smooth'}); }, 50);
-  if (id === 'capsCard') { capsSeen = true; try { sessionStorage.setItem('wpCaps', '1'); } catch (e) {} }
 }
+const hDone = () => /^Altezza/.test(S.geo || '');
+const cDone = () => (S.corners || []).length === 4;
+function doLidar() { if (S.busyGeo) { toast('Misura già in corso', 2000); return; } wzLidar = true; cmd({a: 'lidar'}); toast('Misuro l\'altezza: la camera si inclina verso il pavimento', 3500); }
+function doCalib() {
+  if (S.busyGeo) { toast('Aspetta che finisca la misura in corso', 2500); return; }
+  wzCalib = true;
+  if (S.docked) { cmd({a: 'scanStart'}); toast('Calibrazione automatica: il gimbal fa un giro del campo', 3500); }
+  else { calibPts = []; calibHint(); $('viewBox').classList.add('calib'); toast('Gimbal scollegato: tocca i 4 angoli del campo sull\'immagine', 4000); }
+}
+function hManual() {
+  dlg({msg: 'Altezza della telecamera dal pavimento, in metri (es. 1.43)', input: true, ph: '1.43', buttons: [{t: 'Salva', cls: 'pri', cb: v => {
+    const h = parseFloat((v || '').replace(',', '.'));
+    if (!(h > 0.5 && h < 9)) { toast('Scrivi l\'altezza in metri, es. 1.43'); return; }
+    cmd({a: 'height', v: h}); OK.h = true; saveWz(); goStep(2);
+  }}, {t: 'Annulla'}]});
+}
+const STEP_NAMES = ['iPhone in bolla', 'Altezza', 'Campo', 'Calottine e palla', 'Controllo finale'];
+function line(cls, txt, val) { return '<div class="rowc"><span>' + txt + '</span><span class="' + cls + '">' + val + '</span></div>'; }
+function renderWizard() {
+  if (curPhase() !== 'prep') return;
+  $('ckStep').textContent = '· passo ' + (wz + 1) + ' di 5';
+  let h = '<div style="font-weight:800;font-size:15px;margin-top:4px">' + STEP_NAMES[wz] + '</div>';
+  const B = (act, t, pri) => '<button data-act="' + act + '"' + (pri ? ' class="pri"' : '') + '>' + t + '</button>';
+  if (wz === 0) {
+    const lv = S.level, has = lv !== undefined && lv < 900, ok = !S.portrait && has && Math.abs(lv) <= 1;
+    if (S.portrait) h += '<div class="st bad">iPhone in VERTICALE: premi 2 volte Switch sul gimbal.</div>';
+    else if (!has) h += '<div class="st warn">Livella non disponibile: controlla a occhio che sia dritto.</div>';
+    else if (ok) h += '<div class="st okt">✓ In bolla (' + lv.toFixed(1) + '°)</div>';
+    else h += '<div class="st bad">Storto di ' + lv.toFixed(1) + '°: raddrizza l\'iPhone nel supporto.</div>';
+    h += B('next', 'Avanti ▶', ok || !has);
+    // Appena è in bolla da 1,5 secondi si passa da soli.
+    if (ok) { if (!okSince) okSince = Date.now(); else if (Date.now() - okSince > 1500) { goStep(1); return; } } else okSince = 0;
+  } else if (wz === 1) {
+    const busy = S.busyGeo && wzLidar;
+    if (busy) h += '<div class="st warn">Misura in corso… ' + esc(S.lidarDbg || '') + '</div>';
+    else if (wzLidar && hDone() && !OK.h) { OK.h = true; saveWz(); }
+    if (S.lidarMsg && !busy) h += '<div class="st warn">' + esc(S.lidarMsg) + '</div>';
+    if (!busy) {
+      if (OK.h && hDone()) h += '<div class="st okt">✓ ' + esc((S.geo || '').split(' · ')[0]) + '</div>' + B('next', 'Avanti ▶', true) + B('lidar', 'Rimisura col LiDAR') + B('hman', 'Scrivila a mano');
+      else if (hDone()) h += '<div class="st">Altezza salvata: <b>' + esc((S.geo || '').split(' · ')[0].replace('Altezza ', '')) + '</b>. È ancora giusta?</div>' + B('hok', 'Sì, va bene', true) + B('lidar', 'Rimisura col LiDAR') + B('hman', 'Scrivila a mano');
+      else h += '<div class="st">Serve l\'altezza della telecamera dal pavimento.</div>' + B('lidar', 'Misura col LiDAR', true) + B('hman', 'Scrivila a mano');
+    }
+  } else if (wz === 2) {
+    if (S.busyGeo) h += '<div class="st warn">Calibrazione in corso…</div>';
+    else {
+      if (wzCalib && cDone() && !calibPts && !OK.c) { OK.c = true; saveWz(); }
+      if (OK.c && cDone()) h += '<div class="st okt">✓ Campo pronto.</div><div class="st small">Se un pallino non è sull\'angolo, trascinalo: la lente mostra il punto preciso.</div>' + B('next', 'Avanti ▶', true) + B('calib', 'Rifai la calibrazione');
+      else if (cDone()) h += '<div class="st">Il campo verde coincide con la vasca?</div>' + B('cok', 'Sì, coincide', true) + B('calib', 'No, rifai la calibrazione');
+      else h += '<div class="st">' + (S.docked ? 'Il gimbal fa un giro del campo e trova gli angoli.' : 'Gimbal scollegato: toccherai i 4 angoli sull\'immagine.') + '</div>' + B('calib', 'Calibra il campo', true);
+    }
+  } else if (wz === 3) {
+    const caps = S.caps || [];
+    const nA = caps.filter(c => c[2] === 1).length, nO = caps.filter(c => c[2] === 0).length;
+    h += '<div class="st">Azzurra: <b>' + esc(S.home) + '</b> · Avversari: <b>' + esc(S.away) + '</b><br>Palla: <b>' + esc(S.ballColor) + '</b></div>';
+    h += '<div class="st">In acqua vedo: <span class="' + (nA ? 'okt' : 'warn') + '">' + nA + ' Azzurra</span>, <span class="' + (nO ? 'okt' : 'warn') + '">' + nO + ' avversari</span>, palla <span class="' + (S.ball ? 'okt">sì' : 'warn">no') + '</span></div>';
+    if (S.ballWarn) h += '<div class="st warn">' + esc(S.ballWarn) + '</div>';
+    h += B('kok', 'Va bene', true) + B('caps', 'Cambia colori o insegna la palla');
+  } else {
+    const newApp = S.freeGB !== undefined;
+    const bat = S.battery, gb = S.gimbalBattery;
+    h += line(bat >= 50 || S.charging ? 'okt' : bat >= 25 ? 'warn' : 'bad', 'Batteria iPhone', (bat >= 0 ? bat + '%' : '?') + (S.charging ? ' in carica' : ''));
+    h += line(!S.docked ? 'bad' : gb >= 40 ? 'okt' : gb >= 20 ? 'warn' : 'bad', 'Gimbal', !S.docked ? 'scollegato' : (gb >= 0 ? gb + '%' : 'collegato'));
+    h += line(S.thermal === 'normale' || S.thermal === 'tiepido' ? 'okt' : 'bad', 'Temperatura', esc(S.thermal || '?'));
+    if (newApp) {
+      const hrs = S.freeGB / 5;
+      h += line(hrs >= 1.5 ? 'okt' : hrs >= 1 ? 'warn' : 'bad', 'Spazio libero', S.freeGB.toFixed(1) + ' GB (~' + hrs.toFixed(1).replace('.', ',') + ' ore)');
+      h += line(S.net === 'nessuna' ? 'bad' : 'okt', 'Internet', esc(S.net || '?'));
+      const sp = S.netSpeed;
+      h += line(S.netTesting ? 'warn' : sp < 0 ? 'warn' : sp >= 6 ? 'okt' : sp >= 3.5 ? 'warn' : 'bad', 'Velocità invio',
+        S.netTesting ? 'prova in corso…' : sp < 0 ? 'da provare' : sp.toFixed(1).replace('.', ',') + ' Mbps' + (sp < 6 && sp >= 3.5 ? ' (usa 720p)' : sp < 3.5 ? ' (troppo poco)' : ''));
+    } else h += '<div class="st warn">Spazio, internet e velocità: servono l\'app 0.8.8.</div>';
+    const hk = S.live && S.live.hasKey;
+    h += line(hk ? 'okt' : 'warn', 'Chiave YouTube', hk ? 'inserita' : 'manca (solo registrazione)');
+    if (newApp) h += B('net', S.netTesting ? 'Prova in corso…' : 'Prova la velocità');
+    if (!hk) h += B('key', 'Inserisci la chiave YouTube');
+    h += B('done', 'Preparazione finita ▶', true);
+  }
+  if (h !== wzHtml) { wzHtml = h; $('wzBody').innerHTML = h; }
+  $('wzBack').style.visibility = wz > 0 ? '' : 'hidden';
+  $('wzSkip').style.visibility = wz < 4 ? '' : 'hidden';
+}
+// pointerup e non click: il riquadro si ridisegna spesso e un click a metà andrebbe perso.
+$('wzBody').addEventListener('pointerup', e => {
+  const b = e.target.closest('button[data-act]'); if (!b) return;
+  const a = b.dataset.act;
+  if (a === 'next') goStep(wz + 1);
+  else if (a === 'lidar') doLidar();
+  else if (a === 'hman') hManual();
+  else if (a === 'hok') { OK.h = true; saveWz(); goStep(2); }
+  else if (a === 'calib') { OK.c = false; saveWz(); doCalib(); }
+  else if (a === 'cok') { OK.c = true; saveWz(); goStep(3); }
+  else if (a === 'kok') { OK.k = true; saveWz(); goStep(4); }
+  else if (a === 'caps') openCard('capsCard');
+  else if (a === 'net') { if (!S.netTesting) { S.netTesting = true; cmd({a: 'netTest'}); renderWizard(); } }
+  else if (a === 'key') openCard('liveCard');
+  else if (a === 'done') $('sbAsk').style.display = 'flex';
+});
+$('wzBack').onclick = () => goStep(wz - 1);
+$('wzSkip').onclick = () => goStep(wz + 1);
+$('ckTitle').onclick = () => { const m = $('ckBox').classList.toggle('mini'); $('ckArrow').textContent = m ? '▸' : '▾'; };
+
+// Avvio: nuova partita o ripresa dopo una chiusura dell'app.
+$('stNew').onclick = () => { cmd({a: 'sbReset'}); OK = {}; wz = 0; saveWz(); setPhase('prep'); };
+$('stResume').onclick = () => setPhase('match');
+
+// Tabellone, poi regista.
+let flowNext = false;
+$('sbAskYes').onclick = () => { $('sbAsk').style.display = 'none'; cmd({a: 'sbVisible', on: true}); flowNext = true; $('flowBar').style.display = 'block'; openCard('teamsCard'); };
+$('sbAskNo').onclick = () => { $('sbAsk').style.display = 'none'; cmd({a: 'sbVisible', on: false}); showRegista(); };
+$('flowNext').onclick = () => { flowNext = false; $('flowBar').style.display = 'none'; $('prep').style.display = 'none'; showRegista(); };
+function showRegista() {
+  $('regAsk').style.display = ''; $('regShow').style.display = 'none';
+  $('regBox').style.display = 'flex';
+}
+$('regYes').onclick = () => {
+  $('regAsk').style.display = 'none'; $('regShow').style.display = '';
+  const q = $('regQR');
+  q.style.display = S.share ? '' : 'none';
+  if (S.share) q.src = '/qr.png?pin=' + PIN + (LOCAL ? '&local=1' : '') + '&t=' + Date.now();
+};
+$('regNo').onclick = () => { $('regBox').style.display = 'none'; setPhase('match'); };
+$('regDone').onclick = () => { $('regBox').style.display = 'none'; setPhase('match'); };
+$('regShare').onclick = () => {
+  if (LOCAL) { try { window.webkit.messageHandlers.wp.postMessage('pair'); return; } catch (e) {} }
+  const text = 'Regia WP Live: ' + (S.share || location.href);
+  if (navigator.share) { navigator.share({text}).catch(() => {}); return; }
+  try { navigator.clipboard.writeText(S.share || ''); toast('Link copiato: incollalo su WhatsApp', 2500); } catch (e) { toast(S.share || ''); }
+};
+$('backPrep').onclick = () => { $('prep').style.display = 'none'; goStep(0); setPhase('prep'); };
+
+// Inizio: un solo pulsante, conto alla rovescia, poi registrazione (e diretta) in Auto.
+let cdTimer = null;
+$('goBtn').onclick = () => {
+  const hk = S.live && S.live.hasKey;
+  const b = [];
+  if (hk) b.push({t: 'Diretta + registrazione', cls: 'pri', cb: () => countdown(true)});
+  b.push({t: 'Solo registrazione', cls: hk ? '' : 'pri', cb: () => countdown(false)});
+  b.push({t: 'Annulla'});
+  dlg({msg: '<b>Si parte?</b><br>La ripresa va in Auto.' + (hk ? '' : '<br><span class="small">Chiave YouTube non inserita: solo registrazione.</span>'), buttons: b});
+};
+function countdown(live) {
+  let n = 5;
+  $('cdTxt').textContent = live ? 'Diretta e registrazione tra' : 'Registrazione tra';
+  $('cdNum').textContent = n; $('cdBox').style.display = 'flex';
+  clearInterval(cdTimer);
+  cdTimer = setInterval(() => {
+    n--;
+    if (n > 0) { $('cdNum').textContent = n; return; }
+    clearInterval(cdTimer); $('cdBox').style.display = 'none';
+    if (!S.auto) cmd({a: 'auto', on: true});
+    cmd({a: 'rec', on: true});
+    if (live) cmd({a: 'liveStart'});
+    matchStart = Date.now();
+  }, 1000);
+}
+$('cdCancel').onclick = () => { clearInterval(cdTimer); $('cdBox').style.display = 'none'; };
+
+// Fine partita: tieni premuto, poi riepilogo.
+let matchStart = 0, lastRecSec = 0, endFlow = false;
+hold($('finBtn'), () => true, 'finire la partita', () => { endFlow = true; cmd({a: 'endMatch'}); });
+function checkEnd() {
+  if (S.rec) lastRecSec = S.recSeconds || lastRecSec;
+  const e = S.end || {};
+  if (!endFlow || (e.state !== 'done' && e.state !== 'error')) return;
+  endFlow = false;
+  endHidden = e.message || '';
+  const sb = S.sb || {};
+  let m = '<b>Partita finita</b>';
+  if (sb.home && sb.away) m += '<div style="font-size:22px;margin:8px 0">' + esc(sb.home.short) + ' ' + sb.hs + ' – ' + sb.as + ' ' + esc(sb.away.short) + '</div>';
+  if (lastRecSec) m += '<div>Registrazione: ' + fmt(lastRecSec) + '</div>';
+  m += '<div class="small" style="margin-top:6px">' + esc(e.message) + '</div>';
+  dlg({msg: m, buttons: [{t: 'Nuova partita', cls: 'pri', cb: () => setPhase('start')}, {t: 'Chiudi'}]});
+}
+
 function renderPhase() {
+  let ph = curPhase();
+  const running = !!(S.rec || (S.live && S.live.state && S.live.state !== 'off'));
   // Con registrazione o diretta in corso si è per forza in partita.
-  if (phase === 'prep' && (S.rec || (S.live && S.live.state && S.live.state !== 'off'))) phase = 'match';
+  if (running && ph !== 'match') { setPhase('match'); return; }
   const b = document.body.classList;
-  b.toggle('phPrep', phase === 'prep'); b.toggle('phMatch', phase !== 'prep');
+  b.toggle('phStart', ph === 'start'); b.toggle('phPrep', ph === 'prep'); b.toggle('phMatch', ph === 'match');
+  b.toggle('running', running); b.toggle('idle', !running && $('cdBox').style.display !== 'flex');
   let pen = false; try { pen = localStorage.getItem('wpPen') === '1'; } catch (e) {}
   b.toggle('penOn', pen); $('penOn').checked = pen;
   b.toggle('sbOn', !!(S.sb && S.sb.visible));
   b.toggle('manual', !S.auto && !S.assisted);
-  // In preparazione il tabellone non va in sovrimpressione: si decide dopo, alla domanda.
-  if (phase === 'prep' && S.sb && S.sb.visible) { if (!sbHiding) { sbHiding = true; cmd({a: 'sbVisible', on: false}); } } else sbHiding = false;
-  if (phase !== 'prep') return;
-  const set = (id, ok, txt) => { const e = $(id); e.classList.toggle('ok', !!ok); e.querySelector('b').textContent = ok ? '✓' : '○'; if (txt) e.querySelector('span').textContent = txt; };
-  const lv = S.level, levelOk = !S.portrait && lv !== undefined && lv < 900 && Math.abs(lv) <= 1;
-  set('ck1', levelOk, S.portrait ? 'iPhone in VERTICALE: 2 volte Switch' : (lv !== undefined && lv < 900 && !levelOk ? 'iPhone storto di ' + lv.toFixed(1) + '°: raddrizzalo' : 'iPhone orizzontale e in bolla'));
-  const hOk = /^Altezza/.test(S.geo || '');
-  set('ck2', hOk, hOk ? (S.geo || '').split(' · ')[0] : 'Altezza della telecamera');
-  set('ck3', (S.corners || []).length === 4, 'Campo calibrato');
-  set('ck4', capsSeen, 'Calottine e palla');
+  const modal = ['dlg', 'regBox', 'sbAsk'].some(id => $(id).style.display === 'flex');
+  $('startBox').style.display = ph === 'start' && !modal ? 'flex' : 'none';
+  // Prima di "Preparazione finita" il tabellone non va in sovrimpressione: si decide alla domanda.
+  if (ph !== 'match' && S.sb && S.sb.visible) { if (!sbHiding) { sbHiding = true; cmd({a: 'sbVisible', on: false}); } } else sbHiding = false;
+  if (ph === 'prep') renderWizard();
+  checkEnd();
 }
-// Ogni voce fa partire subito il suo passo; se è già fatta, si rifà tenendo premuto.
-const hDone = () => /^Altezza/.test(S.geo || '');
-const cDone = () => (S.corners || []).length === 4;
-function doLidar() { if (S.busyGeo) { toast('Misura già in corso', 2000); return; } cmd({a: 'lidar'}); toast('Misuro l\'altezza: la camera si inclina verso il pavimento', 3500); }
-function doCalib() {
-  if (S.busyGeo) { toast('Aspetta che finisca la misura in corso', 2500); return; }
-  if (S.docked) { cmd({a: 'scanStart'}); toast('Calibrazione automatica: il gimbal fa un giro del campo', 3500); }
-  else { calibPts = []; calibHint(); $('viewBox').classList.add('calib'); toast('Gimbal scollegato: tocca i 4 angoli del campo sull\'immagine', 4000); }
-}
-$('ck1').onclick = () => toast(S.portrait ? 'Premi 2 volte Switch sul gimbal per metterlo orizzontale' : 'Raddrizza l\'iPhone nel supporto finché la voce diventa verde', 3500);
-$('ck2').onclick = () => { if (!hDone()) doLidar(); };
-$('ck3').onclick = () => { if (!cDone()) doCalib(); };
-hold($('ck2'), hDone, 'rifare la misura dell\'altezza', doLidar);
-hold($('ck3'), cDone, 'rifare la calibrazione', doCalib);
-$('ck4').onclick = () => openCard('capsCard');
-$('ckTitle').onclick = () => { const m = $('ckBox').classList.toggle('mini'); $('ckArrow').textContent = m ? '▸' : '▾'; };
-$('ckDone').onclick = () => { $('sbAsk').style.display = 'flex'; };
-$('sbAskYes').onclick = () => { $('sbAsk').style.display = 'none'; cmd({a: 'sbVisible', on: true}); setPhase('match'); openCard('teamsCard'); };
-$('sbAskNo').onclick = () => { $('sbAsk').style.display = 'none'; cmd({a: 'sbVisible', on: false}); setPhase('match'); };
-$('backPrep').onclick = () => { $('prep').style.display = 'none'; setPhase('prep'); };
 $('penOn').onchange = e => { try { localStorage.setItem('wpPen', e.target.checked ? '1' : '0'); } catch (x) {} renderPhase(); };
 function renderGeo() {
   renderPhase();
@@ -1015,10 +1272,11 @@ $('sbClkOn').onchange = e => cmd({a: 'sbClockOn', on: e.target.checked});
 $('sbSwap').onclick = () => cmd({a: 'sbSwap'});
 $('sbReset').onclick = null;
 $('clkSet').onclick = () => {
-  const v = prompt('Tempo che manca (minuti:secondi), es. 5:32');
-  if (!v) return;
-  const p = v.split(':'); const sec = (parseInt(p[0]) || 0) * 60 + (parseInt(p[1]) || 0);
-  cmd({a: 'sbClock', op: 'set', s: sec});
+  dlg({msg: 'Tempo che manca (minuti:secondi), es. 5:32', input: true, ph: '5:32', buttons: [{t: 'Imposta', cls: 'pri', cb: v => {
+    if (!v) return;
+    const p = v.split(':'); const sec = (parseInt(p[0]) || 0) * 60 + (parseInt(p[1]) || 0);
+    cmd({a: 'sbClock', op: 'set', s: sec});
+  }}, {t: 'Annulla'}]});
 };
 
 // Larga, preparazione
@@ -1126,7 +1384,7 @@ vb.addEventListener('pointermove', e => {
   let dx = (e.clientX - M.x) / (r.width / 3), dy = (e.clientY - M.y) / (r.height / 3);
   if (!M.on && Math.hypot(e.clientX - M.x, e.clientY - M.y) > 8) {
     M.on = true; mouseDragged = true; vb.setPointerCapture(e.pointerId);
-    M.t = setInterval(() => { if (M) cmd({a: 'move', x: M.vx, y: M.vy}); }, 120);
+    M.t = setInterval(() => { if (M && moveTick()) cmd({a: 'move', x: M.vx, y: M.vy}); }, 50);
   }
   if (!M.on) return;
   const d = Math.hypot(dx, dy); if (d > 1) { dx /= d; dy /= d; }
