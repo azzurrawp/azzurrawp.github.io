@@ -1,0 +1,38 @@
+name: Classifica FIN
+# Legge classifica e risultati ufficiali del girone (FIN Toscana) e aggiorna classifica.json.
+# Poche letture a settimana: sabato e domenica sera, lunedi e giovedi mattina (ora italiana).
+on:
+  schedule:
+    - cron: '30 20 * * 6'
+    - cron: '30 20 * * 0'
+    - cron: '0 7 * * 1'
+    - cron: '0 7 * * 4'
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['tools/sync_classifica.py', '.github/workflows/classifica.yml']
+permissions:
+  contents: write
+concurrency:
+  group: classifica
+  cancel-in-progress: false
+jobs:
+  aggiorna:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Leggi classifica
+        run: python3 tools/sync_classifica.py classifica.json
+      - name: Pubblica se cambiata
+        run: |
+          git config user.name "Azzurra WP"
+          git config user.email "azzurrawp@users.noreply.github.com"
+          git add classifica.json
+          git diff --cached --quiet && exit 0
+          git commit -q -m "Classifica: aggiornamento automatico"
+          git pull -q --rebase origin main
+          git push -q origin HEAD:main
