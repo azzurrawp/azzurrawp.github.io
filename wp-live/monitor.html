@@ -103,6 +103,12 @@ img{-webkit-user-drag:none}
 #viewBox.calib #calibHint{display:block}
 #mapCancelBtn{position:absolute;left:50%;transform:translateX(-50%);bottom:12px;z-index:7;display:none;min-height:46px;padding:0 18px;border:0;border-radius:23px;background:rgba(138,28,28,.95);color:#fff;font-weight:800;font-size:15px}
 #viewBox.mapping #mapCancelBtn{display:block}
+#goalBox{position:absolute;left:50%;transform:translateX(-50%);bottom:12px;z-index:7;display:none;background:rgba(11,20,32,.9);border:2px solid #ffd400;border-radius:14px;padding:10px 12px;color:#fff;font-size:14px;max-width:min(92vw,520px);text-align:center}
+#goalBox .row{justify-content:center;margin-top:8px}
+#goalBox button{min-height:46px;padding:0 18px;border:0;border-radius:23px;font-weight:800;font-size:15px;color:#fff;background:#2b4a6f}
+#goalBox #goalOkBtn{background:#1e8e3e}
+body.goalCheck #goalBox{display:block}
+body.goalCheck #fieldBtns,body.goalCheck #ckBox,body.goalCheck #seg{display:none !important}
 #hud{position:absolute;inset:0;pointer-events:none;z-index:4}
 #hud > *{pointer-events:auto}
 .ok{color:#5ee08a}.warn{color:#ffb347}.bad{color:#ff6b6b}
@@ -286,6 +292,7 @@ select{width:100%;padding:8px;border-radius:8px;background:#0b1420;color:#fff;bo
       <div class="small">Angolo per angolo: lo zoom va al più largo; giri la camera verso ogni angolo delle linee di porta e lo tocchi.</div>
       <div class="row" style="margin-top:8px">
         <button class="btn2" id="calibManual" style="background:#1e8e3e">Calibra angolo per angolo</button>
+        <button class="btn2" id="goalBtn">Controlla le porte</button>
         <button class="btn2" id="calibClear">Cancella</button>
       </div>
       <div class="small" id="levelTxt" style="margin-top:8px"></div>
@@ -402,6 +409,7 @@ select{width:100%;padding:8px;border-radius:8px;background:#0b1420;color:#fff;bo
     <div id="frame"><img id="view" draggable="false" alt="Anteprima"><canvas id="ov"></canvas></div>
     <div id="calibHint"></div>
     <button id="mapCancelBtn">Annulla calibrazione</button>
+    <div id="goalBox"><div id="goalTxt"></div><div class="row"><button id="goalOkBtn">✓ Giusto</button><button id="goalSkipBtn">Salta</button></div></div>
   </div>
   <div id="hud">
     <div id="statusBar"></div>
@@ -598,6 +606,7 @@ function render() {
   if (S.thermal !== 'normale' && S.thermal !== 'tiepido') sb += '<span class="bad">Caldo</span>';
   $('statusBar').innerHTML = sb;
   renderButtons();
+  renderGoal();
   // La modalità è già nel riquadro in alto: qui solo il dettaglio (es. "palla persa"), senza ripeterla.
   const md = (S.mode || '').replace(/^(MANUALE|ASSISTITA|AUTOMATICO)( · )?/, '');
   $('modeTxt').textContent = md; $('modeTxt').style.display = md ? '' : 'none';
@@ -653,6 +662,15 @@ function drawOverlay() {
     x.setTransform(1, 0, 0, 1, w, h);
     x.strokeStyle = 'rgba(255,255,255,.5)'; x.lineWidth = 2; x.setLineDash([6, 6]);
     x.strokeRect(0, 0, w, h); x.setLineDash([]);
+  }
+  // Controllo porte: mirino giallo dove l'app mette il centro della porta.
+  if (S.goalCheck && S.goalPt && S.goalPt.length === 2) {
+    const gx = S.goalPt[0] * w, gy = S.goalPt[1] * h, r = 26;
+    x.strokeStyle = '#ffd400'; x.lineWidth = 3;
+    x.beginPath(); x.arc(gx, gy, r, 0, 2 * Math.PI);
+    x.moveTo(gx - r - 14, gy); x.lineTo(gx - 6, gy); x.moveTo(gx + 6, gy); x.lineTo(gx + r + 14, gy);
+    x.moveTo(gx, gy - r - 14); x.lineTo(gx, gy - 6); x.moveTo(gx, gy + 6); x.lineTo(gx, gy + r + 14);
+    x.stroke();
   }
   const pts = dragPts || calibPts || S.corners || [];
   // Le righe del campo servono in preparazione; in partita solo se richieste dal menu.
@@ -785,6 +803,12 @@ $('viewBox').addEventListener('click', e => {
     cmd({a: 'ballLearn', x: (e.clientX - r.left) / r.width, y: (e.clientY - r.top) / r.height});
     learnLeft--;
     toast(learnLeft > 0 ? 'Bene. Tocca di nuovo la palla, in un altro punto (' + (3 - learnLeft) + '/3)' : 'Colore della palla imparato', 2500);
+    return;
+  }
+  if (S.goalCheck) {
+    const r = $('view').getBoundingClientRect();
+    cmd({a: 'goalMark', x: (e.clientX - r.left) / r.width, y: (e.clientY - r.top) / r.height});
+    toast('Centro della porta segnato', 1500);
     return;
   }
   if (mapping) {
@@ -1118,7 +1142,23 @@ function renderFieldBtns() {
     if (done) toast('Passo 3 di 5 · campo verde sulla vasca? Trascina i pallini, poi Fatto', 4500);
   }
 }
-$('fbDone').onclick = () => { OK.c = true; saveWz(); goStep(3); renderFieldBtns(); };
+$('fbDone').onclick = () => { goalFlow = true; cmd({a: 'goalCheckStart'}); };
+// Controllo porte: la camera va da sola su ogni porta; "Giusto" o tocco sul centro vero.
+let goalFlow = false, goalWas = '';
+$('goalOkBtn').onclick = () => cmd({a: 'goalOK'});
+$('goalSkipBtn').onclick = () => cmd({a: 'goalCancel'});
+function renderGoal() {
+  const g = S.goalCheck || '';
+  document.body.classList.toggle('goalCheck', !!g);
+  if (g) $('goalTxt').innerHTML = '<b>Porta ' + g + '</b> · il mirino giallo è al centro della porta, sul pelo dell\'acqua?<br>Se no, <b>tocca il centro vero</b> della porta (puoi muovere la camera col dito).';
+  if (goalWas && !g) {
+    // Finito il giro: messaggio e, se si veniva dalla preparazione, passo successivo.
+    if (S.goalMsg) dlg({msg: S.goalMsg, buttons: [{t: 'OK', cls: 'pri'}]});
+    if (goalFlow) { goalFlow = false; OK.c = true; saveWz(); goStep(3); renderFieldBtns(); }
+  }
+  goalWas = g;
+}
+$('goalBtn').onclick = () => { $('prep').style.display = 'none'; cmd({a: 'goalCheckStart'}); };
 $('fbRedo').onclick = () => { OK.c = false; saveWz(); doCalib(); };
 $('fbCalib').onclick = () => doCalib(false);
 $('fbScan').onclick = () => doCalib(true);

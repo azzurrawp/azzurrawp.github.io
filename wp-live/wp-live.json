@@ -1,6 +1,6 @@
 {
-  "latestVersion": "0.9.8",
-  "releaseNotes": "0.9.8: zoom dell'Assistita più calmo (cambia solo per differenze vere che durano); Rigore: la camera va subito sulla porta con lo zoom giusto, anche in Manuale, e lo zoom resta fermo fino al tiro. Resto come la 0.9.7.",
+  "latestVersion": "0.9.9",
+  "releaseNotes": "0.9.9: controllo delle porte dopo la calibrazione del campo (la camera va da sola su ogni porta: Giusto o tocca il centro vero); il rigore usa le porte controllate; nel menu Campo c'è \"Controlla le porte\". Resto come la 0.9.8.",
   "params": {
     "gimbalSpeed": 0.3,
     "zoomRampRate": 1.5
