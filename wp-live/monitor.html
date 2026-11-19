@@ -1678,6 +1678,12 @@ $('undoBtn').onclick = () => {
   undoSide = null; $('undoBtn').style.display = 'none'; toast('Gol annullato');
 };
 // Azioni critiche: tenere premuto 2 secondi.
+// Dopo un "tieni premuto" riuscito, il tocco che finisce col dito ancora sopra genera un clic:
+// senza questo filtro REC ripartiva subito dopo essere stata fermata (prova del 19/11).
+let heldEl = null, heldAt = 0;
+document.addEventListener('click', e => {
+  if (heldEl && Date.now() - heldAt < 3000 && heldEl.contains(e.target)) { e.stopPropagation(); e.preventDefault(); heldEl = null; }
+}, true);
 function hold(el, needed, msg, action) {
   el.classList.add('hold');
   let st = 0, raf = 0;
@@ -1686,7 +1692,7 @@ function hold(el, needed, msg, action) {
     if (!st) return;
     const p = Math.min(1, (Date.now() - st) / 2000);
     el.style.setProperty('--hold', p);
-    if (p >= 1) { stop(); action(); toast('Fatto'); return; }
+    if (p >= 1) { stop(); heldEl = el; heldAt = Date.now(); action(); toast('Fatto'); return; }
     raf = requestAnimationFrame(step);
   };
   el.addEventListener('pointerdown', e => {
