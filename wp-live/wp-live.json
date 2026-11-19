@@ -1,6 +1,6 @@
 {
-  "latestVersion": "0.9.7",
-  "releaseNotes": "0.9.7: l'iPhone mostra la stessa regia anche col regista collegato; preparazione più chiara (bolla con avviso se il gimbal oscilla, disegno degli angoli del campo, colori delle calottine da scegliere ogni partita); suggerimento per iniziare (Manuale/Assistita poi REC).",
+  "latestVersion": "0.9.8",
+  "releaseNotes": "0.9.8: zoom dell'Assistita più calmo (cambia solo per differenze vere che durano); Rigore: la camera va subito sulla porta con lo zoom giusto, anche in Manuale, e lo zoom resta fermo fino al tiro. Resto come la 0.9.7.",
   "params": {
     "gimbalSpeed": 0.3,
     "zoomRampRate": 1.5

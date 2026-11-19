@@ -1533,9 +1533,9 @@ function placeBar() {
 window.addEventListener('resize', placeBar);
 // Rigore: inquadratura su porta, portiere, tiratore e linea dei 5 m; torna alla regia dopo il tiro.
 function penalty(side) {
-  if (!S.directorReady) { toast('Serve il campo calibrato e lo zoom automatico acceso'); return; }
+  if ((S.corners || []).length !== 4) { toast('Prima calibra il campo'); return; }
   if (S.penalty === side) { cmd({a: 'penalty', side: 'off'}); toast('Fine rigore'); return; }
-  cmd({a: 'penalty', side}); toast('Rigore ' + (side === 'left' ? 'a sinistra' : 'a destra'));
+  cmd({a: 'penalty', side}); toast('Rigore ' + (side === 'left' ? 'a sinistra' : 'a destra') + ': la camera va sulla porta. Ritocca per finire', 3000);
 }
 $('penL').onclick = () => penalty('left');
 $('penR').onclick = () => penalty('right');
