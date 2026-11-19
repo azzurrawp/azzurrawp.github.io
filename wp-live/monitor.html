@@ -204,6 +204,9 @@ details.sec>summary::-webkit-details-marker{display:none}
 details.sec>summary::after{content:'▸';opacity:.7}
 details.sec[open]>summary::after{content:'▾'}
 details.sec>.card{margin:0 6px 8px}
+.bigSwitch{display:flex;gap:10px;align-items:center;background:#1b3150;border-radius:10px;padding:10px;font-size:15px}
+.bigSwitch input{width:24px;height:24px}
+.subT{margin:12px 0 4px;font-weight:800;font-size:13px;letter-spacing:.04em;text-transform:uppercase;opacity:.8;border-top:1px solid #2a3d57;padding-top:8px}
 #status{font-size:14px;line-height:1.5}
 .row{display:flex;gap:6px;flex-wrap:wrap}
 details summary{cursor:pointer;font-weight:700;padding:4px 0}
@@ -313,22 +316,27 @@ select{width:100%;padding:8px;border-radius:8px;background:#0b1420;color:#fff;bo
     </details>
     <details class="sec" id="secTeams"><summary>Squadre e tabellone</summary>
     <div class="card" id="teamsCard">
-      <label>Nome della partita<input class="txt" id="sbTitle" maxlength="60" placeholder="Campionato regionale FIN - Allievi"></label>
-      <label style="display:flex;gap:8px;align-items:center;margin-top:6px"><input type="checkbox" id="sbFull"> Nomi delle squadre per intero</label>
-      <label style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="sbVis"> Tabellone in diretta e registrazione</label>
-      <label style="display:flex;gap:8px;align-items:center;margin-top:6px"><input type="checkbox" id="sbClkOn"> Orologio nel tabellone</label>
-      <div style="font-size:12px;opacity:.75">Il tempo ufficiale è della giuria: se accendi l'orologio, avvialo e fermalo col cronometrista o correggilo con "Imposta orologio".</div>
+      <label class="bigSwitch"><input type="checkbox" id="sbVis"> <span><b>Mostra il tabellone sul video</b><br><small>nella diretta e nella registrazione</small></span></label>
+      <div class="subT">Partita</div>
+      <label>Nome della partita<input class="txt" id="sbTitle" maxlength="60" placeholder="es. Amichevole U16"></label>
       <div class="row" style="margin-top:6px">
-        <label style="flex:1">Durata tempo<select id="sbLen"><option>5</option><option>6</option><option>7</option><option selected>8</option><option>10</option></select></label>
+        <label style="flex:1">Durata di ogni tempo (minuti)<select id="sbLen"><option>5</option><option>6</option><option>7</option><option selected>8</option><option>10</option></select></label>
       </div>
-      <div class="row" style="margin-top:6px">
-        <button class="btn2" id="pMinus">Tempo −</button><button class="btn2" id="pPlus">Tempo +</button>
-        <button class="btn2" id="clkSet">Imposta orologio</button>
-        <button class="btn2" id="sbSwap">Inverti squadre</button>
-        <button class="btn2" id="sbReset">Azzera partita</button>
-      </div>
+      <label style="display:flex;gap:8px;align-items:center;margin-top:6px"><input type="checkbox" id="sbFull"> Nomi lunghi (altrimenti solo sigle: AZZ – DRE)</label>
+      <div class="subT">Squadre</div>
       <div class="teamBox" id="tb_home"></div>
       <div class="teamBox" id="tb_away"></div>
+      <div class="subT">Durante la partita</div>
+      <div class="row">
+        <button class="btn2" id="pMinus">Tempo −</button><button class="btn2" id="pPlus">Tempo +</button>
+        <button class="btn2" id="sbSwap">Inverti squadre</button>
+      </div>
+      <label style="display:flex;gap:8px;align-items:center;margin-top:8px"><input type="checkbox" id="sbClkOn"> Mostra il cronometro</label>
+      <div style="font-size:12px;opacity:.75">Si avvia e si ferma a mano; il tempo ufficiale resta quello della giuria.</div>
+      <div class="row" style="margin-top:6px">
+        <button class="btn2" id="clkSet">Imposta cronometro</button>
+        <button class="btn2" id="sbReset">Azzera partita (tieni premuto)</button>
+      </div>
     </div>
     </details>
     <details class="sec" id="secCaps"><summary>Calottine e palla</summary>
@@ -1164,7 +1172,7 @@ function hManual() {
     cmd({a: 'height', v: h}); OK.h = true; saveWz(); goStep(2);
   }}, {t: 'Annulla'}]});
 }
-const STEP_NAMES = ['iPhone in bolla', 'Altezza', 'Campo', 'Calottine e palla', 'Controllo finale'];
+const STEP_NAMES = ['iPhone in bolla', 'Altezza', 'Campo', 'Colori in acqua', 'Controllo finale'];
 function line(cls, txt, val) { return '<div class="rowc"><span>' + txt + '</span><span class="' + cls + '">' + val + '</span></div>'; }
 let campoToastStep = -1;
 function renderFieldBtns() {
@@ -1269,11 +1277,13 @@ function renderWizard() {
     const caps = S.caps || [];
     const nA = caps.filter(c => c[2] === 1).length, nO = caps.filter(c => c[2] === 0).length;
     const opt = sel => (S.capColors || []).map(c => '<option' + (c === sel ? ' selected' : '') + '>' + esc(c) + '</option>').join('');
-    h += '<div class="st">Calottine di <b>stasera</b>: Azzurra <select id="wzHome" style="width:auto">' + opt(S.home) + '</select> avversari <select id="wzAway" style="width:auto">' + opt(S.away) + '</select></div>' +
-      '<div class="st">Palla: <b>' + esc(S.ballColor === 'imparato' ? 'colore insegnato toccandola' : S.ballColor) + '</b></div>';
-    h += '<div class="st">In acqua vedo: <span class="' + (nA ? 'okt' : 'warn') + '">' + nA + ' Azzurra</span>, <span class="' + (nO ? 'okt' : 'warn') + '">' + nO + ' avversari</span>, palla <span class="' + (S.ball ? 'okt">sì' : 'warn">no') + '</span></div>';
+    h += '<div class="st"><b>Che calottine hanno stasera?</b></div>' +
+      '<div class="st">Azzurra: <select id="wzHome" style="width:auto">' + opt(S.home) + '</select></div>' +
+      '<div class="st">Avversari: <select id="wzAway" style="width:auto">' + opt(S.away) + '</select></div>' +
+      '<div class="st">Palla: <b>' + esc(S.ballColor === 'imparato' ? 'colore insegnato sullo schermo' : S.ballColor) + '</b></div>';
+    h += '<div class="st" style="opacity:.85">Riconosciuti adesso: ' + nA + ' Azzurra · ' + nO + ' avversari · palla ' + (S.ball ? 'sì' : 'no') + ' <small>(normale se la vasca è vuota)</small></div>';
     if (S.ballWarn) h += '<div class="st warn">' + esc(S.ballWarn) + '</div>';
-    h += B('kok', 'Colori giusti ▶', true) + B('caps', 'Colore della palla o altro');
+    h += B('kok', '✓ Colori giusti, avanti', true) + B('learn', 'Insegna il colore della palla');
   } else {
     const newApp = S.freeGB !== undefined;
     const bat = S.battery, gb = S.gimbalBattery;
@@ -1311,6 +1321,7 @@ $('wzBody').addEventListener('pointerup', e => {
   else if (a === 'cok') { OK.c = true; saveWz(); goStep(3); }
   else if (a === 'kok') { OK.k = true; saveWz(); goStep(4); }
   else if (a === 'caps') openCard('capsCard');
+  else if (a === 'learn') $('learnBtn').click();
   else if (a === 'net') { if (!S.netTesting) { S.netTesting = true; cmd({a: 'netTest'}); renderWizard(); } }
   else if (a === 'key') openCard('liveCard');
   else if (a === 'done') $('sbAsk').style.display = 'flex';
