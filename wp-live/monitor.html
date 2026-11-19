@@ -178,9 +178,19 @@ input.txt{width:100%;padding:8px;border-radius:8px;background:#0b1420;color:#fff
 #prepPanel{width:min(calc(420px + var(--sl)),92vw);height:100%;overflow-y:auto;background:#0b1420;padding:14px;padding-left:max(14px,calc(var(--sl) + 6px));display:flex;flex-direction:column;gap:10px}
 .card{background:#132235;border-radius:12px;padding:10px}
 details.sec{background:#0f1c2c;border-radius:12px}
+#wzBody{max-height:calc(100vh - 150px);overflow-y:auto}
 /* − e + solo sul PC (mouse): su iPhone e telefoni lo zoom si fa col pizzico a due dita */
 @media (pointer: coarse) { #seg .zb{display:none} }
 body.local #seg .zb{display:none}
+/* Calibrazione angolo per angolo: niente pulsanti in mezzo al campo (si toccherebbero al posto degli angoli) */
+body.mapping #fieldBtns{display:none !important}
+/* Schermata d'avvio: niente avvisi di gimbal o campo */
+body.phStart #toast{display:none !important}
+#seg button small{display:block;font-size:10px;font-weight:600;opacity:.8;margin-top:2px}
+#startHint{position:absolute;left:max(16px,calc(var(--sl) + 12px));bottom:calc(16px + env(safe-area-inset-bottom));max-width:min(46vw,360px);background:rgba(0,0,0,.72);color:#fff;border:2px solid #ffd400;border-radius:14px;padding:10px 14px;font-size:15px;font-weight:700;display:none;z-index:5;pointer-events:none}
+body.phMatch.idle.firstRun #startHint{display:block}
+#fbHelp{background:rgba(0,0,0,.78);color:#fff;border-radius:12px;padding:8px 10px;font-size:13px;max-width:300px;line-height:1.3}
+#fbHelp svg{display:block;margin:6px auto 0}
 details.sec>summary{list-style:none;cursor:pointer;padding:12px 14px;font-size:16px;font-weight:800;display:flex;justify-content:space-between}
 details.sec>summary::-webkit-details-marker{display:none}
 details.sec>summary::after{content:'▸';opacity:.7}
@@ -400,13 +410,14 @@ select{width:100%;padding:8px;border-radius:8px;background:#0b1420;color:#fff;bo
     <button class="rb" id="liveBtn"><span class="rc">● LIVE</span><span class="rl" id="liveTime">spenta</span></button>
     <div id="recWrap"><button class="rb" id="rec"><span class="rc"><span id="recDot"></span></span><span class="rl" id="recTime">REC</span></button></div>
     <button class="rb" id="micBtn"><span class="rc" id="micIcon">🎤</span><span class="rl" id="micTxt">Mic</span></button>
-    <div id="seg"><button id="zOut" class="zb" title="Allarga">−</button><button id="zIn" class="zb" title="Stringi">+</button><button id="largaBtn">Larga</button><button id="manBtn">Manuale</button><button id="assistBtn">Assistita</button></div>
+    <div id="seg"><button id="zOut" class="zb" title="Allarga">−</button><button id="zIn" class="zb" title="Stringi">+</button><button id="largaBtn">Larga</button><button id="manBtn">Manuale<small>muovi e zoomi tu</small></button><button id="assistBtn">Assistita<small>zoom automatico</small></button></div>
     <div id="ckBox">
       <div id="ckTitle" style="font-weight:800;color:#ffd400;cursor:pointer">Preparazione <span id="ckStep" style="color:#fff;font-weight:600"></span> <span id="ckArrow">▾</span></div>
       <div id="wzBody"></div>
       <div id="wzNav"><button id="wzBack">‹ Indietro</button><button id="wzSkip">Salta ›</button></div>
     </div>
-    <div id="fieldBtns"><button id="fbDone">✓<br>Fatto</button><button id="fbRedo">↺ Rifai</button><button id="fbCalib">Tocca i 4 angoli</button><button id="fbScan">Giro automatico col gimbal</button></div>
+    <div id="fieldBtns"><div id="fbHelp">Tocca gli <b>angoli del campo</b>: dove le linee di porta incontrano i bordi lunghi della vasca, in quest'ordine:<svg width="200" height="70" viewBox="0 0 200 70"><polygon points="40,10 160,10 190,60 10,60" fill="rgba(30,142,62,.35)" stroke="#7CFC9A" stroke-width="2"/><g font-size="13" font-weight="800" fill="#ffd400"><text x="2" y="58">1</text><text x="190" y="58">2</text><text x="164" y="14">3</text><text x="28" y="14">4</text></g><text x="100" y="40" font-size="11" fill="#fff" text-anchor="middle">lato vicino a te in basso</text></svg></div><button id="fbDone">✓<br>Fatto</button><button id="fbRedo">↺ Rifai</button><button id="fbCalib">Tocca i 4 angoli</button><button id="fbScan">Giro automatico col gimbal</button></div>
+    <div id="startHint">Per iniziare: scegli <b>Manuale</b> o <b>Assistita</b>, poi tocca <b>REC</b> per registrare (e LIVE per la diretta).</div>
     <button id="goBtn">▶ Inizia</button>
     <button id="finBtn">■ Fine partita</button>
     <div id="penBox"><button id="penL">◀ Rigore</button><button id="penR">Rigore ▶</button></div>
@@ -1058,24 +1069,26 @@ function doCalib(auto) {
     cmd({a: 'mapStart'});
     mapping = true;
     $('viewBox').classList.add('calib', 'mapping');
-    toast('Tocca gli angoli uno alla volta; se non li vedi, muovi la camera col dito', 4500);
+    document.body.classList.add('mapping');
   }
 }
 let mapping = false, mapSeen = false;
 function renderMapping() {
   const idx = typeof S.mapIndex === 'number' ? S.mapIndex : -1;
   if (idx >= 0) mapSeen = true;
+  if (idx < 0 && !mapping) document.body.classList.remove('mapping');
   if (mapping && mapSeen && idx < 0) {
     // Finito (o annullato): il campo verde compare con Fatto / Rifai.
-    mapping = false; mapSeen = false;
+    mapping = false; mapSeen = false; document.body.classList.remove('mapping');
     $('viewBox').classList.remove('calib', 'mapping');
   }
   if (idx >= 0) {
     if (!mapping) { mapping = true; $('viewBox').classList.add('calib', 'mapping'); }
+    document.body.classList.add('mapping');
     $('calibHint').textContent = 'Angolo ' + (idx + 1) + ' di 4 · tocca: ' + (S.mapName || '') + ' · se non lo vedi, muovi la camera col dito';
   }
 }
-$('mapCancelBtn').onclick = () => { cmd({a: 'mapCancel'}); mapping = false; mapSeen = false; $('viewBox').classList.remove('calib', 'mapping'); };
+$('mapCancelBtn').onclick = () => { cmd({a: 'mapCancel'}); mapping = false; mapSeen = false; $('viewBox').classList.remove('calib', 'mapping'); document.body.classList.remove('mapping'); };
 function hManual() {
   dlg({msg: 'Altezza della telecamera dal pavimento, in metri (es. 1.43)', input: true, ph: '1.43', buttons: [{t: 'Salva', cls: 'pri', cb: v => {
     const h = parseFloat((v || '').replace(',', '.'));
@@ -1095,19 +1108,21 @@ function renderFieldBtns() {
   $('fbRedo').style.display = done && !busy ? '' : 'none';
   $('fbCalib').style.display = !done && !busy && !calibPts ? '' : 'none';
   $('fbScan').style.display = 'none';  // il giro automatico resta solo nel menu
+  $('fbHelp').style.display = !done && !busy && !calibPts ? '' : 'none';
   const r = $('view').getBoundingClientRect(), c = S.corners || [];
   let x = r.left + r.width / 2, y = r.top + r.height / 2;
   if (done) { x = r.left + r.width * c.reduce((a, p) => a + p[0], 0) / 4; y = r.top + r.height * c.reduce((a, p) => a + p[1], 0) / 4; }
   const fb = $('fieldBtns'); fb.style.left = x + 'px'; fb.style.top = y + 'px';
   if (campoToastStep !== wz) {
     campoToastStep = wz;
-    toast('Passo 3 di 5 · ' + (done ? 'campo verde sulla vasca? Trascina i pallini, poi Fatto' : 'tocca "Tocca i 4 angoli"'), 4500);
+    if (done) toast('Passo 3 di 5 · campo verde sulla vasca? Trascina i pallini, poi Fatto', 4500);
   }
 }
 $('fbDone').onclick = () => { OK.c = true; saveWz(); goStep(3); renderFieldBtns(); };
 $('fbRedo').onclick = () => { OK.c = false; saveWz(); doCalib(); };
 $('fbCalib').onclick = () => doCalib(false);
 $('fbScan').onclick = () => doCalib(true);
+let lvHist = [];
 function renderWizard() {
   renderFieldBtns();
   if (curPhase() !== 'prep') return;
@@ -1115,11 +1130,17 @@ function renderWizard() {
   let h = '<div style="font-weight:800;font-size:15px;margin-top:4px">' + STEP_NAMES[wz] + '</div>';
   const B = (act, t, pri) => '<button data-act="' + act + '"' + (pri ? ' class="pri"' : '') + '>' + t + '</button>';
   if (wz === 0) {
-    const lv = S.level, has = lv !== undefined && lv < 900, ok = !S.portrait && has && Math.abs(lv) <= 1;
+    const lv = S.level, has = lv !== undefined && lv < 900;
+    // Il telefono che oscilla da solo = gimbal non in AUTO (successo il 19/11 premendo i suoi tasti).
+    const now = Date.now();
+    if (has) { lvHist.push([now, lv]); lvHist = lvHist.filter(x => now - x[0] < 3000); }
+    const lvs = lvHist.map(x => x[1]), swing = lvs.length > 4 ? Math.max(...lvs) - Math.min(...lvs) : 0;
+    const ok = !S.portrait && has && Math.abs(lv) <= 1 && swing < 2;
     if (S.portrait) h += '<div class="st bad">iPhone in VERTICALE: premi 2 volte Switch sul gimbal.</div>';
     else if (!has) h += '<div class="st warn">Livella non disponibile: controlla a occhio che sia dritto.</div>';
+    else if (swing >= 2) h += '<div class="st bad">Il telefono oscilla da solo: il gimbal non è in modalità normale. Spegnilo e riaccendilo (tasto di accensione tenuto premuto) e non premere gli altri suoi tasti.</div>';
     else if (ok) h += '<div class="st okt">✓ In bolla (' + lv.toFixed(1) + '°)</div>';
-    else h += '<div class="st bad">Storto di ' + lv.toFixed(1) + '°: raddrizza l\'iPhone nel supporto.</div>';
+    else h += '<div class="st bad">Storto di ' + lv.toFixed(1) + '°: ruota un poco il telefono nel morsetto del gimbal finché il numero arriva vicino a 0.</div>';
     h += B('next', 'Avanti ▶', ok || !has);
     // Appena è in bolla da 1,5 secondi si passa da soli.
     if (ok) { if (!okSince) okSince = Date.now(); else if (Date.now() - okSince > 1500) { goStep(1); return; } } else okSince = 0;
@@ -1127,7 +1148,7 @@ function renderWizard() {
     const busy = S.busyGeo && wzLidar;
     if (busy) h += '<div class="st warn">Misura in corso… ' + esc(S.lidarDbg || '') + '</div>';
     else if (wzLidar && hDone() && !OK.h) { OK.h = true; saveWz(); }
-    if (S.lidarMsg && !busy) h += '<div class="st warn">' + esc(S.lidarMsg) + '</div>';
+    if (S.lidarMsg && !busy && wzLidar) h += '<div class="st warn">' + esc(S.lidarMsg) + '</div>';
     if (!busy) {
       if (OK.h && hDone()) h += '<div class="st okt">✓ ' + esc((S.geo || '').split(' · ')[0]) + '</div>' + B('next', 'Avanti ▶', true) + B('lidar', 'Rimisura col LiDAR') + B('hman', 'Scrivila a mano');
       else if (hDone()) h += '<div class="st">Altezza salvata: <b>' + esc((S.geo || '').split(' · ')[0].replace('Altezza ', '')) + '</b>. È ancora giusta?</div>' + B('hok', 'Sì, va bene', true) + B('lidar', 'Rimisura col LiDAR') + B('hman', 'Scrivila a mano');
@@ -1144,10 +1165,12 @@ function renderWizard() {
   } else if (wz === 3) {
     const caps = S.caps || [];
     const nA = caps.filter(c => c[2] === 1).length, nO = caps.filter(c => c[2] === 0).length;
-    h += '<div class="st">Azzurra: <b>' + esc(S.home) + '</b> · Avversari: <b>' + esc(S.away) + '</b><br>Palla: <b>' + esc(S.ballColor) + '</b></div>';
+    const opt = sel => (S.capColors || []).map(c => '<option' + (c === sel ? ' selected' : '') + '>' + esc(c) + '</option>').join('');
+    h += '<div class="st">Calottine di <b>stasera</b>: Azzurra <select id="wzHome" style="width:auto">' + opt(S.home) + '</select> avversari <select id="wzAway" style="width:auto">' + opt(S.away) + '</select></div>' +
+      '<div class="st">Palla: <b>' + esc(S.ballColor === 'imparato' ? 'colore insegnato toccandola' : S.ballColor) + '</b></div>';
     h += '<div class="st">In acqua vedo: <span class="' + (nA ? 'okt' : 'warn') + '">' + nA + ' Azzurra</span>, <span class="' + (nO ? 'okt' : 'warn') + '">' + nO + ' avversari</span>, palla <span class="' + (S.ball ? 'okt">sì' : 'warn">no') + '</span></div>';
     if (S.ballWarn) h += '<div class="st warn">' + esc(S.ballWarn) + '</div>';
-    h += B('kok', 'Va bene', true) + B('caps', 'Cambia colori o insegna la palla');
+    h += B('kok', 'Colori giusti ▶', true) + B('caps', 'Colore della palla o altro');
   } else {
     const newApp = S.freeGB !== undefined;
     const bat = S.battery, gb = S.gimbalBattery;
@@ -1168,7 +1191,8 @@ function renderWizard() {
     if (!hk) h += B('key', 'Inserisci la chiave YouTube');
     h += B('done', 'Preparazione finita ▶', true);
   }
-  if (h !== wzHtml) { wzHtml = h; $('wzBody').innerHTML = h; }
+  const ae = document.activeElement;
+  if (h !== wzHtml && !(ae && (ae.id === 'wzHome' || ae.id === 'wzAway'))) { wzHtml = h; $('wzBody').innerHTML = h; }
   $('wzBack').style.visibility = wz > 0 ? '' : 'hidden';
   $('wzSkip').style.visibility = wz < 4 ? '' : 'hidden';
 }
@@ -1187,6 +1211,9 @@ $('wzBody').addEventListener('pointerup', e => {
   else if (a === 'net') { if (!S.netTesting) { S.netTesting = true; cmd({a: 'netTest'}); renderWizard(); } }
   else if (a === 'key') openCard('liveCard');
   else if (a === 'done') $('sbAsk').style.display = 'flex';
+});
+$('wzBody').addEventListener('change', e => {
+  if (e.target.id === 'wzHome' || e.target.id === 'wzAway') cmd({a: 'caps', home: $('wzHome').value, away: $('wzAway').value});
 });
 $('wzBack').onclick = () => goStep(wz - 1);
 $('wzSkip').onclick = () => goStep(wz + 1);
@@ -1218,6 +1245,7 @@ function showQR() {
 try { if (LOCAL && sessionStorage.getItem('wpShowQR') === '1') setTimeout(showQR, 800); } catch (e) {}
 $('stNew').onclick = async () => {
   OK = {}; wz = 0; saveWz();
+  try { sessionStorage.removeItem('wpStarted'); } catch (e) {}
   // La regia dell'iPhone si ricarica con la password nuova: il QR va mostrato anche dopo.
   if (LOCAL && ctl === 'regista') { try { sessionStorage.setItem('wpShowQR', '1'); } catch (e) {} }
   // Nuova partita = password nuova: i link delle partite precedenti non valgono più.
@@ -1319,6 +1347,10 @@ function renderPhase() {
   const b = document.body.classList;
   b.toggle('phStart', ph === 'start'); b.toggle('phPrep', ph === 'prep'); b.toggle('phMatch', ph === 'match');
   b.toggle('running', running); b.toggle('idle', !running && $('cdBox').style.display !== 'flex');
+  // Suggerimento "come si inizia": fino alla prima registrazione di questa partita.
+  if (running) { try { sessionStorage.setItem('wpStarted', '1'); } catch (e) {} }
+  let started = false; try { started = sessionStorage.getItem('wpStarted') === '1'; } catch (e) {}
+  b.toggle('firstRun', !started);
   let pen = false; try { pen = localStorage.getItem('wpPen') === '1'; } catch (e) {}
   b.toggle('penOn', pen); $('penOn').checked = pen;
   b.toggle('sbOn', !!(S.sb && S.sb.visible));
@@ -1394,7 +1426,7 @@ $('assistBtn').onclick = () => {
 $('manBtn').onclick = () => {
   if (S.assisted) cmd({a: 'assisted', on: false});
   if (S.auto || S.assisted) cmd({a: 'auto', on: false});
-  toast('Manuale: muovi e zoomi tu (tasti − e + o due dita)', 2500);
+  toast('Manuale: muovi e zoomi tu (due dita per lo zoom)', 2500);
 };
 
 // Registrazione
