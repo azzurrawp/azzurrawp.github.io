@@ -1,6 +1,6 @@
 {
-  "latestVersion": "0.9.5",
-  "releaseNotes": "0.9.5: posizioni Porta sinistra / Tutto il campo / Porta destra (menu, sezione Partita); i tasti del gimbal non comandano più l'app; togliendo Assistita si torna in Manuale; avviso \"iPhone scivolato\" solo con la camera al centro; menu a sezioni; Inizia non copre lo zoom; si possono togliere squadre dalla libreria.",
+  "latestVersion": "0.9.6",
+  "releaseNotes": "0.9.6: corretto il verso tra immagine e gimbal (zoom dell'Assistita, posizioni e ripresa automatica puntavano dalla parte opposta). Dopo l'aggiornamento il campo va ricalibrato. Resto come la 0.9.5.",
   "params": {
     "gimbalSpeed": 0.3,
     "zoomRampRate": 1.5
