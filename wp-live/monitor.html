@@ -107,6 +107,8 @@ img{-webkit-user-drag:none}
 #goalBox .row{justify-content:center;margin-top:8px}
 #goalBox button{min-height:46px;padding:0 18px;border:0;border-radius:23px;font-weight:800;font-size:15px;color:#fff;background:#2b4a6f}
 #goalBox #goalOkBtn{background:#1e8e3e}
+#liveBtn.noData{background:#b00020 !important;animation:blink 1s infinite}
+@keyframes blink{50%{opacity:.45}}
 body.goalCheck #goalBox{display:block}
 body.goalCheck #fieldBtns,body.goalCheck #ckBox,body.goalCheck #seg{display:none !important}
 #hud{position:absolute;inset:0;pointer-events:none;z-index:4}
@@ -342,6 +344,7 @@ select{width:100%;padding:8px;border-radius:8px;background:#0b1420;color:#fff;bo
     <details class="sec" id="secLive"><summary>Dati diretta</summary>
     <div class="card" id="liveCard">
       <div id="liveTxt" class="small"></div>
+      <div class="row" style="margin:6px 0"><button class="btn2" id="netBtn">Prova la velocità</button><span id="netTxt" class="small"></span></div>
       <label>URL dello stream<input id="rtmpUrl" style="width:100%;padding:8px;border-radius:8px;background:#0b1420;color:#fff;border:1px solid #2a8cff" autocomplete="off"></label>
       <label>Chiave dello stream<input id="rtmpKey" type="password" placeholder="incolla la chiave" style="width:100%;padding:8px;border-radius:8px;background:#0b1420;color:#fff;border:1px solid #2a8cff" autocomplete="off"></label>
       <label>Qualità<select id="liveQ"><option value="720p">720p (circa 1,2 GB/ora)</option><option value="1080p">1080p (circa 2,2 GB/ora)</option></select></label>
@@ -607,6 +610,7 @@ function render() {
   $('statusBar').innerHTML = sb;
   renderButtons();
   renderGoal();
+  renderNet();
   // La modalità è già nel riquadro in alto: qui solo il dettaglio (es. "palla persa"), senza ripeterla.
   const md = (S.mode || '').replace(/^(MANUALE|ASSISTITA|AUTOMATICO)( · )?/, '');
   $('modeTxt').textContent = md; $('modeTxt').style.display = md ? '' : 'none';
@@ -978,8 +982,24 @@ $('liveBtn').onclick = () => {
   const L = S.live || {};
   if (L.state && L.state !== 'off') return;  // per fermarla si tiene premuto 2 secondi
   if (!L.hasKey) { dlg({msg: 'Prima inserisci la chiave dello stream (Dati diretta).', buttons: [{t: 'Inserisci', cls: 'pri', cb: () => openCard('liveCard')}, {t: 'Chiudi'}]}); return; }
-  dlg({msg: 'Avviare la diretta su YouTube (' + (L.quality || '1080p') + ')?', buttons: [{t: 'Avvia', cls: 'pri', cb: () => cmd({a: 'liveStart'})}, {t: 'Annulla'}]});
+  const sp = typeof S.netSpeed === 'number' && S.netSpeed >= 0 ? S.netSpeed.toFixed(1).replace('.', ',') + ' Mbps' : 'non provata';
+  dlg({msg: 'Avviare la diretta su YouTube (' + (L.quality || '1080p') + ')? Velocità di invio: ' + sp + ' (servono almeno 6 Mbps per 1080p, 3,5 per 720p).', buttons: [
+    {t: 'Avvia', cls: 'pri', cb: () => cmd({a: 'liveStart'})},
+    {t: 'Prova la velocità', cb: () => { cmd({a: 'netTest'}); toast('Prova della velocità: 10 secondi…', 3000); }},
+    {t: 'Annulla'}]});
 };
+$('netBtn').onclick = () => { if (!S.netTesting) { cmd({a: 'netTest'}); toast('Prova della velocità: 10 secondi…', 3000); } };
+function renderNet() {
+  const sp = S.netSpeed;
+  $('netTxt').textContent = S.netTesting ? 'prova in corso…' : typeof sp === 'number' && sp >= 0 ? 'invio ' + sp.toFixed(1).replace('.', ',') + ' Mbps' + (sp < 3.5 ? ' (troppo poco)' : sp < 6 ? ' (usa 720p)' : ' (ok)') : '';
+  const L = S.live || {};
+  // Diretta collegata ma senza dati in uscita: pulsante LIVE rosso lampeggiante (vedi messaggio).
+  const nd = /non riceve/.test(L.message || '');
+  $('liveBtn').classList.toggle('noData', nd);
+  if (nd && !noDataShown) { noDataShown = true; toast(L.message, 7000); }
+  if (!nd) noDataShown = false;
+}
+let noDataShown = false;
 $('liveSave').onclick = () => {
   cmd({a: 'liveConfig', url: $('rtmpUrl').value.trim(), key: $('rtmpKey').value.trim(), quality: $('liveQ').value});
   $('rtmpKey').value = '';

@@ -1,6 +1,6 @@
 {
-  "latestVersion": "0.9.9",
-  "releaseNotes": "0.9.9: controllo delle porte dopo la calibrazione del campo (la camera va da sola su ogni porta: Giusto o tocca il centro vero); il rigore usa le porte controllate; nel menu Campo c'è \"Controlla le porte\". Resto come la 0.9.8.",
+  "latestVersion": "0.10.0",
+  "releaseNotes": "0.10.0: diretta con stato vero (dati realmente inviati; avviso rosso se YouTube non riceve il video); \"Prova la velocità\" anche nel menu Dati diretta e prima di avviare la diretta; calibrazione a tutto schermo.",
   "params": {
     "gimbalSpeed": 0.3,
     "zoomRampRate": 1.5
