@@ -178,6 +178,9 @@ input.txt{width:100%;padding:8px;border-radius:8px;background:#0b1420;color:#fff
 #prepPanel{width:min(calc(420px + var(--sl)),92vw);height:100%;overflow-y:auto;background:#0b1420;padding:14px;padding-left:max(14px,calc(var(--sl) + 6px));display:flex;flex-direction:column;gap:10px}
 .card{background:#132235;border-radius:12px;padding:10px}
 details.sec{background:#0f1c2c;border-radius:12px}
+/* − e + solo sul PC (mouse): su iPhone e telefoni lo zoom si fa col pizzico a due dita */
+@media (pointer: coarse) { #seg .zb{display:none} }
+body.local #seg .zb{display:none}
 details.sec>summary{list-style:none;cursor:pointer;padding:12px 14px;font-size:16px;font-weight:800;display:flex;justify-content:space-between}
 details.sec>summary::-webkit-details-marker{display:none}
 details.sec>summary::after{content:'▸';opacity:.7}
