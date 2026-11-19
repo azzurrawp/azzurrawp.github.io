@@ -1,6 +1,6 @@
 {
-  "latestVersion": "0.10.0",
-  "releaseNotes": "0.10.0: diretta con stato vero (dati realmente inviati; avviso rosso se YouTube non riceve il video); \"Prova la velocità\" anche nel menu Dati diretta e prima di avviare la diretta; calibrazione a tutto schermo.",
+  "latestVersion": "0.10.2",
+  "releaseNotes": "0.10.2: corretta la diretta: ora parte anche il video (profilo H.264 adatto al 1080p) oltre all'audio.",
   "params": {
     "gimbalSpeed": 0.3,
     "zoomRampRate": 1.5
