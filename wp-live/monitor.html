@@ -819,6 +819,9 @@ function hitCorner(e) {
 }
 let learnLeft = 0;
 $('viewBox').addEventListener('click', e => {
+  // I pulsanti dentro la vista (Giusto, Salta, Annulla calibrazione) non sono tocchi sull'immagine:
+  // prima del 20/11 "Giusto" segnava anche il centro porta nel punto del pulsante.
+  if (e.target.closest('button, #goalBox')) return;
   if (G || touches.size > 0) return;
   if (mouseDragged) { mouseDragged = false; return; }
   if (learnLeft > 0) {
@@ -1145,6 +1148,7 @@ function renderMapping() {
     // Finito (o annullato): il campo verde compare con Fatto / Rifai.
     mapping = false; mapSeen = false; document.body.classList.remove('mapping');
     $('viewBox').classList.remove('calib', 'mapping');
+    if (redoFlow) setTimeout(nextRedo, 600);
   }
   if (idx >= 0) {
     if (!mapping) { mapping = true; $('viewBox').classList.add('calib', 'mapping'); }
@@ -1152,7 +1156,7 @@ function renderMapping() {
     $('calibHint').textContent = 'Angolo ' + (idx + 1) + ' di 4 · tocca: ' + (S.mapName || '') + ' · se non lo vedi, muovi la camera col dito';
   }
 }
-$('mapCancelBtn').onclick = () => { cmd({a: 'mapCancel'}); mapping = false; mapSeen = false; $('viewBox').classList.remove('calib', 'mapping'); document.body.classList.remove('mapping'); };
+$('mapCancelBtn').onclick = () => { cmd({a: 'mapCancel'}); redoQueue = []; redoFlow = false; mapping = false; mapSeen = false; $('viewBox').classList.remove('calib', 'mapping'); document.body.classList.remove('mapping'); };
 function hManual() {
   dlg({msg: 'Altezza della telecamera dal pavimento, in metri (es. 1.43)', input: true, ph: '1.43', buttons: [{t: 'Salva', cls: 'pri', cb: v => {
     const h = parseFloat((v || '').replace(',', '.'));
@@ -1187,6 +1191,17 @@ function renderFieldBtns() {
 $('fbDone').onclick = () => { goalFlow = true; cmd({a: 'goalCheckStart'}); };
 // Controllo porte: la camera va da sola su ogni porta; "Giusto" o tocco sul centro vero.
 let goalFlow = false, goalWas = '';
+// Rifare solo alcuni angoli: uno alla volta, poi di nuovo il controllo porte.
+let redoQueue = [], redoFlow = false;
+function nextRedo() {
+  const n = redoQueue.shift();
+  if (!n) { redoFlow = false; cmd({a: 'goalCheckStart'}); return; }
+  redoFlow = true;
+  cmd({a: 'larga'}); cmd({a: 'mapStart', redo: n - 1});
+  mapping = true; mapSeen = false;
+  $('viewBox').classList.add('calib', 'mapping'); document.body.classList.add('mapping');
+  toast('Angolo ' + n + ': la camera ci va da sola, poi tocca il punto esatto', 3500);
+}
 $('goalOkBtn').onclick = () => cmd({a: 'goalOK'});
 $('goalSkipBtn').onclick = () => cmd({a: 'goalCancel'});
 function renderGoal() {
@@ -1195,7 +1210,13 @@ function renderGoal() {
   if (g) $('goalTxt').innerHTML = '<b>Porta ' + g + '</b> · il mirino giallo è al centro della porta, sul pelo dell\'acqua?<br>Se no, <b>tocca il centro vero</b> della porta (puoi muovere la camera col dito).';
   if (goalWas && !g) {
     // Finito il giro: messaggio e, se si veniva dalla preparazione, passo successivo.
-    if (S.goalMsg) dlg({msg: S.goalMsg, buttons: [{t: 'OK', cls: 'pri'}]});
+    if (S.goalMsg) {
+      // "ricontrolla gli angoli 2 e 3": si possono rifare subito solo quegli angoli (la camera ci va da sola).
+      const nums = [...S.goalMsg.matchAll(/angoli (\d) e (\d)/g)].flatMap(m => [+m[1], +m[2]]);
+      const btns = nums.length ? [{t: 'Rifai angoli ' + nums.join(', ').replace(/, (\d)$/, ' e $1'), cls: 'pri', cb: () => { redoQueue = nums.slice(); nextRedo(); }},
+                                  {t: 'Va bene così'}] : [{t: 'OK', cls: 'pri'}];
+      dlg({msg: S.goalMsg, buttons: btns});
+    }
     if (goalFlow) { goalFlow = false; OK.c = true; saveWz(); goStep(3); renderFieldBtns(); }
   }
   goalWas = g;
