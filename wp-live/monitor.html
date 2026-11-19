@@ -626,6 +626,10 @@ function render() {
 // con gli angoli nella fascia scura intorno, così si possono trascinare.
 let fitK = 1;
 function fitView() {
+  // Dal 19/11 l'immagine resta sempre a tutto schermo (in vasca rimpicciolita era inutilizzabile):
+  // gli angoli fuori inquadratura si indicano con le frecce sul bordo.
+  const f0 = $('frame'); if (fitK !== 1 || f0.style.transform) { f0.style.transform = ''; fitK = 1; }
+  return;
   const on = document.body.classList.contains('wzCampo') || !!dragPts;
   const pts = on ? (dragPts || S.corners || []) : [];
   let x0 = 0, x1 = 1, y0 = 0, y1 = 1;
@@ -673,6 +677,22 @@ function drawOverlay() {
     x.stroke();
   }
   const pts = dragPts || calibPts || S.corners || [];
+  // Angoli fuori dall'inquadratura: freccia gialla sul bordo, col numero, verso dove si trovano.
+  if (pts.length && (curPhase() !== 'match' || mapping || dragPts)) {
+    x.font = 'bold 18px sans-serif'; x.textAlign = 'center'; x.textBaseline = 'middle';
+    pts.forEach((p, i) => {
+      if (p[0] >= 0 && p[0] <= 1 && p[1] >= 0 && p[1] <= 1) return;
+      const m = 28, ex = Math.max(m, Math.min(w - m, p[0] * w)), ey = Math.max(m, Math.min(h - m, p[1] * h));
+      const ang = Math.atan2(p[1] * h - ey, p[0] * w - ex);
+      x.save(); x.translate(ex, ey);
+      x.fillStyle = 'rgba(0,0,0,.65)'; x.beginPath(); x.arc(0, 0, 22, 0, 2 * Math.PI); x.fill();
+      x.rotate(ang); x.fillStyle = '#ffd400';
+      x.beginPath(); x.moveTo(22, 0); x.lineTo(8, -10); x.lineTo(8, 10); x.closePath(); x.fill();
+      x.restore();
+      x.fillStyle = '#ffd400'; x.fillText(String(i + 1), ex - 4 * Math.cos(ang), ey - 4 * Math.sin(ang));
+    });
+    x.textAlign = 'start'; x.textBaseline = 'alphabetic';
+  }
   // Le righe del campo servono in preparazione; in partita solo se richieste dal menu.
   let linesOn = false; try { linesOn = localStorage.getItem('wpLines') === '1'; } catch (e) {}
   const showField = curPhase() !== 'match' || linesOn || !!calibPts || !!dragPts;
@@ -1136,6 +1156,8 @@ function renderFieldBtns() {
   const r = $('view').getBoundingClientRect(), c = S.corners || [];
   let x = r.left + r.width / 2, y = r.top + r.height / 2;
   if (done) { x = r.left + r.width * c.reduce((a, p) => a + p[0], 0) / 4; y = r.top + r.height * c.reduce((a, p) => a + p[1], 0) / 4; }
+  // Al centro del campo, ma sempre dentro l'immagine (il centro può stare fuori inquadratura).
+  x = Math.max(r.left + 130, Math.min(r.right - 130, x)); y = Math.max(r.top + 70, Math.min(r.bottom - 70, y));
   const fb = $('fieldBtns'); fb.style.left = x + 'px'; fb.style.top = y + 'px';
   if (campoToastStep !== wz) {
     campoToastStep = wz;
