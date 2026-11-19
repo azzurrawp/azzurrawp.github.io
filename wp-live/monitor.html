@@ -1101,7 +1101,7 @@ let wz = 0, OK = {};
 try { wz = +(sessionStorage.getItem('wpWz') || 0); OK = JSON.parse(sessionStorage.getItem('wpOk') || '{}'); } catch (e) {}
 function saveWz() { try { sessionStorage.setItem('wpWz', wz); sessionStorage.setItem('wpOk', JSON.stringify(OK)); } catch (e) {} }
 function goStep(i) { wz = Math.max(0, Math.min(4, i)); wzLidar = wzCalib = false; okSince = 0; saveWz(); renderWizard(); renderFieldBtns(); }
-let wzLidar = false, wzCalib = false, okSince = 0, sbHiding = false, wzHtml = '';
+let wzLidar = false, wzCalib = false, okSince = 0, sbHiding = false, sbLastPhase = '', wzHtml = '';
 const esc = t => String(t == null ? '' : t).replace(/[&<>"]/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c]));
 function dlg(o) {
   const b = $('dlg'), inp = $('dlgIn');
@@ -1461,7 +1461,10 @@ function renderPhase() {
   const modal = ['dlg', 'regBox', 'sbAsk'].some(id => $(id).style.display === 'flex');
   $('startBox').style.display = ph === 'start' && !modal ? 'flex' : 'none';
   // Prima di "Preparazione finita" il tabellone non va in sovrimpressione: si decide alla domanda.
-  if (ph !== 'match' && S.sb && S.sb.visible) { if (!sbHiding) { sbHiding = true; cmd({a: 'sbVisible', on: false}); } } else sbHiding = false;
+  // Il tabellone si spegne una volta sola entrando in preparazione (poi lo si può riaccendere a mano:
+  // prima del 20/11 veniva rispento di continuo e la casella "Tabellone in diretta" non si poteva spuntare).
+  if (ph === 'prep' && sbLastPhase !== 'prep' && S.sb && S.sb.visible) cmd({a: 'sbVisible', on: false});
+  sbLastPhase = ph;
   renderMapping();
   renderFieldBtns();
   if (ph === 'prep') renderWizard();
