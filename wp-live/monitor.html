@@ -222,6 +222,44 @@ select{width:100%;padding:8px;border-radius:8px;background:#0b1420;color:#fff;bo
 #loupeImg,#loupeCv{position:absolute;inset:0;width:100%;height:100%;border-radius:10px}
 #loupeImg{background:#000;object-fit:cover}
 #loupeBtns{display:flex;gap:8px;justify-content:center;margin-top:10px}
+
+/* ===== Stile "vetro" iOS 26 (20/11): solo i comandi sopra il video; menu invariato. ===== */
+:root{--glass:rgba(28,28,30,.34);--glassHi:rgba(255,255,255,.22);--glassEdge:rgba(255,255,255,.28);
+  --ios-blue:#0A84FF;--ios-green:#30D158;--ios-orange:#FF9F0A;--ios-red:#FF3B30;--ios-yellow:#FFD60A}
+html,body{font-family:-apple-system,"SF Pro Text","SF Pro Display",system-ui,sans-serif;-webkit-font-smoothing:antialiased;letter-spacing:-.01em}
+.rc,.rl,#seg,#statusBar,#modeTxt,#toast,#sbBar,#penBox button,#goalBox,#startHint,#hint{
+  background-color:var(--glass);-webkit-backdrop-filter:blur(22px) saturate(180%);backdrop-filter:blur(22px) saturate(180%);
+  box-shadow:inset 0 1px 0 var(--glassHi),inset 0 0 0 .5px var(--glassEdge),0 6px 20px rgba(0,0,0,.28)}
+.rc{border:0;font-weight:600}
+.rl{border-radius:999px;padding:2px 9px;font-weight:600;font-size:11.5px}
+.rc svg{width:28px;height:28px;display:block}
+/* LIVE: capsula, rossa solo quando è in onda */
+#liveBtn .rc{border:0;border-radius:999px;font-weight:700;letter-spacing:.02em}
+/* REC come l'app Fotocamera: anello bianco sottile, punto rosso */
+#rec .rc{border:3px solid rgba(255,255,255,.95);background-color:rgba(28,28,30,.22)}
+#recDot{background:var(--ios-red);transition:all .2s ease}
+#rec.on #recDot{border-radius:7px}
+/* Manuale / Assistita / Larga: controllo a segmenti su vetro */
+#seg{border-radius:18px;overflow:hidden}
+#seg button{background:transparent;font-weight:600;transition:background .2s}
+#seg button + button{border-left:.5px solid rgba(255,255,255,.18)}
+#seg button small{font-weight:500;opacity:.75}
+#statusBar{border-radius:999px;font-weight:500}
+#modeTxt{border-radius:999px;padding:3px 12px;font-weight:600}
+#toast{border-radius:16px;color:#fff;font-weight:600}
+#sbBar{border:0;border-radius:22px}
+#sbBar button{border:0;border-radius:14px;background:rgba(255,255,255,.12);box-shadow:inset 0 0 0 .5px rgba(255,255,255,.25)}
+#penBox button{border:0;border-radius:18px;font-weight:600}
+#penBox button.on{background:var(--ios-yellow);color:#000}
+#goalBox{border:1.5px solid var(--ios-yellow);border-radius:20px}
+#goalBox button{background:rgba(255,255,255,.16);font-weight:600}
+#goalBox #goalOkBtn{background:var(--ios-green)}
+#undoBtn{border:0;border-radius:999px;background:var(--ios-orange);font-weight:700;box-shadow:0 6px 20px rgba(0,0,0,.3)}
+#finBtn{border-radius:999px;background:var(--ios-red);font-weight:700}
+#fbDone{background:var(--ios-green)}
+#startHint{border:1.5px solid var(--ios-yellow);border-radius:20px;font-weight:600}
+#hint{border-radius:12px}
+#liveBtn.noData .rc{background:var(--ios-red) !important}
 </style>
 </head>
 <body>
@@ -435,7 +473,7 @@ select{width:100%;padding:8px;border-radius:8px;background:#0b1420;color:#fff;bo
   <div id="hud">
     <div id="statusBar"></div>
     <div id="modeTxt"></div>
-    <button class="rb" id="prepBtn"><span class="rc">☰</span><span class="rl">Menu</span></button>
+    <button class="rb" id="prepBtn"><span class="rc"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></span><span class="rl">Menu</span></button>
     <button class="rb" id="liveBtn"><span class="rc">● LIVE</span><span class="rl" id="liveTime">spenta</span></button>
     <div id="recWrap"><button class="rb" id="rec"><span class="rc"><span id="recDot"></span></span><span class="rl" id="recTime">REC</span></button></div>
     <button class="rb" id="micBtn"><span class="rc" id="micIcon">🎤</span><span class="rl" id="micTxt">Mic</span></button>
@@ -633,10 +671,13 @@ function render() {
   const md = (S.mode || '').replace(/^(MANUALE|ASSISTITA|AUTOMATICO)( · )?/, '');
   $('modeTxt').textContent = md; $('modeTxt').style.display = md ? '' : 'none';
   $('autoBtn').style.background = S.auto ? '#1e8e3e' : '';
-  $('manBtn').style.background = !S.auto && !S.assisted ? '#e67e00' : 'rgba(0,0,0,.6)';
-  $('assistBtn').style.background = S.assisted ? '#1565c0' : 'rgba(0,0,0,.6)';
-  if (S.audio === false) { $('micIcon').textContent = '🎤'; $('micTxt').textContent = 'Mic n.d.'; $('micIcon').style.background = '#555'; }
-  else { $('micIcon').textContent = S.muted ? '🔇' : '🎤'; $('micTxt').textContent = S.muted ? 'Mic spento' : 'Mic'; $('micIcon').style.background = S.muted ? '#e07b00' : 'rgba(30,142,62,.9)'; }
+  $('manBtn').style.background = !S.auto && !S.assisted ? 'var(--ios-orange)' : '';
+  $('assistBtn').style.background = S.assisted ? 'var(--ios-blue)' : '';
+  const micSvg = off => '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21M8.5 21h7"/>' + (off ? '<path d="M4 4l16 16"/>' : '') + '</svg>';
+  const micKey = S.audio === false ? 'na' : S.muted ? 'off' : 'on';
+  if ($('micIcon').dataset.k !== micKey) { $('micIcon').dataset.k = micKey; $('micIcon').innerHTML = micSvg(micKey !== 'on'); }
+  if (S.audio === false) { $('micTxt').textContent = 'Mic n.d.'; $('micIcon').style.background = 'rgba(142,142,147,.6)'; }
+  else { $('micTxt').textContent = S.muted ? 'Mic spento' : 'Mic'; $('micIcon').style.background = S.muted ? 'var(--ios-orange)' : 'rgba(48,209,88,.85)'; }
   $('rec').classList.toggle('on', !!S.rec);
   $('recWrap').classList.toggle('on', !!S.rec);
   $('recTime').textContent = S.rec ? 'REC ' + fmt(S.recSeconds) : 'REC';
@@ -993,7 +1034,7 @@ function renderLive() {
   const L = S.live || {};
   const on = L.state && L.state !== 'off';
   const pill = $('liveBtn').querySelector('.rc');
-  pill.style.background = L.state === 'live' ? '#e53935' : (on ? '#e07b00' : 'rgba(0,0,0,.55)');
+  pill.style.background = L.state === 'live' ? 'var(--ios-red)' : (on ? 'var(--ios-orange)' : '');
   $('liveTime').textContent = L.state === 'live' ? fmt(L.seconds || 0) : (on ? 'collegamento…' : (L.state === 'error' ? 'errore' : 'spenta'));
   $('liveTxt').textContent = L.message || (L.hasKey ? 'Pronta: ' + L.quality : 'Inserisci i dati della diretta');
   if (document.activeElement !== $('rtmpUrl') && !$('rtmpUrl').value) $('rtmpUrl').value = L.url || '';
