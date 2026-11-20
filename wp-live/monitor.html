@@ -1616,7 +1616,7 @@ function renderPhase() {
   const b = document.body.classList;
   b.toggle('phStart', ph === 'start'); b.toggle('phPrep', ph === 'prep'); b.toggle('phMatch', ph === 'match');
   b.toggle('running', running); b.toggle('idle', !running && $('cdBox').style.display !== 'flex');
-  // Suggerimento "come si inizia": fino alla prima registrazione di questa partita.
+  // Suggerimento "come si inizia": fino alla scelta della modalità o alla prima registrazione di questa partita.
   if (running) { try { sessionStorage.setItem('wpStarted', '1'); } catch (e) {} }
   let started = false; try { started = sessionStorage.getItem('wpStarted') === '1'; } catch (e) {}
   b.toggle('firstRun', !started);
@@ -1690,6 +1690,9 @@ $('autoBtn').onclick = () => {
     buttons: [{t: 'Accendi Auto', cls: 'red', cb: () => { if (S.assisted) cmd({a: 'assisted', on: false}); cmd({a: 'auto', on: true}); }}, {t: 'Resta com\'è', cls: 'pri'}]});
 };
 // Due modalità per ora: Manuale (il regista muove e zooma) e Assistita (il regista muove, zoom automatico).
+// Il suggerimento "Per iniziare" sparisce appena si sceglie la modalità (e non torna per tutta la partita).
+function hintDone() { try { sessionStorage.setItem('wpStarted', '1'); } catch (e) {} document.body.classList.remove('firstRun'); }
+['manBtn', 'assistBtn'].forEach(id => $(id).addEventListener('click', hintDone));
 $('assistBtn').onclick = () => {
   if (S.assisted) return;
   cmd({a: 'assisted', on: true});
