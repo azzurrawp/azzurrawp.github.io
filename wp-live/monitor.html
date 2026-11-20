@@ -1423,6 +1423,8 @@ function renderWizard() {
       h += line(S.netTesting ? 'warn' : sp < 0 ? 'warn' : sp >= 6 ? 'okt' : sp >= 3.5 ? 'warn' : 'bad', 'Velocità invio',
         S.netTesting ? 'prova in corso…' : sp < 0 ? 'da provare' : sp.toFixed(1).replace('.', ',') + ' Mbps' + (sp < 6 && sp >= 3.5 ? ' (usa 720p)' : sp < 3.5 ? ' (troppo poco)' : ''));
     } else h += '<div class="st warn">Spazio, internet e velocità: servono l\'app 0.8.8.</div>';
+    const T = S.tablet || {};
+    h += line(!T.linked ? 'warn' : T.ok ? 'okt' : 'warn', 'Tablet (risultato)', !T.linked ? 'non collegato: punteggio a mano' : T.ok ? 'collegato' : 'collegato, in attesa dei dati');
     const hk = S.live && S.live.hasKey;
     h += line(hk ? 'okt' : 'warn', 'Chiave YouTube', hk ? 'inserita' : 'manca (solo registrazione)');
     if (newApp) h += B('net', S.netTesting ? 'Prova in corso…' : 'Prova la velocità');
@@ -1448,8 +1450,9 @@ $('wzBody').addEventListener('pointerup', e => {
   else if (a === 'caps') openCard('capsCard');
   else if (a === 'learn') $('learnBtn').click();
   else if (a === 'net') { if (!S.netTesting) { S.netTesting = true; cmd({a: 'netTest'}); renderWizard(); } }
-  else if (a === 'key') openCard('liveCard');
-  else if (a === 'done') $('sbAsk').style.display = 'flex';
+  else if (a === 'key') openLivePanel();
+  // Con il tablet collegato il tabellone si accende da solo: niente domanda.
+  else if (a === 'done') { if ((S.tablet || {}).linked) { cmd({a: 'sbVisible', on: true}); setPhase('match'); toast('Preparazione finita: tabellone dal tablet', 3000); } else $('sbAsk').style.display = 'flex'; }
 });
 $('wzBody').addEventListener('change', e => {
   if (e.target.id === 'wzHome' || e.target.id === 'wzAway') cmd({a: 'caps', home: $('wzHome').value, away: $('wzAway').value});
