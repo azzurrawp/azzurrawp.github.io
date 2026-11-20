@@ -1256,12 +1256,13 @@ function openCard(id) {
 }
 const hDone = () => /^Altezza/.test(S.geo || '');
 const cDone = () => (S.corners || []).length === 4;
-// Controllo delle misure con l'altezza (20/11). Sotto gli 8 metri è una prova in casa (tavolo): nessun avviso.
+// Controllo delle misure con l'altezza (20/11). Misure da tavolo di cucina = prova in casa: nessun avviso.
 function geoCheck() {
   const m = /lunghezza misurata ([\d.]+) m vicino, ([\d.]+) m lontano/.exec(S.geo || '');
   if (!m) return null;
-  const near = +m[1], far = +m[2], L = 25;
-  if (Math.max(near, far) < 8) return {home: true, near, far};
+  const near = +m[1], far = +m[2], L = 25, w = /vasca larga ([\d.]+) m/.exec(S.geo || '');
+  // Prova in casa: lunghezze sotto 8 m o larghezza sotto 6 m (una vasca vera è larga almeno 10 m).
+  if (Math.max(near, far) < 8 || (w && +w[1] < 6)) return {home: true, near, far};
   const bad = x => Math.abs(x - L) / L > 0.15;
   return {near, far, ok: !bad(near) && !bad(far), redo: bad(near) && bad(far) ? [] : bad(near) ? [1, 2] : bad(far) ? [3, 4] : []};
 }
