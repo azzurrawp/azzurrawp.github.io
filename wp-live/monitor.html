@@ -260,6 +260,27 @@ html,body{font-family:-apple-system,"SF Pro Text","SF Pro Display",system-ui,san
 #startHint{border:1.5px solid var(--ios-yellow);border-radius:20px;font-weight:600}
 #hint{border-radius:12px}
 #liveBtn.noData .rc{background:var(--ios-red) !important}
+
+/* Pannello LIVE (20/11): si prepara e si avvia la diretta in un posto solo. */
+#livePanel{position:fixed;inset:0;z-index:23;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.35)}
+#livePanel .lp{width:min(420px,92vw);max-height:92vh;overflow-y:auto;padding:18px;border-radius:28px;color:#fff;
+  background:rgba(28,28,30,.55);-webkit-backdrop-filter:blur(30px) saturate(180%);backdrop-filter:blur(30px) saturate(180%);
+  box-shadow:inset 0 1px 0 var(--glassHi),inset 0 0 0 .5px var(--glassEdge),0 20px 50px rgba(0,0,0,.45)}
+#livePanel .lpT{font-size:20px;font-weight:700;text-align:center;margin-bottom:8px}
+#livePanel .lpL{font-size:13px;font-weight:600;opacity:.7;margin:12px 0 4px;text-transform:uppercase;letter-spacing:.03em}
+#livePanel .lpS{font-size:13px;opacity:.85}
+#livePanel .lpW{font-size:13px;color:var(--ios-yellow);margin-top:4px}
+#livePanel .lpRow{display:flex;gap:8px;align-items:center;margin-top:6px}
+#livePanel input{flex:1;width:100%;padding:11px 12px;border-radius:12px;border:0;background:rgba(255,255,255,.12);color:#fff;font-size:16px}
+#livePanel .lpB{border:0;border-radius:999px;padding:10px 14px;background:rgba(255,255,255,.16);color:#fff;font-weight:600;font-size:15px;white-space:nowrap}
+#livePanel .lpSeg{display:flex;background:rgba(255,255,255,.12);border-radius:12px;padding:3px}
+#livePanel .lpSeg button{flex:1;border:0;border-radius:10px;padding:9px 0;background:transparent;color:#fff;font-weight:600;font-size:15px}
+#livePanel .lpSeg button.on{background:rgba(255,255,255,.28)}
+#livePanel .lpAdv{margin-top:10px;font-size:14px}
+#livePanel .lpAdv summary{opacity:.75}
+#livePanel .lpGo{width:100%;margin-top:16px;min-height:52px;border:0;border-radius:999px;background:var(--ios-red);color:#fff;font-size:18px;font-weight:700}
+#livePanel .lpGo:disabled{opacity:.4}
+#livePanel .lpNo{width:100%;margin-top:8px;min-height:44px;border:0;border-radius:999px;background:transparent;color:var(--ios-blue);font-size:17px;font-weight:600}
 </style>
 </head>
 <body>
@@ -446,6 +467,21 @@ html,body{font-family:-apple-system,"SF Pro Text","SF Pro Display",system-ui,san
   </div>
 </div></div>
 <div id="dlg"><div><div id="dlgMsg"></div><input id="dlgIn"><div id="dlgBtns"></div></div></div>
+<div id="livePanel"><div class="lp">
+  <div class="lpT">Diretta YouTube</div>
+  <div class="lpL">Chiave dello stream</div>
+  <div id="lpKeyState" class="lpS"></div>
+  <div class="lpRow"><input id="lpKey" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="incolla qui la chiave"><button id="lpPaste" class="lpB">Incolla</button></div>
+  <div class="lpL">Qualità</div>
+  <div class="lpSeg"><button data-q="720p">720p</button><button data-q="1080p">1080p</button></div>
+  <div id="lpQHint" class="lpS"></div>
+  <div class="lpRow"><button id="lpNet" class="lpB">Prova la velocità</button><span id="lpNetTxt" class="lpS"></span></div>
+  <div id="lpNetWarn" class="lpW"></div>
+  <details class="lpAdv"><summary>Avanzate</summary><div class="lpL">Indirizzo dello stream</div><input id="lpUrl" autocomplete="off" autocapitalize="off" spellcheck="false"></details>
+  <button id="lpGo" class="lpGo">Avvia diretta</button>
+  <button id="lpNo" class="lpNo">Annulla</button>
+  <div class="lpS" style="margin-top:8px;text-align:center">Su YouTube Studio la diretta deve essere aperta (Stefano).</div>
+</div></div>
 <div id="regBox"><div>
   <div style="font-size:19px;font-weight:800">Regista</div>
   <div id="regAsk">
@@ -1040,16 +1076,53 @@ function renderLive() {
   if (document.activeElement !== $('rtmpUrl') && !$('rtmpUrl').value) $('rtmpUrl').value = L.url || '';
   if (document.activeElement !== $('liveQ')) $('liveQ').value = L.quality || '1080p';
   $('rtmpKey').placeholder = L.hasKey ? 'chiave già inserita (incolla per cambiarla)' : 'incolla la chiave';
+  renderLivePanel();
 }
 $('liveBtn').onclick = () => {
   const L = S.live || {};
   if (L.state && L.state !== 'off') return;  // per fermarla si tiene premuto 2 secondi
-  if (!L.hasKey) { dlg({msg: 'Prima inserisci la chiave dello stream (Dati diretta).', buttons: [{t: 'Inserisci', cls: 'pri', cb: () => openCard('liveCard')}, {t: 'Chiudi'}]}); return; }
-  const sp = typeof S.netSpeed === 'number' && S.netSpeed >= 0 ? S.netSpeed.toFixed(1).replace('.', ',') + ' Mbps' : 'non provata';
-  dlg({msg: 'Avviare la diretta su YouTube (' + (L.quality || '1080p') + ')? Velocità di invio: ' + sp + ' (servono almeno 6 Mbps per 1080p, 3,5 per 720p).', buttons: [
-    {t: 'Avvia', cls: 'pri', cb: () => cmd({a: 'liveStart'})},
-    {t: 'Prova la velocità', cb: () => { cmd({a: 'netTest'}); toast('Prova della velocità: 10 secondi…', 3000); }},
-    {t: 'Annulla'}]});
+  openLivePanel();
+};
+// Pannello LIVE: chiave, qualità, prova velocità e avvio nello stesso posto.
+let lpQ = '', lpWasTesting = false, lpNetAt = 0;
+function openLivePanel() {
+  const L = S.live || {};
+  lpQ = L.quality || '720p';
+  $('lpKey').value = '';
+  $('lpUrl').value = L.url || 'rtmp://a.rtmp.youtube.com/live2';
+  $('livePanel').style.display = 'flex';
+  renderLivePanel();
+}
+function closeLivePanel() { $('livePanel').style.display = 'none'; $('lpKey').value = ''; }
+function renderLivePanel() {
+  if ($('livePanel').style.display !== 'flex') return;
+  const L = S.live || {}, sp = S.netSpeed, typed = $('lpKey').value.trim().length > 0;
+  if (lpWasTesting && !S.netTesting) lpNetAt = Date.now();
+  lpWasTesting = !!S.netTesting;
+  $('lpKeyState').textContent = typed ? 'Chiave nuova pronta: verrà salvata all\'avvio.' : (L.hasKey ? '✓ Chiave già inserita (incollane una nuova solo se è cambiata).' : 'Manca la chiave: incollala qui (te la manda chi gestisce il canale).');
+  $('lpKeyState').style.color = typed || L.hasKey ? '' : 'var(--ios-yellow)';
+  document.querySelectorAll('#livePanel .lpSeg button').forEach(b => b.classList.toggle('on', b.dataset.q === lpQ));
+  const ok = typeof sp === 'number' && sp >= 0;
+  $('lpNetTxt').textContent = S.netTesting ? 'prova in corso…' : ok ? 'invio ' + sp.toFixed(1).replace('.', ',') + ' Mbps' + (sp < 3.5 ? ' · troppo poco' : sp < 6 ? ' · ok per 720p' : ' · ok per 1080p') : 'non ancora provata';
+  $('lpQHint').textContent = ok && !S.netTesting ? (sp >= 6 ? 'Consigliata: 1080p (la rete regge).' : 'Consigliata: 720p.') : 'Con l\'hotspot conviene 720p.';
+  $('lpNetWarn').textContent = S.netTesting ? '' : (!ok || !lpNetAt ? 'Consiglio: fai la prova della velocità prima di partire.' : Date.now() - lpNetAt > 600000 ? 'L\'ultima prova è di più di 10 minuti fa: rifalla se hai cambiato posto o rete.' : '');
+  $('lpGo').disabled = !(typed || L.hasKey);
+}
+document.querySelectorAll('#livePanel .lpSeg button').forEach(b => b.onclick = () => { lpQ = b.dataset.q; renderLivePanel(); });
+$('lpKey').oninput = renderLivePanel;
+$('lpPaste').onclick = async () => {
+  try { const t = (await navigator.clipboard.readText()).trim(); if (t) { $('lpKey').value = t; renderLivePanel(); return; } } catch (e) {}
+  $('lpKey').focus(); toast('Tieni premuto nel campo e scegli Incolla', 3000);
+};
+$('lpNet').onclick = () => { if (!S.netTesting) { cmd({a: 'netTest'}); lpWasTesting = true; toast('Prova della velocità: 10 secondi…', 3000); renderLivePanel(); } };
+$('lpNo').onclick = closeLivePanel;
+$('livePanel').onclick = e => { if (e.target === $('livePanel')) closeLivePanel(); };
+$('lpGo').onclick = () => {
+  const L = S.live || {}, key = $('lpKey').value.trim(), url = $('lpUrl').value.trim();
+  if (key || lpQ !== L.quality || (url && url !== L.url)) cmd({a: 'liveConfig', url: url, key: key, quality: lpQ});
+  closeLivePanel();
+  setTimeout(() => cmd({a: 'liveStart'}), 400);
+  toast('Avvio la diretta…', 2500);
 };
 $('netBtn').onclick = () => { if (!S.netTesting) { cmd({a: 'netTest'}); toast('Prova della velocità: 10 secondi…', 3000); } };
 function renderNet() {
