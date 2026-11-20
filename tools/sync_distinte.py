@@ -103,6 +103,23 @@ def parse(path):
             'home': home, 'opp': opp, 'place': place, 'names': names, 'file': fn}, None
 
 
+def fin_opp(encf, date):
+    """Nome dell'avversario come nel calendario FIN (classifica.json), se c'è la partita in quella data."""
+    try:
+        C = json.load(open(os.path.join(os.path.dirname(os.path.abspath(encf)), 'classifica.json'), encoding='utf-8'))
+    except Exception:
+        return None
+    for day in C.get('days', []):
+        for m in day.get('m', []):
+            if m.get('date') != date:
+                continue
+            if TEAM.search(m.get('home', '')):
+                return m.get('away')
+            if TEAM.search(m.get('away', '')):
+                return m.get('home')
+    return None
+
+
 def main():
     a = [x for x in sys.argv[1:] if not x.startswith('--')]
     dry = '--dry' in sys.argv
@@ -120,6 +137,9 @@ def main():
             rep.append('⚠ ' + err); continue
         if sum(1 for n in r['names'] if n) < 7:
             rep.append(f"⚠ {r['file']}: trovati solo {sum(1 for n in r['names'] if n)} nomi, non la uso"); continue
+        fo = fin_opp(encf, r['date'])
+        if fo:
+            r['opp'] = fo
         ex = next((m for m in D['matches'] if re.match(r'(\d+)', m.get('gio', '')) and int(re.match(r'(\d+)', m['gio']).group(1)) == r['gn']), None)
         tag = f"{r['gio']} {r['date'][8:]}/{r['date'][5:7]} h{r['time']} vs {r['opp']} ({'casa' if r['home'] else 'trasferta'})"
         if ex is None:
