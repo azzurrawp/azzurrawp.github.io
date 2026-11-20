@@ -1310,7 +1310,9 @@ function renderMapping() {
     if (redoFlow) setTimeout(nextRedo, 600);
   }
   let dragging = false; try { dragging = !!VD; } catch (e) {}
-  if (!dragging) redoIdx = redoFlow && idx >= 0 ? idx : -1;
+  // Si capisce dall'iPhone se si sta rifacendo un angolo: tutti e 4 gli angoli sono già presenti
+  // (nella calibrazione da zero ce ne sono meno). Così funziona anche dopo aver ricaricato la pagina.
+  if (!dragging) redoIdx = idx >= 0 && (S.corners || []).length === 4 ? idx : -1;
   if (idx >= 0) {
     if (!mapping) { mapping = true; $('viewBox').classList.add('calib', 'mapping'); }
     document.body.classList.add('mapping');
