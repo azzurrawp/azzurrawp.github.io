@@ -1256,6 +1256,23 @@ function openCard(id) {
 }
 const hDone = () => /^Altezza/.test(S.geo || '');
 const cDone = () => (S.corners || []).length === 4;
+// Controllo delle misure con l'altezza (20/11). Sotto gli 8 metri è una prova in casa (tavolo): nessun avviso.
+function geoCheck() {
+  const m = /lunghezza misurata ([\d.]+) m vicino, ([\d.]+) m lontano/.exec(S.geo || '');
+  if (!m) return null;
+  const near = +m[1], far = +m[2], L = 25;
+  if (Math.max(near, far) < 8) return {home: true, near, far};
+  const bad = x => Math.abs(x - L) / L > 0.15;
+  return {near, far, ok: !bad(near) && !bad(far), redo: bad(near) && bad(far) ? [] : bad(near) ? [1, 2] : bad(far) ? [3, 4] : []};
+}
+function geoLine() {
+  const g = geoCheck(); if (!g) return '';
+  const f = x => x.toFixed(1).replace('.', ',');
+  if (g.home) return '<div class="st small">Misure: ' + f(g.near) + ' e ' + f(g.far) + ' m (prova in casa: controllo saltato).</div>';
+  if (g.ok) return '<div class="st okt">✓ Misure giuste: vasca ' + f(g.near) + ' m vicino, ' + f(g.far) + ' m lontano.</div>';
+  return '<div class="st warn">Misure strane: ' + f(g.near) + ' m vicino, ' + f(g.far) + ' m lontano (attesi 25). ' +
+    (g.redo.length ? 'Rifai gli angoli ' + g.redo.join(' e ') + '.' : 'Controlla l\'altezza o rifai la calibrazione.') + '</div>';
+}
 function doLidar() { if (S.busyGeo) { toast('Misura già in corso', 2000); return; } wzLidar = true; cmd({a: 'lidar'}); toast('Misuro l\'altezza: la camera si inclina verso il pavimento', 3500); }
 // Calibrazione a mano (predefinita): si toccano i 4 angoli; il giro automatico del gimbal resta a scelta.
 function doCalib(auto) {
@@ -1350,7 +1367,13 @@ function renderGoal() {
                                   {t: 'Va bene così'}] : [{t: 'OK', cls: 'pri'}];
       dlg({msg: S.goalMsg, buttons: btns});
     }
-    if (goalFlow) { goalFlow = false; OK.c = true; saveWz(); goStep(3); renderFieldBtns(); }
+    if (goalFlow) {
+      goalFlow = false; OK.c = true; saveWz(); goStep(3); renderFieldBtns();
+      const gc = geoCheck();
+      if (!S.goalMsg && gc && !gc.home && !gc.ok && gc.redo.length)
+        dlg({msg: 'Le misure della vasca non tornano: ' + gc.near.toFixed(1).replace('.', ',') + ' m vicino e ' + gc.far.toFixed(1).replace('.', ',') + ' m lontano (attesi 25).',
+             buttons: [{t: 'Rifai angoli ' + gc.redo.join(' e '), cls: 'pri', cb: () => { redoQueue = gc.redo.slice(); nextRedo(); }}, {t: 'Va bene così'}]});
+    }
   }
   goalWas = g;
 }
@@ -1394,7 +1417,7 @@ function renderWizard() {
     if (S.busyGeo) h += '<div class="st warn">Calibrazione in corso…</div>';
     else {
       if (wzCalib && cDone() && !calibPts && !OK.c) { OK.c = true; saveWz(); }
-      if (OK.c && cDone()) h += '<div class="st okt">✓ Campo pronto.</div><div class="st small">Se serve, trascina i pallini sugli angoli.</div>' + B('next', 'Avanti ▶', true) + B('calib', 'Rifai la calibrazione');
+      if (OK.c && cDone()) { const gc = geoCheck(); h += '<div class="st okt">✓ Campo pronto.</div>' + geoLine() + '<div class="st small">Se serve, trascina i pallini sugli angoli.</div>' + B('next', 'Avanti ▶', true) + (gc && !gc.home && !gc.ok && gc.redo.length ? B('redo', 'Rifai angoli ' + gc.redo.join(' e ')) : '') + B('calib', 'Rifai la calibrazione'); }
       else if (cDone()) h += '<div class="st">Il campo verde coincide con la vasca?</div>' + B('cok', 'Sì, coincide', true) + B('calib', 'No, rifai la calibrazione');
       else h += '<div class="st">' + (S.docked ? 'Il gimbal fa un giro del campo e trova gli angoli.' : 'Gimbal scollegato: toccherai i 4 angoli sull\'immagine.') + '</div>' + B('calib', 'Calibra il campo', true);
     }
@@ -1423,6 +1446,8 @@ function renderWizard() {
       h += line(S.netTesting ? 'warn' : sp < 0 ? 'warn' : sp >= 6 ? 'okt' : sp >= 3.5 ? 'warn' : 'bad', 'Velocità invio',
         S.netTesting ? 'prova in corso…' : sp < 0 ? 'da provare' : sp.toFixed(1).replace('.', ',') + ' Mbps' + (sp < 6 && sp >= 3.5 ? ' (usa 720p)' : sp < 3.5 ? ' (troppo poco)' : ''));
     } else h += '<div class="st warn">Spazio, internet e velocità: servono l\'app 0.8.8.</div>';
+    const gc = geoCheck();
+    if (gc && !gc.home) h += line(gc.ok ? 'okt' : 'warn', 'Misure della vasca', gc.ok ? 'giuste' : 'da ricontrollare (passo 3)');
     const T = S.tablet || {};
     h += line(!T.linked ? 'warn' : T.ok ? 'okt' : 'warn', 'Tablet (risultato)', !T.linked ? 'non collegato: punteggio a mano' : T.ok ? 'collegato' : 'collegato, in attesa dei dati');
     const hk = S.live && S.live.hasKey;
@@ -1446,6 +1471,7 @@ $('wzBody').addEventListener('pointerup', e => {
   else if (a === 'hok') { OK.h = true; saveWz(); goStep(2); }
   else if (a === 'calib') { OK.c = false; saveWz(); doCalib(); }
   else if (a === 'cok') { OK.c = true; saveWz(); goStep(3); }
+  else if (a === 'redo') { const gc = geoCheck(); if (gc && gc.redo.length) { redoQueue = gc.redo.slice(); nextRedo(); } }
   else if (a === 'kok') { OK.k = true; saveWz(); goStep(4); }
   else if (a === 'caps') openCard('capsCard');
   else if (a === 'learn') $('learnBtn').click();
