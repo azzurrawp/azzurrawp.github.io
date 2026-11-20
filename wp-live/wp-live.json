@@ -1,6 +1,6 @@
 {
-  "latestVersion": "0.11.0",
-  "releaseNotes": "0.11.0: tabellone collegato al tablet (Azzurra WP Stat): squadre, chi gioca in casa, risultato e tempo arrivano da soli; calottine impostate da casa/trasferta; niente scritta GOL sul video.",
+  "latestVersion": "0.11.1",
+  "releaseNotes": "0.11.1: su/giù più morbido (metà velocità, accelera e frena dolcemente, niente inclinazioni involontarie); dalla 0.11.0 tabellone collegato al tablet.",
   "params": {
     "gimbalSpeed": 0.3,
     "zoomRampRate": 1.5
