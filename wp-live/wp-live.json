@@ -1,6 +1,6 @@
 {
-  "latestVersion": "0.11.2",
-  "releaseNotes": "0.11.2: monitor regista più fluido (30 immagini al secondo anche a camera ferma; 15 se l'iPhone scalda).",
+  "latestVersion": "0.11.4",
+  "releaseNotes": "0.11.4: calibrazione e porte con conversione esatta immagine↔gimbal anche con la camera inclinata; risultato dal tablet con collegamento sempre aperto (niente '429').",
   "params": {
     "gimbalSpeed": 0.3,
     "zoomRampRate": 1.5
