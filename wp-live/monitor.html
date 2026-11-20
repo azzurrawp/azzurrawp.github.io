@@ -804,11 +804,13 @@ function drawOverlay() {
     pts.forEach((p, i) => { i ? x.lineTo(p[0] * w, p[1] * h) : x.moveTo(p[0] * w, p[1] * h); });
     if (pts.length === 4) x.closePath();
     x.stroke();
-    pts.forEach(p => {
-      const px = p[0] * w, py = p[1] * h;
-      x.lineWidth = 2;
+    pts.forEach((p, i) => {
+      const px = p[0] * w, py = p[1] * h, hot = mapping && i === redoIdx;
+      x.lineWidth = hot ? 4 : 2;
       x.fillStyle = 'rgba(0,0,0,.35)';
-      x.beginPath(); x.arc(px, py, 12, 0, 7); x.fill(); x.stroke();
+      if (hot) x.strokeStyle = '#ffd400';
+      x.beginPath(); x.arc(px, py, hot ? 18 : 12, 0, 7); x.fill(); x.stroke();
+      if (hot) x.strokeStyle = 'rgba(94,224,138,.9)';
       x.fillStyle = '#ffffff';
       x.beginPath(); x.arc(px, py, 2.5, 0, 7); x.fill();
     });
@@ -904,6 +906,11 @@ $('calibBtn').onclick = null;
 $('calibClear').onclick = null;
 function hitCorner(e) {
   // In partita gli angoli non si spostano per sbaglio: si regolano solo in Preparazione.
+  // Rifare un angolo (20/11): si trascina solo il suo pallino (giallo), gli altri restano fermi.
+  if (mapping && redoIdx >= 0) {
+    const p = (S.corners || [])[redoIdx], r = $('view').getBoundingClientRect();
+    return p && Math.hypot(e.clientX - r.left - p[0] * r.width, e.clientY - r.top - p[1] * r.height) < (e.pointerType === 'touch' ? 40 : 30) ? redoIdx : -1;
+  }
   if (mapping) return -1;
   if (!calibPts && curPhase() !== 'prep') return -1;
   const pts = calibPts || S.corners || [];
@@ -934,6 +941,7 @@ $('viewBox').addEventListener('click', e => {
     toast('Centro della porta segnato', 1500);
     return;
   }
+  if (mapping && redoIdx >= 0) { toast('Trascina il pallino giallo ' + (redoIdx + 1) + ' sul punto giusto', 2200); return; }
   if (mapping) {
     const r = $('view').getBoundingClientRect();
     cmd({a: 'mapMark', x: (e.clientX - r.left) / r.width, y: (e.clientY - r.top) / r.height});
@@ -1290,7 +1298,7 @@ function doCalib(auto) {
     document.body.classList.add('mapping');
   }
 }
-let mapping = false, mapSeen = false;
+let mapping = false, mapSeen = false, redoIdx = -1;
 function renderMapping() {
   const idx = typeof S.mapIndex === 'number' ? S.mapIndex : -1;
   if (idx >= 0) mapSeen = true;
@@ -1301,13 +1309,17 @@ function renderMapping() {
     $('viewBox').classList.remove('calib', 'mapping');
     if (redoFlow) setTimeout(nextRedo, 600);
   }
+  let dragging = false; try { dragging = !!VD; } catch (e) {}
+  if (!dragging) redoIdx = redoFlow && idx >= 0 ? idx : -1;
   if (idx >= 0) {
     if (!mapping) { mapping = true; $('viewBox').classList.add('calib', 'mapping'); }
     document.body.classList.add('mapping');
-    $('calibHint').textContent = 'Angolo ' + (idx + 1) + ' di 4 · tocca: ' + (S.mapName || '') + ' · se non lo vedi, muovi la camera col dito';
+    $('calibHint').textContent = redoIdx >= 0
+      ? 'Angolo ' + (idx + 1) + ' · trascina il pallino giallo su: ' + (S.mapName || '') + ' · se non lo vedi, muovi la camera col dito'
+      : 'Angolo ' + (idx + 1) + ' di 4 · tocca: ' + (S.mapName || '') + ' · se non lo vedi, muovi la camera col dito';
   }
 }
-$('mapCancelBtn').onclick = () => { cmd({a: 'mapCancel'}); redoQueue = []; redoFlow = false; mapping = false; mapSeen = false; $('viewBox').classList.remove('calib', 'mapping'); document.body.classList.remove('mapping'); };
+$('mapCancelBtn').onclick = () => { cmd({a: 'mapCancel'}); redoQueue = []; redoFlow = false; redoIdx = -1; mapping = false; mapSeen = false; $('viewBox').classList.remove('calib', 'mapping'); document.body.classList.remove('mapping'); };
 function hManual() {
   dlg({msg: 'Altezza della telecamera dal pavimento, in metri (es. 1.43)', input: true, ph: '1.43', buttons: [{t: 'Salva', cls: 'pri', cb: v => {
     const h = parseFloat((v || '').replace(',', '.'));
@@ -1351,7 +1363,7 @@ function nextRedo() {
   cmd({a: 'larga'}); cmd({a: 'mapStart', redo: n - 1});
   mapping = true; mapSeen = false;
   $('viewBox').classList.add('calib', 'mapping'); document.body.classList.add('mapping');
-  toast('Angolo ' + n + ': la camera ci va da sola, poi tocca il punto esatto', 3500);
+  toast('Angolo ' + n + ': la camera ci va da sola, poi trascina il pallino giallo sul punto esatto', 3500);
 }
 $('goalOkBtn').onclick = () => cmd({a: 'goalOK'});
 $('goalSkipBtn').onclick = () => cmd({a: 'goalCancel'});
@@ -1924,6 +1936,12 @@ function vertexEnd(e) {
   if (v.moved) {
     mouseDragged = true;
     if (calibPts) { calibPts = v.pts; dragPts = null; }
+    else if (mapping && v.i === redoIdx) {
+      cmd({a: 'mapMark', x: v.pts[v.i][0], y: v.pts[v.i][1]});
+      toast('Angolo ' + (v.i + 1) + ' sistemato', 1500);
+      redoIdx = -1;
+      setTimeout(() => { dragPts = null; drawOverlay(); }, 800);
+    }
     else {
       S.corners = v.pts; cmd({a: 'calib', pts: v.pts});
       toast('Angolo ' + (v.i + 1) + ' spostato', 1500);
