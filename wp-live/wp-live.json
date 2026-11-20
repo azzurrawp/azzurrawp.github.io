@@ -1,6 +1,6 @@
 {
-  "latestVersion": "0.10.4",
-  "releaseNotes": "0.10.4: rifacendo un angolo dopo il controllo porte la camera ci va da sola; audio stereo (dalla 0.10.3); diretta funzionante (dalla 0.10.2).",
+  "latestVersion": "0.11.0",
+  "releaseNotes": "0.11.0: tabellone collegato al tablet (Azzurra WP Stat): squadre, chi gioca in casa, risultato e tempo arrivano da soli; calottine impostate da casa/trasferta; niente scritta GOL sul video.",
   "params": {
     "gimbalSpeed": 0.3,
     "zoomRampRate": 1.5

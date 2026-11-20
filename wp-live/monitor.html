@@ -319,6 +319,14 @@ select{width:100%;padding:8px;border-radius:8px;background:#0b1420;color:#fff;bo
     <details class="sec" id="secTeams"><summary>Squadre e tabellone</summary>
     <div class="card" id="teamsCard">
       <label class="bigSwitch"><input type="checkbox" id="sbVis"> <span><b>Mostra il tabellone sul video</b><br><small>nella diretta e nella registrazione</small></span></label>
+      <div class="subT">Dal tablet (Azzurra WP Stat)</div>
+      <div style="font-size:13px;opacity:.85">Squadre, chi gioca in casa, risultato e tempo arrivano da soli dall'app statistiche del tablet (serve internet su tablet e iPhone). Incolla il link dell'app statistiche (quello con <b>#k=</b>) o solo il codice.</div>
+      <div class="row" style="margin-top:6px">
+        <input class="txt" id="tabCode" style="flex:1" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="link o codice dell'app statistiche">
+        <button class="btn2" id="tabSave">Collega</button>
+      </div>
+      <div id="tabTxt" style="font-size:13px;margin-top:4px"></div>
+      <button class="btn2" id="tabOff" style="display:none;margin-top:4px">Scollega il tablet</button>
       <div class="subT">Partita</div>
       <label>Nome della partita<input class="txt" id="sbTitle" maxlength="60" placeholder="es. Amichevole U16"></label>
       <div class="row" style="margin-top:6px">
@@ -1578,6 +1586,11 @@ function renderScore() {
   $('sbClock').textContent = b.period + '° ' + fmt(b.clock) + (b.running ? ' ⏸' : ' ▶');
   $('sbClock').style.background = b.running ? '#1e8e3e' : '#244a7a';
   $('sbVis').checked = b.visible;
+  const T = S.tablet || {};
+  $('tabTxt').textContent = T.linked ? T.text : 'Non collegato: squadre e risultato si impostano a mano qui sotto.';
+  $('tabTxt').style.color = T.linked ? (T.ok ? '#7CFC9A' : '#ffd27a') : '';
+  $('tabOff').style.display = T.linked ? '' : 'none';
+  $('tabCode').placeholder = T.linked ? 'tablet collegato (incolla per cambiarlo)' : "link o codice dell'app statistiche";
   $('azOn').checked = S.autoZoom;
   $('heatTxt').textContent = S.heatSaver ? 'attivo' : 'anteprima accesa';
   if (document.activeElement !== $('azzDir')) $('azzDir').value = S.azzDir || '';
@@ -1671,6 +1684,8 @@ $('azzDir').onchange = e => cmd({a: 'azzDir', d: e.target.value});
 $('azOn').onchange = e => cmd({a: 'autoZoom', on: e.target.checked});
 $('sbVis').onchange = e => cmd({a: 'sbVisible', on: e.target.checked});
 $('sbTitle').onchange = e => cmd({a: 'sbTitle', text: e.target.value});
+$('tabSave').onclick = () => { const v = $('tabCode').value.trim(); if (!v) return; cmd({a: 'tabletCode', code: v}); $('tabCode').value = ''; toast('Tablet collegato: aspetto i dati…', 3000); };
+$('tabOff').onclick = () => dlg({msg: 'Scollegare il tablet? Squadre e risultato resteranno quelli attuali e si cambieranno a mano.', buttons: [{t: 'Scollega', cls: 'pri', cb: () => cmd({a: 'tabletCode', code: ''})}, {t: 'Annulla'}]});
 $('sbFull').onchange = e => cmd({a: 'sbFull', on: e.target.checked});
 $('sbClkOn').onchange = e => cmd({a: 'sbClockOn', on: e.target.checked});
 $('sbSwap').onclick = () => cmd({a: 'sbSwap'});
