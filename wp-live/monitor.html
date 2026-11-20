@@ -941,7 +941,7 @@ $('viewBox').addEventListener('click', e => {
     toast('Centro della porta segnato', 1500);
     return;
   }
-  if (mapping && redoIdx >= 0) { toast('Trascina il pallino giallo ' + (redoIdx + 1) + ' sul punto giusto', 2200); return; }
+  if (mapping && redoIdx >= 0) { toast('Sposta il pallino giallo ' + (redoIdx + 1) + ' sul punto giusto', 2200); return; }
   if (mapping) {
     const r = $('view').getBoundingClientRect();
     cmd({a: 'mapMark', x: (e.clientX - r.left) / r.width, y: (e.clientY - r.top) / r.height});
@@ -1315,7 +1315,7 @@ function renderMapping() {
     if (!mapping) { mapping = true; $('viewBox').classList.add('calib', 'mapping'); }
     document.body.classList.add('mapping');
     $('calibHint').textContent = redoIdx >= 0
-      ? 'Angolo ' + (idx + 1) + ' · trascina il pallino giallo su: ' + (S.mapName || '') + ' · se non lo vedi, muovi la camera col dito'
+      ? 'Angolo ' + (idx + 1) + ' · sposta il pallino giallo su: ' + (S.mapName || '') + ' · se non lo vedi, muovi la camera col dito'
       : 'Angolo ' + (idx + 1) + ' di 4 · tocca: ' + (S.mapName || '') + ' · se non lo vedi, muovi la camera col dito';
   }
 }
@@ -1363,7 +1363,7 @@ function nextRedo() {
   cmd({a: 'larga'}); cmd({a: 'mapStart', redo: n - 1});
   mapping = true; mapSeen = false;
   $('viewBox').classList.add('calib', 'mapping'); document.body.classList.add('mapping');
-  toast('Angolo ' + n + ': la camera ci va da sola, poi trascina il pallino giallo sul punto esatto', 3500);
+  toast('Angolo ' + n + ': la camera ci va da sola, poi sposta il pallino giallo sul punto esatto', 3500);
 }
 $('goalOkBtn').onclick = () => cmd({a: 'goalOK'});
 $('goalSkipBtn').onclick = () => cmd({a: 'goalCancel'});
