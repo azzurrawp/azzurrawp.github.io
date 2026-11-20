@@ -192,6 +192,8 @@ details.sec{background:#0f1c2c;border-radius:12px}
 body.local #seg .zb{display:none}
 /* Calibrazione angolo per angolo: niente pulsanti in mezzo al campo (si toccherebbero al posto degli angoli) */
 body.mapping #fieldBtns{display:none !important}
+/* Mentre si mira (porte o angoli) Mic e REC non coprono il mirino; REC resta se sta registrando. */
+body.goalCheck #micBtn,body.mapping #micBtn,body.goalCheck #recWrap:not(.on),body.mapping #recWrap:not(.on){display:none !important}
 /* Schermata d'avvio: niente avvisi di gimbal o campo */
 body.phStart #toast{display:none !important}
 #seg button small{display:block;font-size:10px;font-weight:600;opacity:.8;margin-top:2px}
@@ -628,6 +630,7 @@ function render() {
   if (S.audio === false) { $('micIcon').textContent = '🎤'; $('micTxt').textContent = 'Mic n.d.'; $('micIcon').style.background = '#555'; }
   else { $('micIcon').textContent = S.muted ? '🔇' : '🎤'; $('micTxt').textContent = S.muted ? 'Mic spento' : 'Mic'; $('micIcon').style.background = S.muted ? '#e07b00' : 'rgba(30,142,62,.9)'; }
   $('rec').classList.toggle('on', !!S.rec);
+  $('recWrap').classList.toggle('on', !!S.rec);
   $('recTime').textContent = S.rec ? 'REC ' + fmt(S.recSeconds) : 'REC';
   if (document.activeElement !== $('homeCap')) $('homeCap').value = S.home;
   if (document.activeElement !== $('awayCap')) $('awayCap').value = S.away;
