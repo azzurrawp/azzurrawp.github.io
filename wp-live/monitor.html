@@ -463,7 +463,7 @@ html,body{font-family:-apple-system,"SF Pro Text","SF Pro Display",system-ui,san
   <div id="stWhat" style="display:none">
     <div style="margin-top:8px">Cosa fai?</div>
     <button id="stNew" class="pri">Nuova partita</button><button id="stResume">Riprendi la partita</button>
-    <div class="small" style="margin-top:10px">"Riprendi" serve se l'app si è chiusa a metà gara: tiene punteggio, calibrazione e password del regista.</div>
+    <div class="small" style="margin-top:10px">"Nuova partita" cancella il campo: si ricalibra da zero. "Riprendi" serve se l'app si è chiusa a metà gara: tiene punteggio, calibrazione e password del regista.</div>
   </div>
 </div></div>
 <div id="dlg"><div><div id="dlgMsg"></div><input id="dlgIn"><div id="dlgBtns"></div></div></div>
@@ -1531,6 +1531,10 @@ $('stNew').onclick = async () => {
   try { sessionStorage.removeItem('wpStarted'); } catch (e) {}
   // La regia dell'iPhone si ricarica con la password nuova: il QR va mostrato anche dopo.
   if (LOCAL && ctl === 'regista') { try { sessionStorage.setItem('wpShowQR', '1'); } catch (e) {} }
+  // Nuova partita = campo da rifare (20/11: i bagnini non montano il campo sempre uguale).
+  // "Riprendi la partita" invece tiene la calibrazione.
+  try { await api('/cmd', {a: 'calibClear'}); } catch (e) {}
+  S.corners = []; calibPts = null;
   // Nuova partita = password nuova: i link delle partite precedenti non valgono più.
   try {
     const j = await (await api('/cmd', {a: 'newMatch'})).json();
