@@ -143,7 +143,7 @@ body.ro #rob{display:inline-block}
 #top{gap:6px!important}#top button{padding:0 10px!important}#last{flex:1 1 0;min-width:0}#top input{width:110px}
 body.pend-g #g .c:not([data-f="g"]),body.pend-gu #g .c:not([data-f="gu"]){opacity:.25}
 body.pend-g #g .c[data-f="g"],body.pend-gu #g .c[data-f="gu"]{box-shadow:inset 0 0 0 3px #ffd600;background:#fffde7!important}
-#g .c.pend{background:#ffd600!important;opacity:1!important}
+#g .c.pend{background:#ffd600!important;opacity:1!important}body #g .c.pno{box-shadow:none!important;background:none!important;opacity:.25!important}
 #rgb{position:fixed;left:50%;bottom:6px;transform:translateX(-50%);z-index:20;background:#ffd600;color:#3e2723;border-radius:14px;padding:8px 10px 8px 18px;align-items:center;gap:14px;box-shadow:0 4px 18px rgba(0,0,0,.35);font-size:20px;font-weight:800;max-width:96vw}#rgb.on{display:flex!important}
 #hist{background:#455a64!important}
 #g #calh{padding:0;position:relative}#ftb{position:absolute;inset:0;width:100%;height:100%;border:0;border-radius:0;font-size:clamp(15px,2.6vh,22px);line-height:1;font-weight:800;padding:0;background:#ffd600!important;color:#3e2723!important;animation:pl 1.6s infinite;display:flex;flex-direction:column;align-items:center;justify-content:center}#ftb small{font-size:10px;line-height:1.1;text-transform:uppercase}html.view #ftb,body.ro #ftb{display:none!important}
@@ -504,9 +504,9 @@ function fb(f,i,sign){beep(f,sign);
   if(f!='x'){if(lastRow)lastRow.classList.remove('last');lastRow=document.getElementById('n'+i);lastRow.classList.add('last')}}
 // assist -> gol: l'assist resta "in attesa" finché non si tocca il marcatore (stesso tipo, giocatore diverso)
 var PEND=null,GOALOF={a:'g',au:'gu'};
-function pendUI(){var b=document.body;b.classList.remove('pend-g','pend-gu');[].forEach.call(document.querySelectorAll('#g .pend'),function(x){x.classList.remove('pend')});
+function pendUI(){var b=document.body;b.classList.remove('pend-g','pend-gu');[].forEach.call(document.querySelectorAll('#g .pend,#g .pno'),function(x){x.classList.remove('pend');x.classList.remove('pno')});
   var u=document.getElementById('undo');
-  if(PEND){b.classList.add('pend-'+GOALOF[PEND.f]);document.getElementById(PEND.f+PEND.i).classList.add('pend');u.textContent='✕ Annulla assist';
+  if(PEND){b.classList.add('pend-'+GOALOF[PEND.f]);document.getElementById(PEND.f+PEND.i).classList.add('pend');document.getElementById(GOALOF[PEND.f]+PEND.i).classList.add('pno');u.textContent='✕ Annulla assist';
     document.getElementById('last').textContent='Assist di '+nm(PEND.i)+(PEND.f=='au'?' (uomo +)':'')+': tocca chi ha segnato in '+(PEND.f=='au'?'GOL uomo +':'GOL')}
   else u.textContent='↶ Annulla'}
 function nm(i){return (i+1)+' '+(S.names[i]||'')}
@@ -1250,7 +1250,7 @@ fetchStats();livePoll();viewAuto();
 window.addEventListener('online',function(){syncDistinte(false);livePoll()});
 document.addEventListener('visibilitychange',function(){if(document.visibilityState=='visible')livePoll()});
 // aggiornamenti: controlla a ogni riapertura; la nuova versione si carica da sola quando si è nell'elenco partite (mai durante la registrazione)
-var APPV=94,swReg=null,swReload=false;document.getElementById('appv').textContent='Versione '+APPV;document.getElementById('appv').dataset.b=document.getElementById('appv').textContent;fitH.h=0;fitH();
+var APPV=95,swReg=null,swReload=false;document.getElementById('appv').textContent='Versione '+APPV;document.getElementById('appv').dataset.b=document.getElementById('appv').textContent;fitH.h=0;fitH();
 if('serviceWorker' in navigator&&!VIEW){var hadCtrl=!!navigator.serviceWorker.controller;
   navigator.serviceWorker.register('sw.js').then(function(r){swReg=r}).catch(function(){});
   document.addEventListener('visibilitychange',function(){if(!document.hidden&&swReg)swReg.update().catch(function(){})});
