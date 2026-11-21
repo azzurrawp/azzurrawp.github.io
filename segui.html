@@ -311,7 +311,7 @@ function syncDistinte(ask){if(!window.crypto||!crypto.subtle)return Promise.reso
     return decrypt(o,DB.pin).then(function(d){
       DB.rdone=DB.rdone||{};(d.resets||[]).forEach(function(x){var m=byId(x.id),k=x.id+'@'+x.at;if(!m||DB.rdone[k])return;DB.rdone[k]=1;
         if((m.upd||0)<x.at&&m.log.length){F.concat(['x']).forEach(function(f){m[f]=z()});m.og=0;m.ogu=0;m.log=[];m.per=1;m.done=false;m.upd=Date.now();if(S&&S.id==m.id)all()}});
-      var r=merge(d.matches||[]);DB.encv=o.data;DB.mv=MV;persist();renderHome();fetchStats();publish(false);
+      var r=merge(d.matches||[]);DB.encv=o.data;DB.mv=MV;persist();renderHome();try{if(S)all()}catch(e){}fetchStats();publish(false);
       if(r[0]||ask)toast('Distinte aggiornate: '+r[0]+' nuove, '+r[1]+' controllate')},
       function(){DB.pin='';persist();toast('Codice squadra errato');if(ask)setTimeout(function(){syncDistinte(true)},800)})
   }).catch(function(){})}
@@ -1247,7 +1247,7 @@ fetchStats();livePoll();viewAuto();
 window.addEventListener('online',function(){syncDistinte(false);livePoll()});
 document.addEventListener('visibilitychange',function(){if(document.visibilityState=='visible')livePoll()});
 // aggiornamenti: controlla a ogni riapertura; la nuova versione si carica da sola quando si è nell'elenco partite (mai durante la registrazione)
-var APPV=92,swReg=null,swReload=false;document.getElementById('appv').textContent='Versione '+APPV;document.getElementById('appv').dataset.b=document.getElementById('appv').textContent;fitH.h=0;fitH();
+var APPV=93,swReg=null,swReload=false;document.getElementById('appv').textContent='Versione '+APPV;document.getElementById('appv').dataset.b=document.getElementById('appv').textContent;fitH.h=0;fitH();
 if('serviceWorker' in navigator&&!VIEW){var hadCtrl=!!navigator.serviceWorker.controller;
   navigator.serviceWorker.register('sw.js').then(function(r){swReg=r}).catch(function(){});
   document.addEventListener('visibilitychange',function(){if(!document.hidden&&swReg)swReg.update().catch(function(){})});
