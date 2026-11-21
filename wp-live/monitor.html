@@ -97,6 +97,7 @@ button,select{font:inherit;touch-action:manipulation}
 #view{display:block;width:100%;height:100%;background:#000;-webkit-user-drag:none;user-select:none}
 img{-webkit-user-drag:none}
 #ov{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+#vcan{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;display:none;background:#000}
 #frame{transform-origin:50% 50%;transition:transform .25s}
 #viewBox.calib{outline:4px solid #ffd400;outline-offset:-4px}
 #calibHint{position:absolute;left:0;right:0;top:44px;padding:8px;background:rgba(0,0,0,.7);color:#ffd400;font-weight:700;text-align:center;display:none;z-index:3}
@@ -433,6 +434,7 @@ html,body{font-family:-apple-system,"SF Pro Text","SF Pro Display",system-ui,san
     <div class="card">
       <label style="display:flex;align-items:center;gap:8px"><input type="checkbox" id="linesOn"> Mostra le righe del campo durante la partita</label>
       <label style="display:flex;gap:8px;align-items:center;margin-top:8px"><input type="checkbox" id="penOn"> Mostra i pulsanti Rigore</label>
+      <label style="display:flex;gap:8px;align-items:center;margin-top:8px"><input type="checkbox" id="h264On"> Video fluido (prova): anteprima come video, come l'app Insta360</label>
       <button class="btn2" id="calibBtn" style="width:100%;margin-top:8px">Calibra col giro automatico del gimbal (tieni premuto)</button>
       <button class="btn2" id="autoBtn" style="width:100%;margin-top:8px">Ripresa automatica (in prova)</button>
     </div>
@@ -501,7 +503,7 @@ html,body{font-family:-apple-system,"SF Pro Text","SF Pro Display",system-ui,san
 <div id="endBanner" title="Tocca per nascondere" style="display:none;cursor:pointer;position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:25;max-width:90vw;padding:18px 22px;border-radius:16px;color:#fff;font-size:18px;font-weight:800;text-align:center"></div>
 <div id="app" style="display:none">
   <div id="viewBox">
-    <div id="frame"><img id="view" draggable="false" alt="Anteprima"><canvas id="ov"></canvas></div>
+    <div id="frame"><img id="view" draggable="false" alt="Anteprima"><canvas id="vcan"></canvas><canvas id="ov"></canvas></div>
     <div id="calibHint"></div>
     <button id="mapCancelBtn">Annulla calibrazione</button>
     <div id="goalBox"><div id="goalTxt"></div><div class="row"><button id="goalOkBtn">✓ Giusto</button><button id="goalSkipBtn">Salta</button></div></div>
@@ -615,24 +617,82 @@ let WS = null, wsOK = false, wsFrameT = 0, wsStatusT = 0, wsFails = 0, lastFrame
 function wsConnect() {
   if (disconnected || WS) return;
   try { WS = new WebSocket('ws://' + (location.hostname || '127.0.0.1') + ':8081/'); } catch (e) { WS = null; return; }
-  WS.binaryType = 'blob';
+  WS.binaryType = 'arraybuffer';
   WS.onopen = () => { try { WS.send(JSON.stringify({pin: PIN, local: LOCAL})); } catch (e) {} };
   WS.onmessage = ev => {
     if (typeof ev.data === 'string') {
       let o; try { o = JSON.parse(ev.data); } catch (e) { return; }
-      if (o.ok === true && Object.keys(o).length === 1) { wsOK = true; wsFails = 0; return; }
+      if (o.ok === true && Object.keys(o).length === 1) { wsOK = true; wsFails = 0; h264Start(); return; }
+      if (o.h264cfg) { h264Configure(o); return; }
       S = o; wsStatusT = Date.now(); render();
     } else {
+      const u8 = new Uint8Array(ev.data);
+      if (u8[0] === 0) { h264Chunk(u8); return; }
       wsFrameT = Date.now();
       // Si mostra sempre l'ultima immagine arrivata; se il telefono è indietro, le intermedie si saltano.
-      pendingFrame = ev.data;
+      pendingFrame = new Blob([ev.data], {type: 'image/jpeg'});
       if (!frameBusy) showNextFrame();
     }
   };
-  WS.onclose = () => { wsOK = false; WS = null; wsFails++; setTimeout(wsConnect, wsFails > 5 ? 15000 : 2000); };
+  WS.onclose = () => { wsOK = false; WS = null; h264Off(); wsFails++; setTimeout(wsConnect, wsFails > 5 ? 15000 : 2000); };
   WS.onerror = () => {};
 }
 setInterval(() => { if (wsOK) { try { WS.send('{"a":"ping"}'); } catch (e) {} } }, 1000);
+
+// Video fluido (21/11): l'anteprima arriva come video H.264 e la decodifica il browser (WebCodecs),
+// come fa l'app Insta360. Se il browser non ce la fa, o il video si ferma, si torna da soli alle
+// immagini JPEG. Si spegne dal menu Avanzate.
+const H = {dec: null, on: false, seen: 0, timer: 0, fails: 0};
+function h264Pref() { try { return localStorage.getItem('wpH264') !== '0'; } catch (e) { return true; } }
+function h264Start() {
+  // Solo con app 0.12.0 o successiva (le precedenti non sanno mandare il video).
+  const v = String((S && S.version) || '0').split('.').map(Number), app12 = v[0] > 0 || (v[1] || 0) >= 12;
+  if (LOCAL || !app12 || !('VideoDecoder' in window) || !h264Pref() || H.fails >= 2 || !wsOK) return;
+  H.on = true; H.seen = 0;
+  try { WS.send('{"video":"h264"}'); } catch (e) {}
+  clearTimeout(H.timer);
+  H.timer = setTimeout(() => { if (H.on && !H.seen) h264Stop('Video fluido non disponibile qui: uso le immagini.'); }, 4000);
+}
+function h264Off() {
+  H.on = false; clearTimeout(H.timer);
+  try { if (H.dec && H.dec.state !== 'closed') H.dec.close(); } catch (e) {}
+  H.dec = null; $('vcan').style.display = 'none';
+}
+function h264Stop(msg) {
+  if (!H.on) return;
+  H.fails++; h264Off();
+  try { if (wsOK) WS.send('{"video":"jpeg"}'); } catch (e) {}
+  if (msg) toast(msg, 3000);
+}
+function h264Configure(o) {
+  if (!H.on) return;
+  let desc;
+  try { desc = Uint8Array.from(atob(o.h264cfg), c => c.charCodeAt(0)); } catch (e) { return; }
+  try { if (H.dec && H.dec.state !== 'closed') H.dec.close(); } catch (e) {}
+  const cv = $('vcan');
+  H.dec = new VideoDecoder({
+    output: f => {
+      if (cv.width !== f.displayWidth) { cv.width = f.displayWidth; cv.height = f.displayHeight; }
+      cv.getContext('2d').drawImage(f, 0, 0, cv.width, cv.height);
+      f.close();
+      H.seen = wsFrameT = Date.now();
+      if (cv.style.display !== 'block') cv.style.display = 'block';
+    },
+    error: () => h264Stop('Video fluido interrotto: torno alle immagini.')
+  });
+  try { H.dec.configure({codec: o.codec, description: desc, optimizeForLatency: true}); }
+  catch (e) { h264Stop('Video fluido non supportato qui: uso le immagini.'); }
+}
+function h264Chunk(u8) {
+  wsFrameT = Date.now();
+  if (!H.on || !H.dec || H.dec.state !== 'configured') return;
+  const key = u8[1] === 1;
+  const ts = Number(new DataView(u8.buffer, u8.byteOffset + 2, 8).getBigInt64(0));
+  try { H.dec.decode(new EncodedVideoChunk({type: key ? 'key' : 'delta', timestamp: ts, data: u8.subarray(10)})); }
+  catch (e) { h264Stop('Video fluido interrotto: torno alle immagini.'); }
+}
+// Se il video si ferma per 4 secondi col collegamento ancora attivo, si torna alle immagini.
+setInterval(() => { if (H.on && H.seen && wsOK && Date.now() - H.seen > 4000) h264Stop('Video fluido fermo: torno alle immagini.'); }, 1000);
 let pendingFrame = null, frameBusy = false;
 function showNextFrame() {
   if (!pendingFrame) return;
@@ -1707,6 +1767,12 @@ function renderPhase() {
   checkEnd();
 }
 $('penOn').onchange = e => { try { localStorage.setItem('wpPen', e.target.checked ? '1' : '0'); } catch (x) {} renderPhase(); };
+$('h264On').checked = h264Pref();
+$('h264On').onchange = e => {
+  try { localStorage.setItem('wpH264', e.target.checked ? '1' : '0'); } catch (x) {}
+  if (e.target.checked) { H.fails = 0; h264Start(); toast('Video fluido acceso', 1500); }
+  else { if (H.on) { h264Off(); try { WS.send('{"video":"jpeg"}'); } catch (x) {} } toast('Anteprima a immagini', 1500); }
+};
 function renderGeo() {
   renderPhase();
   // Durante calibrazione, mappatura e misura dell'altezza la barra dei gol non serve e intralcia.
