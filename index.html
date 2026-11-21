@@ -167,7 +167,7 @@ body.pend-g #last,body.pend-gu #last{color:#ffd600;font-weight:700;opacity:1}
   <span class="sc"><small>AZZURRA<i id="swh"></i></small><span id="sA">0</span>–<span id="sB">0</span></span>
   <input id="opp" placeholder="Avversario" autocomplete="off" autocorrect="off" spellcheck="false" enterkeyhint="done">
   <div class="og"><button data-og="p">+Gol avv</button><button class="u" data-og="u">+Gol avv UP</button></div>
-  <span id="ldot" style="display:none;font-size:22px">●</span><span id="last"></span>
+  <span id="ldot" style="display:none;font-size:22px;padding:10px;margin:-10px;cursor:pointer">●</span><span id="last"></span>
   <button id="rob">✎ Modifica</button>
   <button class="per" data-p="1">1T</button><button class="per" data-p="2">2T</button><button class="per" data-p="3">3T</button><button class="per" data-p="4">4T</button>
   <button id="undo">↶ Annulla</button>
@@ -414,14 +414,18 @@ function liveSeal(obj){if(!liveSalt){liveSalt=crypto.getRandomValues(new Uint8Ar
 function liveOpen(o){return liveKey(o.s,b64(o.s)).then(function(key){return crypto.subtle.decrypt({name:'AES-GCM',iv:b64(o.iv)},key,b64(o.d))})
   .then(function(buf){var u=new Uint8Array(buf);return o.z?zip8(u,false):u}).then(function(u){return JSON.parse(new TextDecoder().decode(u))})}
 // chi registra (tablet con codice di pubblicazione) trasmette la partita aperta, al massimo ogni 8 secondi
-var liveT=null,liveLast=0,liveOk=null;
+var liveT=null,liveLast=0,liveOk=null,liveOkAt=0;
 function liveDot(){var d=document.getElementById('ldot');if(!d)return;d.style.display=DB.gh&&S&&!S.done?'':'none';d.style.color=liveOk===true?'#4caf50':liveOk===false?'#ff8a80':'#9e9e9e';d.title=liveOk?'Diretta attiva':'Diretta non disponibile (senza internet)'}
+document.getElementById('ldot').addEventListener('click',liveTap);
 function liveKick(now){if(!DB.gh||!DB.pin||!S||!window.crypto||!crypto.subtle)return;clearTimeout(liveT);
   var wait=now?0:Math.max(2500,8000-(Date.now()-liveLast));var m=S;liveT=setTimeout(function(){liveSend(m)},wait)}
-function liveSend(m){if(!navigator.onLine){liveOk=false;liveDot();return}liveLast=Date.now();
+function liveSet(ok){var was=liveOk;liveOk=ok;if(ok)liveOkAt=Date.now();liveDot();if(!S||S.done)return;if(ok===false&&was!==false)toast('Diretta interrotta: tablet senza internet',4000);else if(ok===true&&was===false)toast('Diretta ripresa',2500)}
+function liveTap(){var a=liveOkAt?Math.round((Date.now()-liveOkAt)/1000):-1,t=a<0?'':a<60?' · ultimo invio '+a+' secondi fa':' · ultimo invio '+Math.round(a/60)+' minuti fa';
+  toast(liveOk===true?'Diretta attiva'+t:liveOk===false?'Diretta ferma: tablet senza internet'+(a<0?'':t):'Diretta pronta: il primo invio parte alla prima azione',3500)}
+function liveSend(m){if(!navigator.onLine){liveSet(false);return}liveLast=Date.now();
   var snap={};for(var k in m)if(k!='remote'&&k!='sent'&&k!='liveAt')snap[k]=m[k];
   liveSeal({t:Date.now(),m:snap}).then(function(enc){return liveTopic().then(function(tp){return fetch(LIVE+tp,{method:'POST',body:JSON.stringify(enc)})})})
-   .then(function(r){liveOk=r.ok;liveDot()}).catch(function(){liveOk=false;liveDot()})}
+   .then(function(r){liveSet(r.ok)}).catch(function(){liveSet(false)})}
 // chi consulta riceve gli aggiornamenti (controllo ogni 8 secondi con l'app aperta)
 var liveSince='12h',livePolling=false;
 function livePoll(){if(DB.gh||!DB.pin||livePolling||!navigator.onLine||document.visibilityState=='hidden'||!window.crypto||!crypto.subtle)return;livePolling=true;
@@ -1237,7 +1241,7 @@ fetchStats();livePoll();viewAuto();
 window.addEventListener('online',function(){syncDistinte(false);livePoll()});
 document.addEventListener('visibilitychange',function(){if(document.visibilityState=='visible')livePoll()});
 // aggiornamenti: controlla a ogni riapertura; la nuova versione si carica da sola quando si è nell'elenco partite (mai durante la registrazione)
-var APPV=89,swReg=null,swReload=false;document.getElementById('appv').textContent='Versione '+APPV;
+var APPV=90,swReg=null,swReload=false;document.getElementById('appv').textContent='Versione '+APPV;
 if('serviceWorker' in navigator&&!VIEW){var hadCtrl=!!navigator.serviceWorker.controller;
   navigator.serviceWorker.register('sw.js').then(function(r){swReg=r}).catch(function(){});
   document.addEventListener('visibilitychange',function(){if(!document.hidden&&swReg)swReg.update().catch(function(){})});
