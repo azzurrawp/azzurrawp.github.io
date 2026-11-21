@@ -172,7 +172,6 @@ body.pend-g #last,body.pend-gu #last{color:#ffd600;font-weight:700;opacity:1}
   
   <button id="sum">Riepilogo</button>
   <button id="snd">🔊</button>
-  <button id="fs">⛶</button>
 </div>
 <div id="g"></div>
 <div id="pv"><div class="pvh"><span id="pvt"></span><button id="pvz">🔍 Ingrandisci</button><button id="pvd" class="pvdl">📥 Scarica</button><button id="pvc">Chiudi</button></div><div id="pvb"></div></div>
@@ -248,6 +247,7 @@ body.pend-g #last,body.pend-gu #last{color:#ffd600;font-weight:700;opacity:1}
     <button class="btn mi" id="hnew">➕ Nuova partita</button>
     <button class="btn mi" id="himp" style="background:#2e7d32">📂 Ripristina copia (file)</button>
     <button class="btn mi" id="mtok" style="background:#455a64">🔑 Codice di pubblicazione</button>
+    <button class="btn mi" id="fs" style="background:#455a64">⛶ Schermo intero</button>
     <button class="btn mi" id="mpad" style="background:#607d8b">↕ Margine in basso</button>
     <button class="btn mi" id="mclose" style="background:#90a4ae">Chiudi</button>
     <div id="appv" style="text-align:center;color:#78909c;font-size:14px;margin-top:4px"></div>
@@ -673,7 +673,7 @@ function goFS(){if(VIEW)return;if(APP){try{screen.orientation.lock('landscape').
   try{var q=document.documentElement.requestFullscreen({navigationUI:'hide'});if(q&&q.then)q.then(function(){try{screen.orientation.lock('landscape').catch(function(){})}catch(x){}}).catch(function(){})}catch(e){}}
 var fsb=document.getElementById('fs');if(APP)fsb.style.display='none';
 fsb.addEventListener('click',function(){if(document.fullscreenElement){try{document.exitFullscreen()}catch(e){}}else goFS()});
-document.addEventListener('fullscreenchange',function(){fsb.classList.toggle('warn',!document.fullscreenElement)});fsb.classList.add('warn');
+document.addEventListener('fullscreenchange',function(){fsb.textContent=document.fullscreenElement?'⛶ Esci da schermo intero':'⛶ Schermo intero'});
 var sb=document.getElementById('snd');function sbu(){sb.textContent=DB.mute?'🔇':'🔊'}sbu();
 sb.addEventListener('click',function(){DB.mute=!DB.mute;sbu();persist();if(!DB.mute)beep('g',1)});
 var WL=null;function wake(){try{if(navigator.wakeLock&&(!WL||WL.released))navigator.wakeLock.request('screen').then(function(l){WL=l}).catch(function(){})}catch(e){}}
@@ -1247,7 +1247,7 @@ fetchStats();livePoll();viewAuto();
 window.addEventListener('online',function(){syncDistinte(false);livePoll()});
 document.addEventListener('visibilitychange',function(){if(document.visibilityState=='visible')livePoll()});
 // aggiornamenti: controlla a ogni riapertura; la nuova versione si carica da sola quando si è nell'elenco partite (mai durante la registrazione)
-var APPV=95,swReg=null,swReload=false;document.getElementById('appv').textContent='Versione '+APPV;document.getElementById('appv').dataset.b=document.getElementById('appv').textContent;fitH.h=0;fitH();
+var APPV=96,swReg=null,swReload=false;document.getElementById('appv').textContent='Versione '+APPV;document.getElementById('appv').dataset.b=document.getElementById('appv').textContent;fitH.h=0;fitH();
 if('serviceWorker' in navigator&&!VIEW){var hadCtrl=!!navigator.serviceWorker.controller;
   navigator.serviceWorker.register('sw.js').then(function(r){swReg=r}).catch(function(){});
   document.addEventListener('visibilitychange',function(){if(!document.hidden&&swReg)swReg.update().catch(function(){})});
