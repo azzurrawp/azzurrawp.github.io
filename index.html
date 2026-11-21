@@ -1095,20 +1095,23 @@ function clsLoad(force){if(!force&&Date.now()-CLSt<600000)return;CLSt=Date.now()
     if(ch&&DSEL=='class'&&document.getElementById('season').style.display!='none')showSeason(true)}).catch(function(){CLSt=0})}
 function clsD(m){var d=(m.date||'').split('-');if(d.length!=3)return '';var g='';try{g=new Date(m.date+'T12:00').toLocaleDateString('it-IT',{weekday:'short'})+' '}catch(e){}return g+d[2]+'/'+d[1]+(m.time?' · '+m.time:'')}
 function clsAz(t){return /azzurra/i.test(t||'')}
-function clsRow(m){var pl=m.sh!=null&&m.sa!=null,az=clsAz(m.home)||clsAz(m.away),w=pl?(m.sh>m.sa?1:m.sh<m.sa?2:0):-1;
-  return '<tr'+(az?' class="az"':'')+'><td class="cd">'+esc(clsD(m))+(m.place?'<br><small>'+esc(m.place)+'</small>':'')+'</td><td class="ch'+(w==1?' w':'')+'">'+esc(m.home)+'</td><td class="cs">'+(pl?m.sh+' – '+m.sa:'–')+'</td><td class="ca'+(w==2?' w':'')+'">'+esc(m.away)+'</td></tr>'}
-function classDash(){var c=CLS;if(!c||!c.table)return '<div id="empty">Classifica non ancora disponibile: apri questa pagina con internet attivo.</div>';
+var CLSown=false;
+function clsOwn(m){if(m.sh!=null||!(clsAz(m.home)||clsAz(m.away)))return null;var o=null;DB.matches.forEach(function(x){if(x.date==m.date&&x.done&&x.log&&x.log.length)o=x});if(!o)return null;var s=score(o);return clsAz(m.home)?[s[0],s[1]]:[s[1],s[0]]}
+function clsRow(m){var own=clsOwn(m),sh=own?own[0]:m.sh,sa=own?own[1]:m.sa,pl=sh!=null&&sa!=null,az=clsAz(m.home)||clsAz(m.away),w=pl?(sh>sa?1:sh<sa?2:0):-1,past=m.date&&m.date<clsToday();if(own)CLSown=true;
+  return '<tr'+(az?' class="az"':'')+'><td class="cd">'+esc(clsD(m))+(m.place?'<br><small>'+esc(m.place)+'</small>':'')+'</td><td class="ch'+(w==1?' w':'')+'">'+esc(m.home)+'</td><td class="cs">'+(pl?sh+' – '+sa+(own?'*':''):past?'<small style="font-weight:600;color:#90a4ae">in attesa</small>':'–')+'</td><td class="ca'+(w==2?' w':'')+'">'+esc(m.away)+'</td></tr>'}
+function clsToday(){var d=new Date();return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2)}
+function classDash(){CLSown=false;var c=CLS;if(!c||!c.table)return '<div id="empty">Classifica non ancora disponibile: apri questa pagina con internet attivo.</div>';
   var h='<h2>Classifica · '+esc(c.name||'')+'</h2><div class="tw"><table class="cl"><tr><th>Pos</th><th class="l">Squadra</th><th>Punti</th><th>G</th><th>V</th><th>N</th><th>P</th><th>Gol fatti</th><th>Gol subiti</th><th>Diff. reti</th></tr>';
   c.table.forEach(function(t){h+='<tr'+(clsAz(t.team)?' class="az"':'')+'><td>'+t.pos+'</td><td class="l">'+esc(t.team)+'</td><td><b>'+t.pt+'</b></td><td>'+t.g+'</td><td>'+t.v+'</td><td>'+t.n+'</td><td>'+t.p+'</td><td>'+t.gf+'</td><td>'+t.gs+'</td><td>'+(t.dr>0?'+':'')+t.dr+'</td></tr>'});
   h+='</table></div><div class="note">G = giocate · V = vinte · N = pareggiate · P = perse.</div>';
-  var days=c.days||[],nx=null;days.forEach(function(d){if(!nx&&d.m.some(function(m){return m.sh==null}))nx=d});
+  var days=c.days||[],nx=null,td=clsToday();days.forEach(function(d){if(!nx&&d.m.some(function(m){return m.sh==null&&(!m.date||m.date>=td)}))nx=d});
   if(nx)h+='<h2>Prossima giornata · '+nx.n+'ª</h2><div class="tw"><table class="cm">'+nx.m.map(clsRow).join('')+'</table></div>';
-  var pd=days.filter(function(d){return d!==nx&&d.m.some(function(m){return m.sh!=null})}).reverse();
+  var pd=days.filter(function(d){return d!==nx&&d.m.some(function(m){return m.sh!=null||(m.date&&m.date<td)})}).reverse();
   if(pd.length){h+='<h2>Risultati</h2>';pd.forEach(function(d){h+='<h3 class="clg">'+d.n+'ª giornata</h3><div class="tw"><table class="cm">'+d.m.map(clsRow).join('')+'</table></div>'})}
-  var ft=days.filter(function(d){return d!==nx&&d.m.every(function(m){return m.sh==null})});
+  var ft=days.filter(function(d){return d!==nx&&pd.indexOf(d)<0});
   if(ft.length){h+='<h2>Giornate successive</h2>';ft.forEach(function(d){h+='<h3 class="clg">'+d.n+'ª giornata</h3><div class="tw"><table class="cm">'+d.m.map(clsRow).join('')+'</table></div>'})}
   var u='';try{u=new Date(c.chk||c.upd).toLocaleString('it-IT',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'})}catch(e){}
-  return h+'<div class="note">Fonte: FIN Comitato Regionale Toscano – Settore Pallanuoto'+(u?' · dati letti il '+u:'')+' · <a href="'+esc(c.src||'https://www.federnuoto.toscana.it/Pallanuoto/Index_Pallanuoto.asp')+'" target="_blank" rel="noopener">pagina ufficiale</a></div>'}
+  return h+(CLSown?'<div class="note">* Risultato dalla nostra raccolta dati: la FIN non lo ha ancora inserito.</div>':'')+'<div class="note">Fonte: FIN Comitato Regionale Toscano – Settore Pallanuoto'+(u?' · dati letti il '+u:'')+' · <a href="'+esc(c.src||'https://www.federnuoto.toscana.it/Pallanuoto/Index_Pallanuoto.asp')+'" target="_blank" rel="noopener">pagina ufficiale</a></div>'}
 function showSeason(keep){setTimeout(rotCheck,0);var ms=DB.matches.filter(function(m){return m.log.length}).sort(function(a,b){return (a.date+a.time).localeCompare(b.date+b.time)});
   var rv=ms.slice().reverse();if(!rv.length)DSEL=null;else if(DSEL!='season'&&DSEL!='class'&&!ms.some(function(m){return m.id==DSEL}))DSEL=rv[0].id;clsLoad();
   var tb=function(m){var d=(m.date||'').split('-');return '<button data-dsel="'+esc(m.id)+'" class="'+(DSEL==m.id?'on':'')+'">'+(m.home?'🏠 ':'🚌 ')+(d.length==3?d[2]+'/'+d[1]+' ':'')+'<span class="cA">Azzurra</span> vs <span class="cB">'+esc(m.opp||'?')+'</span> <b>'+resH(m)+'</b></button>'},sbt='<button data-dsel="season" class="'+(DSEL=='season'?'on':'')+'">Stagione</button><button data-dsel="class" class="'+(DSEL=='class'?'on':'')+'">🏆 Classifica</button>';
@@ -1258,7 +1261,7 @@ fetchStats();livePoll();viewAuto();
 window.addEventListener('online',function(){syncDistinte(false);livePoll()});
 document.addEventListener('visibilitychange',function(){if(document.visibilityState=='visible')livePoll()});
 // aggiornamenti: controlla a ogni riapertura; la nuova versione si carica da sola quando si è nell'elenco partite (mai durante la registrazione)
-var APPV=100,swReg=null,swReload=false;document.getElementById('appv').textContent='Versione '+APPV;document.getElementById('appv').dataset.b=document.getElementById('appv').textContent;fitH.h=0;fitH();
+var APPV=101,swReg=null,swReload=false;document.getElementById('appv').textContent='Versione '+APPV;document.getElementById('appv').dataset.b=document.getElementById('appv').textContent;fitH.h=0;fitH();
 if('serviceWorker' in navigator&&!VIEW){var hadCtrl=!!navigator.serviceWorker.controller;
   navigator.serviceWorker.register('sw.js').then(function(r){swReg=r}).catch(function(){});
   document.addEventListener('visibilitychange',function(){if(!document.hidden&&swReg)swReg.update().catch(function(){})});
