@@ -146,7 +146,7 @@ body.pend-g #g .c[data-f="g"],body.pend-gu #g .c[data-f="gu"]{box-shadow:inset 0
 #g .c.pend{background:#ffd600!important;opacity:1!important}
 #rgb{position:fixed;left:50%;bottom:6px;transform:translateX(-50%);z-index:20;background:#ffd600;color:#3e2723;border-radius:14px;padding:8px 10px 8px 18px;align-items:center;gap:14px;box-shadow:0 4px 18px rgba(0,0,0,.35);font-size:20px;font-weight:800;max-width:96vw}#rgb.on{display:flex!important}
 #hist{background:#455a64!important}
-#ftb{position:fixed;left:70px;bottom:3px;z-index:6;border:0;border-radius:10px;font-size:15px;font-weight:800;padding:5px 12px;background:#ffd600!important;color:#3e2723!important;animation:pl 1.6s infinite}html.view #ftb,body.ro #ftb{display:none!important}
+#g #calh{padding:0;position:relative}#ftb{position:absolute;inset:0;width:100%;height:100%;border:0;border-radius:0;font-size:clamp(15px,2.6vh,22px);line-height:1;font-weight:800;padding:0;background:#ffd600!important;color:#3e2723!important;animation:pl 1.6s infinite;display:flex;flex-direction:column;align-items:center;justify-content:center}#ftb small{font-size:10px;line-height:1.1;text-transform:uppercase}html.view #ftb,body.ro #ftb{display:none!important}
 #ft{position:fixed;inset:0;background:rgba(11,61,145,.72);z-index:27;align-items:center;justify-content:center}#ft.on{display:flex!important}
 .ftc{background:#fff;border-radius:22px;padding:22px 34px 26px;width:min(620px,94vw);text-align:center;box-shadow:0 10px 40px rgba(0,0,0,.4);border-top:10px solid #ffd600}
 .fti{font-size:72px;line-height:1.1;animation:ftp 1.4s ease-in-out infinite}@keyframes ftp{50%{transform:scale(1.12) rotate(-6deg)}}
@@ -172,7 +172,7 @@ body.pend-g #last,body.pend-gu #last{color:#ffd600;font-weight:700;opacity:1}
   <button class="per" data-p="1">1T</button><button class="per" data-p="2">2T</button><button class="per" data-p="3">3T</button><button class="per" data-p="4">4T</button>
   <button id="undo">↶ Annulla</button>
   <button id="hist" title="Ultime azioni">🕘 Cronologia</button>
-  <button id="ftb" title="Foto di squadra da fare" style="display:none">📸 Foto da fare</button>
+  
   <button id="sum">Riepilogo</button>
   <button id="snd">🔊</button>
   <button id="fs">⛶</button>
@@ -452,14 +452,14 @@ function save(){if(!S)return;S.upd=Date.now();persist();liveKick(S.done)}
 var g=document.getElementById('g'),H='';
 function d(cls,html,attr){return '<div class="'+cls+'"'+(attr||'')+'>'+(html||'')+'</div>'}
 var FD=['g','a','gu','au','e'],GC={g:'cg gl',gu:'cg up gl gl2',a:'ca',au:'ca up',e:'ce gl'};
-H+=d('h hn','Cal.')+'<div class="h hn" id="nlh">Giocatore <span id="nli"></span></div>'+d('h hg gl','GOL')+d('h ha','ASSIST')+d('h hu gl gl2','GOL<br>uomo +')+d('h hu','ASSIST<br>uomo +')+d('h he gl','FALLI<br>GRAVI')+d('sep')+d('h hx','Cal.')+d('h hx','FALLI GRAVI<br>avversari');
+H+='<div class="h hn" id="calh"><span id="calt">Cal.</span><button id="ftb" title="Foto di squadra da fare" style="display:none">📸<small>foto</small></button></div>'+'<div class="h hn" id="nlh">Giocatore <span id="nli"></span></div>'+d('h hg gl','GOL')+d('h ha','ASSIST')+d('h hu gl gl2','GOL<br>uomo +')+d('h hu','ASSIST<br>uomo +')+d('h he gl','FALLI<br>GRAVI')+d('sep')+d('h hx','Cal.')+d('h hx','FALLI GRAVI<br>avversari');
 for(var i=0;i<N;i++){var zb=i%2?' z':'';
   H+=d('n'+zb,'<span class="cap" id="cp'+i+'">'+(i+1)+'</span>',' id="n'+i+'"')+d('nm'+zb,'<input data-i="'+i+'" maxlength="16" autocomplete="off" autocorrect="off" spellcheck="false" enterkeyhint="done">',' id="m'+i+'"');
   FD.forEach(function(f){H+=d('c '+GC[f]+zb,'',' data-f="'+f+'" data-i="'+i+'" id="'+f+i+'"')});
   H+=d('sep')+d('n'+zb,'<span class="cap" id="cpx'+i+'">'+(i+1)+'</span>',' id="nx'+i+'"')+d('c cx'+zb,'',' data-f="x" data-i="'+i+'" id="x'+i+'"');
 }
-H+=d('tot','Tot')+d('tot','');FD.forEach(function(f){H+=d('tot '+GC[f].replace('up',''),'',' id="t'+f+'"')});H+=d('sep')+d('tot','')+d('tot cx','',' id="tx"');
 g.innerHTML=H;
+(function(){var t=document.createElement('div');t.id='totH';t.style.display='none';t.innerHTML=FD.map(function(f){return '<span id="t'+f+'"></span>'}).join('')+'<span id="tx"></span>';document.body.appendChild(t)})();
 var inputs=g.querySelectorAll('.nm input');
 for(var k=0;k<inputs.length;k++)inputs[k].addEventListener('change',function(){S.names[this.dataset.i]=this.value.trim();save()});
 var oppIn=document.getElementById('opp');oppIn.addEventListener('change',function(){S.opp=this.value.trim();save()});
@@ -568,7 +568,7 @@ function tooClose(f,i){if(!GOALS[f])return false;for(var k=S.log.length-1;k>=0;k
     warn:'Due gol così vicini di solito sono un tocco sbagliato.',yes:'Sì, registra',color:'#e65100',
     onYes:function(){add(f,i,true)},onNo:function(){toast(PEND?'Gol non registrato: tocca il marcatore giusto':'Gol non registrato')}});return true}return false}
 var RIG=null,RIG_last={},RGQ=null,SHOT=null,FTend=null;
-function ftUI(){var b=document.getElementById('ftb');if(b)b.style.display=(S&&!VIEW&&!S.done&&S.foto===0)?'':'none'}
+function ftUI(){var b=document.getElementById('ftb');if(b){var on=S&&!VIEW&&!S.done&&S.foto===0;b.style.display=on?'flex':'none';document.getElementById('calt').style.visibility=on?'hidden':''}}
 function ftAsk(end){if(VIEW||window.NOFOTO)return false;FTend=end||null;
   document.getElementById('ftq').textContent=end?'Ultima occasione!':'Foto di squadra!';
   document.getElementById('fts').textContent=end?'Foto di squadra prima che vadano negli spogliatoi.':'Tutti in posa a bordo vasca prima del fischio d\'inizio.';
@@ -1241,7 +1241,7 @@ fetchStats();livePoll();viewAuto();
 window.addEventListener('online',function(){syncDistinte(false);livePoll()});
 document.addEventListener('visibilitychange',function(){if(document.visibilityState=='visible')livePoll()});
 // aggiornamenti: controlla a ogni riapertura; la nuova versione si carica da sola quando si è nell'elenco partite (mai durante la registrazione)
-var APPV=90,swReg=null,swReload=false;document.getElementById('appv').textContent='Versione '+APPV;
+var APPV=91,swReg=null,swReload=false;document.getElementById('appv').textContent='Versione '+APPV;
 if('serviceWorker' in navigator&&!VIEW){var hadCtrl=!!navigator.serviceWorker.controller;
   navigator.serviceWorker.register('sw.js').then(function(r){swReg=r}).catch(function(){});
   document.addEventListener('visibilitychange',function(){if(!document.hidden&&swReg)swReg.update().catch(function(){})});
