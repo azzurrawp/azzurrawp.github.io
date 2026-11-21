@@ -17,7 +17,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
-html,body{height:100%;height:100dvh;overflow:hidden;background:#fff;color:#102a43;font-family:system-ui,Roboto,sans-serif}
+html,body{height:100%;height:100dvh;height:var(--ah,100dvh);overflow:hidden;background:#fff;color:#102a43;font-family:system-ui,Roboto,sans-serif}
 body{display:flex;flex-direction:column;touch-action:manipulation}
 html:not(.view),html:not(.view) body{overscroll-behavior:none;touch-action:pan-x pan-y;-webkit-touch-callout:none}html:not(.view) img,html:not(.view) canvas{-webkit-user-drag:none}
 #top{display:flex;align-items:center;gap:10px;padding:5px 10px;background:#0b3d91;color:#fff;flex:0 0 auto}
@@ -251,6 +251,7 @@ body.pend-g #last,body.pend-gu #last{color:#ffd600;font-weight:700;opacity:1}
     <button class="btn mi" id="hnew">➕ Nuova partita</button>
     <button class="btn mi" id="himp" style="background:#2e7d32">📂 Ripristina copia (file)</button>
     <button class="btn mi" id="mtok" style="background:#455a64">🔑 Codice di pubblicazione</button>
+    <button class="btn mi" id="mpad" style="background:#607d8b">↕ Margine in basso</button>
     <button class="btn mi" id="mclose" style="background:#90a4ae">Chiudi</button>
     <div id="appv" style="text-align:center;color:#78909c;font-size:14px;margin-top:4px"></div>
     <div class="leg">© 2026 Azzurra WP Stat · Tutti i diritti riservati all’autore · Uso privato, vietati copia e uso commerciale</div>
@@ -476,6 +477,14 @@ function totals(){nlUI();F.forEach(function(f){document.getElementById('t'+f).te
 // calotte: chi gioca in casa ha la calotta bianca, chi è in trasferta quella blu; portieri (1 e 13) rossa
 function capCls(i,ours){return (i==0||i==12)?'cap r':((ours?S.home:!S.home)?'cap w':'cap b')}
 function where(m){return m.home?'🏠 In casa':'🚌 In trasferta'}
+// altezza reale visibile: su alcuni tablet 100dvh risulta piu' alta dello schermo e l'ultima riga finisce fuori
+function fitH(){var a=[window.innerHeight,document.documentElement.clientHeight,screen.height],ae=document.activeElement,vv=window.visualViewport;
+  if(vv&&!(ae&&(ae.tagName=='INPUT'||ae.tagName=='TEXTAREA')))a.push(vv.height*(vv.scale||1));
+  var pad=+(localStorage.getItem('wp_pad')||0)||0,pb=document.getElementById('mpad');if(pb)pb.textContent='↕ Margine in basso: '+(pad?pad+' px':'nessuno');
+  var h=Math.floor(Math.min.apply(null,a.filter(function(x){return x>120})))-pad;if(h>0&&h!=fitH.h){fitH.h=h;document.documentElement.style.setProperty('--ah',h+'px')}
+  var v=document.getElementById('appv');if(v&&v.dataset.b)v.textContent=v.dataset.b+' · '+window.innerWidth+'×'+h}
+fitH();window.addEventListener('resize',fitH);document.getElementById('mpad').addEventListener('click',function(){var p=((+(localStorage.getItem('wp_pad')||0)||0)+24)%120;try{localStorage.setItem('wp_pad',p)}catch(e){}fitH()});window.addEventListener('orientationchange',function(){setTimeout(fitH,300);setTimeout(fitH,1200)});
+if(window.visualViewport)visualViewport.addEventListener('resize',fitH);setTimeout(fitH,500);setTimeout(fitH,2000);document.addEventListener('focusout',function(){setTimeout(fitH,400)});
 var rotOk=false;function rotCheck(){var el=document.getElementById('rot');if(!el)return;var need=!!S&&home.style.display=='none'&&document.getElementById('season').style.display!='flex'&&!rotOk&&innerHeight>innerWidth&&innerWidth<700;el.style.display=need?'flex':'none'}
 window.addEventListener('resize',rotCheck);window.addEventListener('orientationchange',function(){setTimeout(rotCheck,300)});
 function all(){setTimeout(rotCheck,0);var sl=document.getElementById('swh');if(sl)sl.textContent=S.home?'🏠 IN CASA':'🚌 IN TRASFERTA';for(var i=0;i<N;i++){document.getElementById('cp'+i).className=capCls(i,true);document.getElementById('cpx'+i).className=capCls(i,false);F.forEach(function(f){cell(f,i)});cell('x',i);inputs[i].value=S.names[i]||''}oppIn.value=S.opp||'';totals()}
@@ -1241,7 +1250,7 @@ fetchStats();livePoll();viewAuto();
 window.addEventListener('online',function(){syncDistinte(false);livePoll()});
 document.addEventListener('visibilitychange',function(){if(document.visibilityState=='visible')livePoll()});
 // aggiornamenti: controlla a ogni riapertura; la nuova versione si carica da sola quando si è nell'elenco partite (mai durante la registrazione)
-var APPV=91,swReg=null,swReload=false;document.getElementById('appv').textContent='Versione '+APPV;
+var APPV=92,swReg=null,swReload=false;document.getElementById('appv').textContent='Versione '+APPV;document.getElementById('appv').dataset.b=document.getElementById('appv').textContent;fitH.h=0;fitH();
 if('serviceWorker' in navigator&&!VIEW){var hadCtrl=!!navigator.serviceWorker.controller;
   navigator.serviceWorker.register('sw.js').then(function(r){swReg=r}).catch(function(){});
   document.addEventListener('visibilitychange',function(){if(!document.hidden&&swReg)swReg.update().catch(function(){})});
