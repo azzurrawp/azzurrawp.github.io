@@ -545,7 +545,7 @@ function heUI(){var H=HE,O=S.opp||'Avversario',h='';
   function caps(zero){var a=[];for(var i=1;i<=N;i++)a.push([zero?i-1:i,'Cal. '+i]);return a}
   grp('Tempo','t','per',[1,2,3,4].map(function(p){return [p,p+'° tempo']}));
   var T={goal:'Gol Azzurra',ast:'Assist',ogoal:'Gol '+O,foul:'Fallo grave Azzurra',ofoul:'Fallo grave '+O,rs:'Rigore sbagliato (Azzurra)',ors:'Rigore di '+O+' non segnato'};
-  if(H.kind=='goal'){var ty=[[0,'Gol'],[1,'Gol uomo +']];if(!H.a)ty.push([2,'Gol su rigore']);grp('Tipo','y','ty',ty);grp('Chi ha segnato','','i',pl());if(H.a)grp('Chi ha fatto l\'assist','','ai',pl())}
+  if(H.kind=='goal'){grp('Tipo','y','ty',[[0,'Gol'],[1,'Gol uomo +'],[2,'Gol su rigore']]);grp('Chi ha segnato','','i',pl());if(H.ty!=2)grp('Chi ha fatto l\'assist','','ai',pl('Nessun assist'))}
   else if(H.kind=='ast'){grp('Tipo','y','ty',[[0,'Assist'],[1,'Assist uomo +']]);grp('Chi ha fatto l\'assist','','i',pl())}
   else if(H.kind=='ogoal'){grp('Tipo','y o','ty',[[0,'Gol'],[1,'Gol uomo +'],[2,'Gol su rigore']]);grp('Calotta di chi ha segnato','o','cap',caps().concat([[0,'Non so']]))}
   else if(H.kind=='foul'||H.kind=='ofoul'){var o=H.kind=='ofoul';grp('Tipo','y'+(o?' o':''),'ty',[[0,'Espulsione'],[1,'Fallo da rigore'],[2,'🟥 Definitiva']]);
@@ -556,10 +556,14 @@ function heUI(){var H=HE,O=S.opp||'Avversario',h='';
 function heClose(){HE=null;document.getElementById('he').classList.remove('on')}
 function heCnt(e,d){var f=e[0];if(f=='rs'||f=='ors')return;if(f=='og'||f=='ogu')S[f]=Math.max(0,S[f]+d);else S[f][e[1]]=Math.max(0,(S[f][e[1]]||0)+d)}
 function heSave(){var H=HE;if(!H)return;var e=S.log[H.k];if(e!==H.e){heClose();hlShow();return}var f=e[0],a=H.a;
-  if(H.kind=='goal'&&a&&H.i===H.ai){beep('e',-1);toast('Il marcatore deve essere diverso da chi ha fatto l\'assist');return}
+  if(H.kind=='goal'&&H.ty==2)H.ai=-1;
+  if(H.kind=='goal'&&H.ai>=0&&H.i===H.ai){beep('e',-1);toast('Il marcatore deve essere diverso da chi ha fatto l\'assist');return}
   if((H.kind=='foul'||H.kind=='ofoul')&&H.i!==e[1]&&(S[f][H.i]>=3||defOut(S,f,H.i))){beep('e',-1);toast((f=='x'?'Avversario cal. ':'Calotta ')+(H.i+1)+': è già fuori');return}
   heCnt(e,-1);if(a)heCnt(a,-1);e[2]=H.per;
-  if(H.kind=='goal'){e[0]=H.ty==1?'gu':'g';e[1]=H.i;if(H.ty==2||e.length>5){while(e.length<6)e.push(0);e[5]=H.ty==2?1:0}if(a){a[0]=H.ty==1?'au':'a';a[1]=H.ai;a[2]=H.per}}
+  if(H.kind=='goal'){e[0]=H.ty==1?'gu':'g';e[1]=H.i;if(H.ty==2||e.length>5){while(e.length<6)e.push(0);e[5]=H.ty==2?1:0}
+    if(a&&H.ai<0){S.log.splice(S.log.indexOf(a),1);if(e.length>4)e[4]=0;a=null}
+    else if(!a&&H.ai>=0){while(e.length<5)e.push(0);if(!e[4])e[4]=e[3];a=[H.ty==1?'au':'a',H.ai,H.per,e[3],e[4]];S.log.splice(S.log.indexOf(e),0,a)}
+    else if(a){a[0]=H.ty==1?'au':'a';a[1]=H.ai;a[2]=H.per}}
   else if(H.kind=='ast'){e[0]=H.ty==1?'au':'a';e[1]=H.i}
   else if(H.kind=='ogoal'){e[0]=H.ty==1?'ogu':'og';while(e.length<7)e.push(0);e[5]=H.ty==2?1:0;e[6]=H.cap||0}
   else if(H.kind=='foul'||H.kind=='ofoul'){e[1]=H.i;while(e.length<6)e.push(0);e[5]=H.ty==1?1:H.ty==2?3:0}
@@ -1251,7 +1255,7 @@ fetchStats();livePoll();viewAuto();
 window.addEventListener('online',function(){syncDistinte(false);livePoll()});
 document.addEventListener('visibilitychange',function(){if(document.visibilityState=='visible')livePoll()});
 // aggiornamenti: controlla a ogni riapertura; la nuova versione si carica da sola quando si è nell'elenco partite (mai durante la registrazione)
-var APPV=99,swReg=null,swReload=false;document.getElementById('appv').textContent='Versione '+APPV;document.getElementById('appv').dataset.b=document.getElementById('appv').textContent;fitH.h=0;fitH();
+var APPV=100,swReg=null,swReload=false;document.getElementById('appv').textContent='Versione '+APPV;document.getElementById('appv').dataset.b=document.getElementById('appv').textContent;fitH.h=0;fitH();
 if('serviceWorker' in navigator&&!VIEW){var hadCtrl=!!navigator.serviceWorker.controller;
   navigator.serviceWorker.register('sw.js').then(function(r){swReg=r}).catch(function(){});
   document.addEventListener('visibilitychange',function(){if(!document.hidden&&swReg)swReg.update().catch(function(){})});
