@@ -1238,8 +1238,15 @@ $('lpGo').onclick = () => {
   const L = S.live || {}, key = $('lpKey').value.trim(), url = $('lpUrl').value.trim();
   if (key || lpQ !== L.quality || (url && url !== L.url)) cmd({a: 'liveConfig', url: url, key: key, quality: lpQ});
   closeLivePanel();
-  setTimeout(() => cmd({a: 'liveStart'}), 400);
-  toast('Avvio la diretta…', 2500);
+  const go = rec => {
+    if (rec) cmd({a: 'rec', on: true});
+    setTimeout(() => cmd({a: 'liveStart'}), 400);
+    toast(rec ? 'Avvio diretta e registrazione…' : 'Avvio la diretta…', 2500);
+  };
+  // 22/11: se non sta registrando, si chiede se registrare anche sull'iPhone.
+  if (S.rec) go(false);
+  else dlg({msg: 'Vuoi registrare la partita anche sull\'iPhone?',
+            buttons: [{t: 'Sì, registra', cls: 'pri', cb: () => go(true)}, {t: 'No, solo diretta', cb: () => go(false)}]});
 };
 $('netBtn').onclick = () => { if (!S.netTesting) { cmd({a: 'netTest'}); toast('Prova della velocità: 10 secondi…', 3000); } };
 function renderNet() {
@@ -2178,7 +2185,13 @@ function hold(el, needed, msg, action) {
     stop();
   }));
 }
-hold($('liveBtn'), () => S.live && S.live.state && S.live.state !== 'off', 'fermare la diretta', () => cmd({a: 'liveStop'}));
+hold($('liveBtn'), () => S.live && S.live.state && S.live.state !== 'off', 'fermare la diretta', () => {
+  // 22/11: fermando la diretta si chiede se fermare anche la registrazione (di base continua).
+  if (!S.rec) { cmd({a: 'liveStop'}); return; }
+  dlg({msg: 'Diretta fermata. Fermare anche la registrazione sull\'iPhone?',
+       buttons: [{t: 'Continua a registrare', cls: 'pri', cb: () => {}}, {t: 'Ferma anche la registrazione', cb: () => cmd({a: 'rec', on: false})}]});
+  cmd({a: 'liveStop'});
+});
 hold($('rec'), () => !!S.rec, 'fermare la registrazione', () => cmd({a: 'rec', on: false}));
 hold($('calibBtn'), () => true, 'ricalibrare il campo', () => { $('prep').style.display = 'none'; cmd({a: 'scanStart'}); });
 hold($('calibClear'), () => true, 'cancellare la calibrazione', () => { calibPts = null; $('viewBox').classList.remove('calib'); cmd({a: 'calibClear'}); });
