@@ -1,6 +1,6 @@
 {
-  "latestVersion": "0.12.12",
-  "releaseNotes": "0.12.12: zoom con la rotella del gimbal più rapido (circa 4 secondi dal minimo al massimo).",
+  "latestVersion": "0.12.13",
+  "releaseNotes": "0.12.13: rotella del gimbal come un acceleratore (piano = zoom lento, forte = veloce), fino a 5x, allargare più rapido che stringere, partenza e arresto morbidi.",
   "params": {
     "gimbalSpeed": 0.3,
     "zoomRampRate": 1.5
