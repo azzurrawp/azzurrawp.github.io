@@ -435,6 +435,8 @@ html,body{font-family:-apple-system,"SF Pro Text","SF Pro Display",system-ui,san
       <label style="display:flex;align-items:center;gap:8px"><input type="checkbox" id="linesOn"> Mostra le righe del campo durante la partita</label>
       <label style="display:flex;gap:8px;align-items:center;margin-top:8px"><input type="checkbox" id="penOn"> Mostra i pulsanti Rigore</label>
       <label style="display:flex;gap:8px;align-items:center;margin-top:8px"><input type="checkbox" id="h264On"> Video fluido (prova): anteprima come video, come l'app Insta360</label>
+      <button class="btn2" id="logBtn" style="width:100%;margin-top:10px">Scarica registro diretta</button>
+      <div class="small" style="opacity:.75">Una riga ogni 3 secondi dell'ultima diretta (dati inviati, immagini scartate, ritardo, temperatura): si apre con Excel.</div>
       <button class="btn2" id="calibBtn" style="width:100%;margin-top:8px">Calibra col giro automatico del gimbal (tieni premuto)</button>
       <button class="btn2" id="autoBtn" style="width:100%;margin-top:8px">Ripresa automatica (in prova)</button>
     </div>
@@ -1767,6 +1769,11 @@ function renderPhase() {
   checkEnd();
 }
 $('penOn').onchange = e => { try { localStorage.setItem('wpPen', e.target.checked ? '1' : '0'); } catch (x) {} renderPhase(); };
+$('logBtn').onclick = () => {
+  const a = document.createElement('a');
+  a.href = '/registro.csv?pin=' + PIN + '&t=' + Date.now(); a.download = 'registro-diretta.csv';
+  document.body.appendChild(a); a.click(); a.remove();
+};
 $('h264On').checked = h264Pref();
 $('h264On').onchange = e => {
   try { localStorage.setItem('wpH264', e.target.checked ? '1' : '0'); } catch (x) {}
