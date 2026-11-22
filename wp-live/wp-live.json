@@ -1,6 +1,6 @@
 {
-  "latestVersion": "0.12.9",
-  "releaseNotes": "0.12.9: rotella del gimbal: verso dello zoom letto correttamente (registra il valore preciso per la diagnosi). Include tutte le novità della 0.12.8.",
+  "latestVersion": "0.12.10",
+  "releaseNotes": "0.12.10: dopo un aggiornamento la pagina dei comandi è subito quella nuova; registro degli eventi del gimbal per sistemare la rotella dello zoom.",
   "params": {
     "gimbalSpeed": 0.3,
     "zoomRampRate": 1.5
