@@ -1,6 +1,6 @@
 {
-  "latestVersion": "0.12.8",
-  "releaseNotes": "0.12.8: barra del punteggio a sinistra con i tempi (1°-4°), cronometro solo se acceso dal menù e avviso a fine tempo; Larga tolto; rotella del gimbal per lo zoom; meno calore (niente ricerca palla in Manuale, anteprima più leggera, luminosità a metà se caldo, 3 Mbit/s se critico); registri delle dirette condivisibili dall'iPhone.",
+  "latestVersion": "0.12.9",
+  "releaseNotes": "0.12.9: rotella del gimbal: verso dello zoom letto correttamente (registra il valore preciso per la diagnosi). Include tutte le novità della 0.12.8.",
   "params": {
     "gimbalSpeed": 0.3,
     "zoomRampRate": 1.5
