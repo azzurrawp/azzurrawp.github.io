@@ -1,6 +1,6 @@
 {
-  "latestVersion": "0.12.13",
-  "releaseNotes": "0.12.13: rotella del gimbal come un acceleratore (piano = zoom lento, forte = veloce), fino a 5x, allargare più rapido che stringere, partenza e arresto morbidi.",
+  "latestVersion": "0.12.14",
+  "releaseNotes": "0.12.14: nuova pagina Impostazioni › Test modello: misura velocità e calore del riconoscimento automatico (RF-DETR) sull'iPhone. App più pesante (circa 200 MB) per i modelli di prova.",
   "params": {
     "gimbalSpeed": 0.3,
     "zoomRampRate": 1.5
