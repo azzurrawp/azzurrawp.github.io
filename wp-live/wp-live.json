@@ -1,6 +1,6 @@
 {
-  "latestVersion": "0.11.4",
-  "releaseNotes": "0.11.4: calibrazione e porte con conversione esatta immagine↔gimbal anche con la camera inclinata; risultato dal tablet con collegamento sempre aperto (niente '429').",
+  "latestVersion": "0.12.7",
+  "releaseNotes": "0.12.7: diretta più fluida (corsie separate: diretta e registrazione sempre a 30 fotogrammi, audio indipendente), 720p a 4 Mbit/s; domande su registrazione con la diretta, audio/video allineati, registro della diretta, punteggio dal tablet.",
   "params": {
     "gimbalSpeed": 0.3,
     "zoomRampRate": 1.5
