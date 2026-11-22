@@ -1,6 +1,6 @@
 {
-  "latestVersion": "0.12.10",
-  "releaseNotes": "0.12.10: dopo un aggiornamento la pagina dei comandi è subito quella nuova; registro degli eventi del gimbal per sistemare la rotella dello zoom.",
+  "latestVersion": "0.12.11",
+  "releaseNotes": "0.12.11: rotella del gimbal per lo zoom avanti e indietro, che scorre piano finché giri e si ferma quando lasci.",
   "params": {
     "gimbalSpeed": 0.3,
     "zoomRampRate": 1.5
