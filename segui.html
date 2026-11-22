@@ -594,9 +594,9 @@ function rigAsk(f,i){RGQ={f:f,i:i};document.getElementById('rgcq').textContent=f
 function rigClose(){document.getElementById('rgc').style.display='none';var q=RGQ;RGQ=null;return q}
 function rigUI(){var b=document.getElementById('rgb'),m=document.getElementById('rgbm');document.body.classList.toggle('shot',!!SHOT);
   var pb=document.getElementById('rgbp');
-  if(SHOT){document.getElementById('rgbt').textContent=SHOT.gk?'Chi ha parato? Tocca il portiere nella colonna Cal.':'Chi ha tirato? Tocca il numero nella colonna Cal.';m.textContent='Non so';pb.style.display='none';b.classList.add('on');return}m.textContent='Sbagliato';pb.style.display=(RIG&&RIG.us)?'none':'';
+  if(SHOT){document.getElementById('rgbt').textContent=SHOT.gk?'Chi ha parato? Tocca la calotta o il nome del portiere':'Chi ha tirato? Tocca la calotta o il nome';m.textContent='Non so';pb.style.display='none';b.classList.add('on');return}m.textContent='Sbagliato';pb.style.display=(RIG&&RIG.us)?'none':'';
   if(!RIG){b.classList.remove('on');return}
-  document.getElementById('rgbt').textContent=RIG.us?'Rigore per noi: tocca chi segna in GOL':'Rigore per '+(S.opp||'gli avversari')+': se segnano premi +Gol avv';b.classList.add('on')}
+  document.getElementById('rgbt').textContent=RIG.us?'Rigore per noi: tocca la calotta o il nome di chi segna':'Rigore per '+(S.opp||'gli avversari')+': se segnano premi +Gol avv';b.classList.add('on')}
 function shotEnd(){if(SHOT){SHOT=null;rigUI()}}
 function rigEnd(msg){if(!RIG)return;RIG_last=RIG;RIG=null;rigUI();if(msg)toast(msg)}
 function add(f,i,ok){if(S.done)return;shotEnd();
@@ -626,7 +626,8 @@ var lastPen=0;
 ['pointermove','pointerdown'].forEach(function(t){document.addEventListener(t,function(e){if(e.pointerType=='pen')lastPen=Date.now()},true)});
 function palm(e){return e.pointerType=='touch'&&Date.now()-lastPen<1500}
 var lp=null,lpDone=false;
-function gcell(ev){var c=ev.target.closest('.c');if(c)return c;var k=ev.target.closest('[data-ke]');return k?document.getElementById('e'+k.dataset.ke):null}
+function capIx(ev){var k=ev.target.closest('[data-ke]');if(k)return +k.dataset.ke;var c=ev.target.closest('[id^="n"],[id^="m"]');return c&&/^[nm]\d+$/.test(c.id)?+c.id.slice(1):-1}
+function gcell(ev){var c=ev.target.closest('.c');if(c)return c;var k=ev.target.closest('[data-ke]');if(k&&(SHOT||(RIG&&RIG.us)))return null;return k?document.getElementById('e'+k.dataset.ke):null}
 g.addEventListener('pointerdown',function(ev){var c=gcell(ev);if(!c||palm(ev)||S.done||PEND)return;lpDone=false;
   lp=setTimeout(function(){lpDone=true;var f=c.dataset.f,i=+c.dataset.i;if(S[f][i]>0){remove(f,i);toast('−1 '+LBL[f]+' cal. '+(i+1))}},600)});
 function cancel(){clearTimeout(lp)}
@@ -669,7 +670,7 @@ function rigMiss(kind){if(!RIG||!S)return;var us=RIG.us;S.log.push([us?'rs':'ors
   document.getElementById('last').textContent='✓ Rigore '+(kind==2?'parato':'sbagliato')+' · '+(us?'Azzurra':(S.opp||'avversari'))+' · '+S.per+'T';if(us||kind==2){SHOT={k:S.log.length-1,gk:!us};rigUI()}}
 document.getElementById('rgbm').addEventListener('click',function(){if(SHOT){shotEnd();return}rigMiss(0)});
 document.getElementById('rgbp').addEventListener('click',function(){rigMiss(2)});
-document.getElementById('g').addEventListener('click',function(ev){if(!SHOT||!S)return;var c=ev.target.closest('[id^="n"],[id^="m"]');if(!c||!/^[nm]\d+$/.test(c.id))return;var i=+c.id.slice(1),e=S.log[SHOT.k];
+document.getElementById('g').addEventListener('click',function(ev){if(!S||VIEW)return;var i=capIx(ev);if(i<0)return;if(!SHOT){if(RIG&&RIG.us&&!S.done&&!PEND)add('g',i);return}var e=S.log[SHOT.k];
   if(!e||e[0]!=(SHOT.gk?'ors':'rs')){shotEnd();return}var gk=SHOT.gk;if(gk){while(e.length<7)e.push(0);e[7]=i}else e[1]=i;SHOT=null;rigUI();save();
   document.getElementById('last').textContent=gk?'✓ Rigore parato da '+nm(i)+' · '+S.per+'T':'✓ Rigore '+(e[5]===2?'parato':'sbagliato')+' · tirato da '+nm(i)+' · '+S.per+'T'});
 document.getElementById('pcyes').addEventListener('click',function(){document.getElementById('pconf').style.display='none';var f=bigYes;bigYes=bigNo=null;if(f)f()});
@@ -1298,7 +1299,7 @@ fetchStats();livePoll();viewAuto();
 window.addEventListener('online',function(){syncDistinte(false);livePoll()});
 document.addEventListener('visibilitychange',function(){if(document.visibilityState=='visible')livePoll()});
 // aggiornamenti: controlla a ogni riapertura; la nuova versione si carica da sola quando si è nell'elenco partite (mai durante la registrazione)
-var APPV=102,swReg=null,swReload=false;document.getElementById('appv').textContent='Versione '+APPV;document.getElementById('appv').dataset.b=document.getElementById('appv').textContent;fitH.h=0;fitH();
+var APPV=103,swReg=null,swReload=false;document.getElementById('appv').textContent='Versione '+APPV;document.getElementById('appv').dataset.b=document.getElementById('appv').textContent;fitH.h=0;fitH();
 if('serviceWorker' in navigator&&!VIEW){var hadCtrl=!!navigator.serviceWorker.controller;
   navigator.serviceWorker.register('sw.js').then(function(r){swReg=r}).catch(function(){});
   document.addEventListener('visibilitychange',function(){if(!document.hidden&&swReg)swReg.update().catch(function(){})});
