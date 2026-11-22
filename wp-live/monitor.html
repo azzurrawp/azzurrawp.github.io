@@ -35,6 +35,10 @@ body.geoEdit #seg,body.geoEdit #liveBtn,body.geoEdit #recWrap,body.geoEdit #micB
 #ckBox .sub{font-size:12px;opacity:.75;margin:-2px 0 4px}
 body.phMatch:not(.penOn) #penBox{display:none}
 body.phMatch:not(.sbOn) #sbBar{display:none}
+/* 22/11: risultato dal tablet: niente +/−, GOL, Annulla e tempo a mano (si toccano solo per sbaglio). */
+body.sbTab #hMinus,body.sbTab #hPlus,body.sbTab #aPlus,body.sbTab #aMinus,body.sbTab #sbClock,body.sbTab #undoBtn,body.sbTab #pMinus,body.sbTab #pPlus{display:none !important}
+#sbTabTxt{display:none;font-size:12px;font-weight:700;color:#7CFC9A;padding:0 4px}
+body.sbTab #sbTabTxt{display:block}
 body:not(.manual) #seg .zb{display:none !important}
 #ckBox{position:absolute;left:max(12px,var(--sl));top:96px;width:300px;max-height:calc(100vh - 110px);overflow-y:auto;max-width:46vw;background:rgba(11,20,32,.88);border:2px solid #ffd400;border-radius:14px;padding:10px;font-size:14px;z-index:5}
 #ckBox .ck{display:flex;gap:8px;align-items:center;width:100%;margin:4px 0;padding:8px;border-radius:10px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.06);color:#fff;font-size:14px;text-align:left;cursor:pointer}
@@ -531,7 +535,7 @@ html,body{font-family:-apple-system,"SF Pro Text","SF Pro Display",system-ui,san
     <button id="undoBtn">↶ Annulla gol</button>
     <div id="sbBar">
       <button id="hMinus">−</button><div class="tm" id="hTag">AZZ</div><div class="sc" id="hScore">0</div><button id="hPlus">+</button>
-      <button id="sbClock">1° 8:00</button>
+      <button id="sbClock">1° 8:00</button><div id="sbTabTxt">dal tablet</div>
       <button id="aPlus">+</button><div class="sc" id="aScore">0</div><div class="tm" id="aTag">OSP</div><button id="aMinus">−</button>
     </div>
   </div>
@@ -1877,6 +1881,12 @@ function renderScore() {
   $('sbClock').style.background = b.running ? '#1e8e3e' : '#244a7a';
   $('sbVis').checked = b.visible;
   const T = S.tablet || {};
+  // Risultato dal tablet: i comandi del punteggio a mano spariscono; se il tablet si perde tornano.
+  const fromTab = !!(T.linked && T.ok);
+  if (renderScore.tab !== undefined && renderScore.tab !== fromTab)
+    toast(fromTab ? 'Risultato dal tablet: punteggio a mano nascosto' : 'Tablet non collegato: punteggio a mano', 4000);
+  renderScore.tab = fromTab;
+  document.body.classList.toggle('sbTab', fromTab);
   $('tabTxt').textContent = T.linked ? T.text : 'Non collegato: squadre e risultato si impostano a mano qui sotto.';
   $('tabTxt').style.color = T.linked ? (T.ok ? '#7CFC9A' : '#ffd27a') : '';
   $('tabOff').style.display = T.linked ? '' : 'none';
@@ -2129,6 +2139,7 @@ document.addEventListener('pointerdown', e => {
 // Gol con "Annulla" per 5 secondi.
 let undoSide = null;
 function goal(side) {
+  if (document.body.classList.contains('sbTab')) { toast('Il risultato arriva dal tablet'); return; }
   cmd({a: 'sbScore', side, d: 1});
   undoSide = side;
   const b = S.sb ? (side === 'home' ? S.sb.home : S.sb.away) : null;
