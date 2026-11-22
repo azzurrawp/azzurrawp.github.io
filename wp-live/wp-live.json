@@ -1,6 +1,6 @@
 {
-  "latestVersion": "0.12.11",
-  "releaseNotes": "0.12.11: rotella del gimbal per lo zoom avanti e indietro, che scorre piano finché giri e si ferma quando lasci.",
+  "latestVersion": "0.12.12",
+  "releaseNotes": "0.12.12: zoom con la rotella del gimbal più rapido (circa 4 secondi dal minimo al massimo).",
   "params": {
     "gimbalSpeed": 0.3,
     "zoomRampRate": 1.5
