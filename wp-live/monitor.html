@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <!-- WP-LIVE-MONITOR-API:1 -->
-<!-- WP-LIVE-PAGE-STAMP:2026112404 -->
+<!-- WP-LIVE-PAGE-STAMP:2026112405 -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -645,7 +645,7 @@ try { PIN = localStorage.getItem('wpPin') || ''; } catch (e) {}
       set(v) { v = v == null ? '' : String(v); if (d.get.call(this) === v) return; d.set.call(this, v); }});
   });
 })();
-const PAGE_VER = '2026112404';
+const PAGE_VER = '2026112405';
 let LOCAL = false;
 try { LOCAL = new URLSearchParams(location.search).get('local') === '1' || sessionStorage.getItem('wpLocal') === '1'; if (LOCAL) sessionStorage.setItem('wpLocal', '1'); } catch (e) {}
 // 23/11: sull'iPhone che riprende la fotocamera vera sta sotto la pagina (anteprima nativa): niente immagini dal server.
@@ -1119,13 +1119,18 @@ document.querySelectorAll('[data-preset]').forEach(b => b.onclick = () => {
   cmd({a: 'preset', name: b.dataset.preset});
   toast(b.textContent.replace(/[◀▶]/g, '').trim(), 1500);
 });
-let lastBtnMsg = '', learnSeq = -1, learnWait = false;
+let lastBtnMsg = '', learnSeq = -1, learnWait = false, fitSeq = -1;
 function renderButtons() {
   const g = $('gbTxt'); if (g) g.textContent = S.gimbalButton ? 'Ultimo pulsante: ' + S.gimbalButton : '';
   // 24/11: con l'app 0.13.2 ogni avviso ha un numero: lo stesso messaggio ripetuto si rivede.
   const k = S.buttonMsg ? S.buttonMsg + '#' + (S.buttonSeq || '') : '';
   if (k && k !== lastBtnMsg) toast(S.buttonMsg, 2500);
   lastBtnMsg = k;
+  // 0.13.3: esito del raddrizzamento del campo dopo la calibrazione.
+  if (typeof S.fitSeq === 'number') {
+    if (fitSeq >= 0 && S.fitSeq !== fitSeq && S.fitMsg) dlg({msg: esc(S.fitMsg), buttons: [{t: 'OK', cls: 'pri'}]});
+    fitSeq = S.fitSeq;
+  }
   // Risposta vera dell'iPhone a "Insegna il colore della palla".
   if (typeof S.ballLearnSeq === 'number') {
     if (learnSeq < 0) learnSeq = S.ballLearnSeq;
@@ -1190,7 +1195,8 @@ $('viewBox').addEventListener('click', e => {
   if (mapping) {
     const r = $('view').getBoundingClientRect();
     cmd({a: 'mapMark', x: (e.clientX - r.left) / r.width, y: (e.clientY - r.top) / r.height});
-    toast('Angolo segnato', 1200);
+    // 0.13.3: il primo tocco ingrandisce (il messaggio arriva dall'iPhone), il secondo segna.
+    if (S.mapFine === undefined || S.mapFine) toast('Angolo segnato', 1200);
     return;
   }
   if (hitCorner(e) >= 0) { toast('Trascina il pallino: la lente mostra il punto preciso', 2200); return; }
@@ -1531,14 +1537,16 @@ function geoCheck() {
   // Prova in casa: lunghezze sotto 8 m o larghezza sotto 6 m (una vasca vera è larga almeno 10 m).
   if (Math.max(near, far) < 8 || (w && +w[1] < 6)) return {home: true, near, far};
   const bad = x => Math.abs(x - L) / L > 0.15;
-  return {near, far, ok: !bad(near) && !bad(far), redo: bad(near) && bad(far) ? [] : bad(near) ? [1, 2] : bad(far) ? [3, 4] : []};
+  // 24/11: vasca di via Roma larga 20 m (campo da muro a muro).
+  const wBad = w && Math.abs(+w[1] - 20) / 20 > 0.15;
+  return {near, far, width: w ? +w[1] : 0, ok: !bad(near) && !bad(far) && !wBad, redo: bad(near) && bad(far) ? [] : bad(near) ? [1, 2] : bad(far) ? [3, 4] : []};
 }
 function geoLine() {
   const g = geoCheck(); if (!g) return '';
   const f = x => x.toFixed(1).replace('.', ',');
   if (g.home) return '<div class="st small">Misure: ' + f(g.near) + ' e ' + f(g.far) + ' m (prova in casa: controllo saltato).</div>';
-  if (g.ok) return '<div class="st okt">✓ Misure giuste: vasca ' + f(g.near) + ' m vicino, ' + f(g.far) + ' m lontano.</div>';
-  return '<div class="st warn">Misure strane: ' + f(g.near) + ' m vicino, ' + f(g.far) + ' m lontano (attesi 25). ' +
+  if (g.ok) return '<div class="st okt">✓ Misure giuste: vasca ' + f(g.near) + ' m vicino, ' + f(g.far) + ' m lontano' + (g.width ? ', larga ' + f(g.width) + ' m' : '') + '.</div>';
+  return '<div class="st warn">Misure strane: ' + f(g.near) + ' m vicino, ' + f(g.far) + ' m lontano' + (g.width ? ', larga ' + f(g.width) + ' m' : '') + ' (attesi 25 × 20). ' +
     (g.redo.length ? 'Rifai gli angoli ' + g.redo.join(' e ') + '.' : 'Controlla l\'altezza o rifai la calibrazione.') + '</div>';
 }
 function doLidar() { if (S.busyGeo) { toast('Misura già in corso', 2000); return; } wzLidar = true; cmd({a: 'lidar'}); toast('Misuro l\'altezza: la camera si inclina verso il pavimento', 3500); }
@@ -1579,6 +1587,7 @@ function renderMapping() {
     document.body.classList.add('mapping');
     $('calibHint').textContent = redoIdx >= 0
       ? 'Angolo ' + (idx + 1) + ' · sposta il pallino giallo su: ' + (S.mapName || '') + ' · se non lo vedi, muovi la camera col dito'
+      : S.mapFine ? 'Angolo ' + (idx + 1) + ' di 4 ingrandito · a immagine ferma tocca il punto esatto: ' + (S.mapName || '')
       : 'Angolo ' + (idx + 1) + ' di 4 · tocca: ' + (S.mapName || '') + ' · se non lo vedi, muovi la camera col dito';
   }
 }
