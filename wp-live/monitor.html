@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <!-- WP-LIVE-MONITOR-API:1 -->
-<!-- WP-LIVE-PAGE-STAMP:2026112303 -->
+<!-- WP-LIVE-PAGE-STAMP:2026112304 -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -580,6 +580,18 @@ html.nativeBg #prepPanel details.sec>summary{-webkit-tap-highlight-color:rgba(25
 let PIN = '';
 try { PIN = localStorage.getItem('wpPin') || ''; } catch (e) {}
 // Regia sullo schermo dell'iPhone che riprende (app WP Live): non conta come monitor collegato.
+// 23/11 notte: la pagina riscrive punteggio, stato e scritte 5 volte al secondo anche quando non cambia
+// niente. Su iPhone, se sotto il dito il contenuto cambia proprio durante il tocco, iOS lo considera un
+// "passaggio" e non fa il clic: per questo nel menu servivano 4-5 tocchi. Ora si riscrive solo ciò che cambia.
+(function () {
+  [[Element.prototype, 'innerHTML'], [Node.prototype, 'textContent']].forEach(([proto, prop]) => {
+    const d = Object.getOwnPropertyDescriptor(proto, prop);
+    if (!d || !d.set || !d.get) return;
+    Object.defineProperty(proto, prop, {configurable: true, enumerable: d.enumerable, get: d.get,
+      set(v) { v = v == null ? '' : String(v); if (d.get.call(this) === v) return; d.set.call(this, v); }});
+  });
+})();
+const PAGE_VER = '2026112304';
 let LOCAL = false;
 try { LOCAL = new URLSearchParams(location.search).get('local') === '1' || sessionStorage.getItem('wpLocal') === '1'; if (LOCAL) sessionStorage.setItem('wpLocal', '1'); } catch (e) {}
 // 23/11: sull'iPhone che riprende la fotocamera vera sta sotto la pagina (anteprima nativa): niente immagini dal server.
@@ -828,7 +840,7 @@ function render() {
   let h = g + ' · Zoom ' + S.zoom + '<br>Batteria <span class="' + batCls + '">' + bat + '</span> · Temperatura ' + th + '<br>Palla: ' + ball + ' · Campo ' + (S.corners && S.corners.length === 4 ? '<span class="ok">calibrato</span>' : '<span class="warn">da calibrare</span>');
   if (S.lastSaved) h += '<br><span class="small">Ultima registrazione: ' + S.lastSaved + '</span>';
   if (S.error) h += '<br><span class="bad">' + S.error + '</span>';
-  h += '<br><span class="small">Versione ' + S.version + '</span>';
+  h += '<br><span class="small">Versione ' + S.version + ' · pagina ' + PAGE_VER + '</span>';
   $('status').innerHTML = h;
   renderScan();
   renderLive();
