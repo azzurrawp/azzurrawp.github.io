@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <!-- WP-LIVE-MONITOR-API:1 -->
-<!-- WP-LIVE-PAGE-STAMP:2026112302 -->
+<!-- WP-LIVE-PAGE-STAMP:2026112303 -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -2074,6 +2074,23 @@ $('clkSet').onclick = () => {
 $('largaBtn').onclick = () => cmd({a: 'larga'});
 $('prepBtn').onclick = () => { $('prep').style.display = 'flex'; };
 $('prepClose').onclick = () => { $('prep').style.display = 'none'; };
+// 23/11: sull'iPhone che riprende (WKWebView) molti tocchi nel menu si perdevano: con la pagina che si
+// aggiorna 5 volte al secondo, iOS a volte non trasforma il tocco in "click". Un tocco breve e fermo ora
+// agisce subito al rilascio del dito. Esclusi campi di testo, menu a tendina e pulsanti "tieni premuto".
+(function () {
+  const P = $('prepPanel'); let sx = 0, sy = 0, t0 = 0, tgt = null;
+  P.addEventListener('touchstart', e => { const t = e.touches[0]; sx = t.clientX; sy = t.clientY; t0 = Date.now(); tgt = e.target; }, {passive: true});
+  P.addEventListener('touchend', e => {
+    if (e.touches.length || !tgt) return;
+    const t = e.changedTouches[0];
+    if (Math.abs(t.clientX - sx) > 10 || Math.abs(t.clientY - sy) > 10 || Date.now() - t0 > 700) return;
+    if (tgt.closest('input,select,textarea') && !tgt.matches('input[type=checkbox]')) return;
+    const el = tgt.closest('summary,button,label');
+    if (!el || !P.contains(el) || el.classList.contains('hold') || el.disabled) return;
+    e.preventDefault();
+    el.click();
+  }, {passive: false});
+})();
 $('prep').addEventListener('click', e => { if (e.target === $('prep')) $('prep').style.display = 'none'; });
 
 // PC: trascina col mouse sull'anteprima per muovere la telecamera
