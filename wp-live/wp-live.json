@@ -1,6 +1,6 @@
 {
-  "latestVersion": "0.12.14",
-  "releaseNotes": "0.12.14: nuova pagina Impostazioni › Test modello: misura velocità e calore del riconoscimento automatico (RF-DETR) sull'iPhone. App più pesante (circa 200 MB) per i modelli di prova.",
+  "latestVersion": "0.12.15",
+  "releaseNotes": "0.12.15: sull'iPhone la regia ha sotto la fotocamera vera (più nitida, scalda meno); menu in vetro riordinato; Impostazioni dell'iPhone dal menu della regia; 'tempo di gioco' al posto di 'cronometro'; tolto Larga.",
   "params": {
     "gimbalSpeed": 0.3,
     "zoomRampRate": 1.5

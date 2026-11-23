@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <!-- WP-LIVE-MONITOR-API:1 -->
-<!-- WP-LIVE-PAGE-STAMP:2026112201 -->
+<!-- WP-LIVE-PAGE-STAMP:2026112301 -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -296,6 +296,39 @@ html,body{font-family:-apple-system,"SF Pro Text","SF Pro Display",system-ui,san
 #livePanel .lpGo{width:100%;margin-top:16px;min-height:52px;border:0;border-radius:999px;background:var(--ios-red);color:#fff;font-size:18px;font-weight:700}
 #livePanel .lpGo:disabled{opacity:.4}
 #livePanel .lpNo{width:100%;margin-top:8px;min-height:44px;border:0;border-radius:999px;background:transparent;color:var(--ios-blue);font-size:17px;font-weight:600}
+
+/* ===== Menu in vetro iOS 26/27 e riordinato (23/11) ===== */
+#prep{background:rgba(0,0,0,.28)}
+#prepPanel{background:rgba(22,22,24,.62);-webkit-backdrop-filter:blur(34px) saturate(180%);backdrop-filter:blur(34px) saturate(180%);
+  box-shadow:inset -.5px 0 0 var(--glassEdge),12px 0 40px rgba(0,0,0,.45)}
+#menuTitle{font-size:24px;font-weight:700}
+#prepClose{border-radius:999px;min-height:40px;padding:0 18px}
+#prepPanel .card,#prepPanel details.sec{background:rgba(255,255,255,.08);border-radius:20px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.14),inset 0 0 0 .5px rgba(255,255,255,.16)}
+#prepPanel details.sec>.card{background:rgba(255,255,255,.06)}
+#prepPanel details.sec>summary{font-weight:700;font-size:17px;align-items:center;min-height:24px}
+#prepPanel details.sec>summary .n{margin-left:auto;margin-right:10px;font-size:13px;font-weight:500;color:rgba(235,235,245,.6);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:55%}
+#prepPanel .btn2{border-radius:14px;min-height:46px;background:rgba(255,255,255,.16);font-weight:600;font-size:16px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.18),inset 0 0 0 .5px rgba(255,255,255,.2)}
+#prepPanel .small{color:rgba(235,235,245,.72);font-size:13.5px}
+#prepPanel .subT{color:rgba(235,235,245,.6)}
+#prepPanel label{font-size:15px}
+#prepPanel select,#prepPanel input.txt{min-height:44px;border-radius:12px;border:0;background:rgba(255,255,255,.12);color:#fff;font-size:16px;padding:0 12px}
+#prepPanel .grid2,#prepPanel .grid3{display:grid;gap:8px}
+#prepPanel .grid2{grid-template-columns:1fr 1fr}#prepPanel .grid3{grid-template-columns:1fr 1fr 1fr}
+#prepPanel .tgl{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:48px;margin-top:4px;padding:2px 0;border-top:.5px solid rgba(255,255,255,.1)}
+#prepPanel .tgl small{font-size:12.5px;color:rgba(235,235,245,.6);font-weight:400}
+#prepPanel .tgl select{width:auto;min-width:150px;flex:none}
+#prepPanel .tgl .btn2{min-height:40px;flex:none}
+#prepPanel input[type=checkbox]{-webkit-appearance:none;appearance:none;flex:none;width:51px;height:31px;margin:0;border-radius:999px;background:rgba(120,120,128,.36);position:relative;transition:background .2s;cursor:pointer}
+#prepPanel input[type=checkbox]::after{content:'';position:absolute;top:2px;left:2px;width:27px;height:27px;border-radius:50%;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.3);transition:left .2s}
+#prepPanel input[type=checkbox]:checked{background:var(--ios-green)}
+#prepPanel input[type=checkbox]:checked::after{left:22px}
+#prepPanel input[type=color]{width:52px;height:36px;border:0;border-radius:10px;background:transparent;padding:0}
+#prepPanel .fileBtn{display:inline-flex;align-items:center;justify-content:center;padding:0 14px;min-height:40px}
+#prepPanel .teamBox{border-top:.5px solid rgba(255,255,255,.14)}
+html.nativeBg,html.nativeBg body,html.nativeBg #app{background:transparent !important}
+html.nativeBg #view,html.nativeBg #vcan{visibility:hidden}
 </style>
 </head>
 <body>
@@ -338,51 +371,50 @@ html,body{font-family:-apple-system,"SF Pro Text","SF Pro Display",system-ui,san
   <div id="prepPanel">
     <div id="flowBar"><button id="flowNext">Avanti ▶</button></div>
     <div style="display:flex;justify-content:space-between;align-items:center">
-      <div style="font-size:18px;font-weight:700">Preparazione</div>
+      <div id="menuTitle">Menu</div>
       <button class="btn2" id="prepClose">Chiudi</button>
-    </div>
-    <div class="card">
-      <button class="btn2" id="endBtn" style="width:100%;min-height:56px;background:#8a1c1c;font-size:17px;font-weight:800">Fine partita (tieni premuto)</button>
-      <div class="small" style="margin-top:6px">Ferma diretta e registrazione insieme; quando compare "puoi chiudere l'app" il video è salvato.</div>
-    </div>
-    <div class="card" id="nativeCard" style="display:none">
-      <button class="btn2" id="nativeBtn" style="width:100%;min-height:52px">Schermata fotocamera dell'iPhone</button>
-      <div class="small" style="margin-top:6px">Questa regia resta sull'iPhone finché non si collega un monitor (telefono o PC del regista); poi l'iPhone torna alla schermata fotocamera. Per riaprirla: pulsante "Regia". Per collegare il monitor del regista: schermata fotocamera › "Regista" (QR e password).</div>
     </div>
     <div class="card" id="logoutCard">
       <button class="btn2" id="logoutBtn" style="width:100%;background:#5a2330">Scollega questo monitor (tieni premuto)</button>
-      <div class="small" style="margin-top:6px">Ripresa, registrazione e diretta sull'iPhone continuano: fermale prima, se la partita è finita. Per ricollegarti: QR code o password.</div>
-      <div class="small" id="homeTip" style="margin-top:8px;color:#7fd3ff">Su iPhone, per avere il monitor a schermo intero senza le barre di Safari: tasto Condividi › "Aggiungi alla schermata Home", poi aprilo dall'icona "WP Regia" (la password va scritta una volta).</div>
+      <div class="small" style="margin-top:6px">L'iPhone continua a riprendere. Per ricollegarti: QR code o password.</div>
+      <div class="small" id="homeTip" style="margin-top:8px;color:#7fd3ff">Schermo intero su iPhone: Safari › Condividi › "Aggiungi alla schermata Home", poi apri "WP Regia".</div>
     </div>
-    <details class="sec" open id="secPartita"><summary>Partita</summary>
-    <div class="card" id="phaseCard">
-      <button class="btn2" id="backPrep" style="width:100%">Torna alla preparazione (checklist)</button>
+    <details class="sec" open id="secPartita"><summary>Partita<span class="n" id="nPart"></span></summary>
+    <div class="card" id="presetCard">
+      <div class="small">Porta la camera a:</div>
+      <div class="grid3" style="margin-top:6px">
+        <button class="btn2" data-preset="sinistra">◀ Porta sx</button>
+        <button class="btn2" data-preset="centro">Tutto il campo</button>
+        <button class="btn2" data-preset="destra">Porta dx ▶</button>
+      </div>
       <button class="btn2" id="addReg" style="width:100%;margin-top:8px">Collega un regista (QR e link)</button>
     </div>
-    <div class="card" id="presetCard">
-      <div class="small">Posizioni (dal campo calibrato): la camera va lì da sola, con lo zoom giusto.</div>
-      <div class="row" style="margin-top:6px">
-        <button class="btn2" data-preset="sinistra">◀ Porta sinistra</button>
-        <button class="btn2" data-preset="centro">Tutto il campo</button>
-        <button class="btn2" data-preset="destra">Porta destra ▶</button>
-      </div>
+    </details>
+    <details class="sec" id="secAuto"><summary>Ripresa automatica<span class="n" id="nAuto"></span></summary>
+    <div class="card" id="autoCard">
+      <div class="small">Con <b>Assistita</b> la camera segue il gioco e zooma da sola. Serve il campo calibrato.</div>
+      <label class="tgl"><span>Zoom automatico (regole pallanuoto)</span><input type="checkbox" id="azOn"></label>
+      <label class="tgl"><span>Azzurra attacca verso<br><small>1° e 2° tempo; poi si inverte da solo</small></span><select id="azzDir"><option value="">Non impostato</option><option value="sinistra">Sinistra</option><option value="destra">Destra</option></select></label>
+      <button class="btn2" id="autoBtn" style="width:100%;margin-top:8px">Ripresa automatica completa (in prova)</button>
     </div>
     </details>
-    <details class="sec" id="secCampo"><summary>Campo</summary>
+    <details class="sec" id="secCampo"><summary>Preparazione<span class="n" id="nPrep"></span></summary>
     <div class="card" id="campoCard">
-      <div class="small">Angolo per angolo: lo zoom va al più largo; giri la camera verso ogni angolo delle linee di porta e lo tocchi.</div>
-      <div class="row" style="margin-top:8px">
-        <button class="btn2" id="calibManual" style="background:#1e8e3e">Calibra angolo per angolo</button>
+      <button class="btn2" id="backPrep" style="width:100%">Torna alla checklist</button>
+      <div class="small" style="margin-top:10px">Calibrazione del campo</div>
+      <div class="grid2" style="margin-top:6px">
+        <button class="btn2" id="calibManual" style="background:#1e8e3e">Angolo per angolo</button>
+        <button class="btn2" id="calibBtn">Giro automatico (tieni premuto)</button>
         <button class="btn2" id="goalBtn">Controlla le porte</button>
-        <button class="btn2" id="calibClear">Cancella</button>
+        <button class="btn2" id="calibClear">Cancella calibrazione</button>
       </div>
       <div class="small" id="levelTxt" style="margin-top:8px"></div>
       <div id="lidarBox" style="margin-top:10px;display:none">
-        <div class="small">Altezza con il LiDAR: il gimbal abbassa da solo la telecamera verso il pavimento vicino allo stativo, misura e torna dove era. Davanti allo stativo serve pavimento asciutto; registrazione e diretta ferme.</div>
+        <div class="small">Altezza della camera: misura col LiDAR (pavimento asciutto davanti allo stativo, registrazione e diretta ferme) oppure scrivila.</div>
         <button class="btn2" id="lidarBtn" style="width:100%;margin-top:6px">Misura altezza (LiDAR)</button>
         <div style="display:flex;gap:6px;margin-top:6px;align-items:center">
           <span class="small">oppure col metro:</span>
-          <input id="hIn" type="number" inputmode="decimal" step="0.01" min="0.5" max="9" placeholder="m" style="width:80px;font-size:16px;padding:6px;border-radius:8px;border:1px solid #2a8cff;background:#132235;color:#fff">
+          <input id="hIn" class="txt" type="number" inputmode="decimal" step="0.01" min="0.5" max="9" placeholder="m" style="width:90px">
           <button class="btn2" id="hSet">Usa questa altezza</button>
         </div>
         <div class="small" id="lidarMsg" style="margin-top:4px"></div>
@@ -390,40 +422,36 @@ html,body{font-family:-apple-system,"SF Pro Text","SF Pro Display",system-ui,san
       </div>
     </div>
     </details>
-    <details class="sec" id="secTeams"><summary>Squadre e tabellone</summary>
+    <details class="sec" id="secTeams"><summary>Squadre e tabellone<span class="n" id="nTeams"></span></summary>
     <div class="card" id="teamsCard">
-      <label class="bigSwitch"><input type="checkbox" id="sbVis"> <span><b>Mostra il tabellone sul video</b><br><small>nella diretta e nella registrazione</small></span></label>
+      <label class="tgl"><span>Tabellone sul video<br><small>nella diretta e nella registrazione</small></span><input type="checkbox" id="sbVis"></label>
       <div class="subT">Dal tablet (Azzurra WP Stat)</div>
-      <div style="font-size:13px;opacity:.85">Squadre, chi gioca in casa, risultato e tempo arrivano da soli dall'app statistiche del tablet (serve internet su tablet e iPhone). Incolla il link dell'app statistiche (quello con <b>#k=</b>) o solo il codice.</div>
+      <div class="small">Squadre, risultato e tempo arrivano dal tablet: incolla il link dell'app statistiche (quello con <b>#k=</b>) o il codice.</div>
       <div class="row" style="margin-top:6px">
         <input class="txt" id="tabCode" style="flex:1" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="link o codice dell'app statistiche">
         <button class="btn2" id="tabSave">Collega</button>
       </div>
-      <div id="tabTxt" style="font-size:13px;margin-top:4px"></div>
+      <div id="tabTxt" class="small" style="margin-top:4px"></div>
       <button class="btn2" id="tabOff" style="display:none;margin-top:4px">Scollega il tablet</button>
       <div class="subT">Partita</div>
       <label>Nome della partita<input class="txt" id="sbTitle" maxlength="60" placeholder="es. Amichevole U16"></label>
+      <label class="tgl"><span>Nomi lunghi<br><small>altrimenti solo sigle: AZZ – DRE</small></span><input type="checkbox" id="sbFull"></label>
+      <label class="tgl"><span>Tempo di gioco (conto alla rovescia)<br><small>spento: solo il numero del tempo (1°–4°)</small></span><input type="checkbox" id="sbClkOn"></label>
       <div class="row" style="margin-top:6px" id="lenRow">
-        <label style="flex:1">Durata di ogni tempo (minuti)<select id="sbLen"><option>5</option><option>6</option><option>7</option><option selected>8</option><option>10</option></select></label>
+        <label style="flex:1">Durata del tempo (minuti)<select id="sbLen"><option>5</option><option>6</option><option>7</option><option selected>8</option><option>10</option></select></label>
       </div>
-      <label style="display:flex;gap:8px;align-items:center;margin-top:6px"><input type="checkbox" id="sbFull"> Nomi lunghi (altrimenti solo sigle: AZZ – DRE)</label>
+      <div class="small">Avvio, pausa e cambio tempo: sulla barra del punteggio.</div>
+      <div class="row" style="margin-top:6px">
+        <button class="btn2" id="clkSet">Correggi il tempo che manca</button>
+        <button class="btn2" id="sbSwap">Inverti squadre</button>
+      </div>
       <div class="subT">Squadre</div>
       <div class="teamBox" id="tb_home"></div>
       <div class="teamBox" id="tb_away"></div>
-      <div class="subT">Durante la partita</div>
-      <div class="row">
-        <button class="btn2" id="pMinus">◀ Tempo precedente</button><button class="btn2" id="pPlus">Tempo successivo ▶</button>
-        <button class="btn2" id="sbSwap">Inverti squadre</button>
-      </div>
-      <label style="display:flex;gap:8px;align-items:center;margin-top:8px"><input type="checkbox" id="sbClkOn"> Cronometro</label>
-      <div style="font-size:12px;opacity:.75">Spento: nel tabellone solo il numero del tempo (1°–4°). Acceso: anche il cronometro, che avvii e fermi a mano insieme alla giuria.</div>
-      <div class="row" style="margin-top:6px">
-        <button class="btn2" id="clkSet">Imposta cronometro</button>
-        <button class="btn2" id="sbReset">Azzera partita (tieni premuto)</button>
-      </div>
+      <button class="btn2" id="sbReset" style="width:100%;margin-top:10px">Azzera partita (tieni premuto)</button>
     </div>
     </details>
-    <details class="sec" id="secCaps"><summary>Calottine e palla</summary>
+    <details class="sec" id="secCaps"><summary>Calottine e palla<span class="n" id="nCaps"></span></summary>
     <div class="card" id="capsCard">
       <label>Azzurra<select id="homeCap"></select></label>
       <label>Avversari<select id="awayCap"></select></label>
@@ -433,36 +461,29 @@ html,body{font-family:-apple-system,"SF Pro Text","SF Pro Display",system-ui,san
       <div class="small" id="ballWarn" style="margin-top:4px;color:#ffb300"></div>
     </div>
     </details>
-    <details class="sec" id="secLive"><summary>Dati diretta</summary>
-    <div class="card" id="liveCard">
-      <div id="liveTxt" class="small"></div>
-      <div class="row" style="margin:6px 0"><button class="btn2" id="netBtn">Prova la velocità</button><span id="netTxt" class="small"></span></div>
-      <label>URL dello stream<input id="rtmpUrl" style="width:100%;padding:8px;border-radius:8px;background:#0b1420;color:#fff;border:1px solid #2a8cff" autocomplete="off"></label>
-      <label>Chiave dello stream<input id="rtmpKey" type="password" placeholder="incolla la chiave" style="width:100%;padding:8px;border-radius:8px;background:#0b1420;color:#fff;border:1px solid #2a8cff" autocomplete="off"></label>
-      <label>Qualità<select id="liveQ"><option value="720p">720p (circa 1,2 GB/ora)</option><option value="1080p">1080p (circa 2,2 GB/ora)</option></select></label>
-      <button class="btn2" id="liveSave" style="margin-top:8px;width:100%">Salva dati diretta</button>
-      <div class="small" style="margin-top:4px">La chiave resta sull'iPhone della ripresa.</div>
-    </div>
-    </details>
-    <details class="sec" id="secAdv"><summary>Avanzate</summary>
+    <details class="sec" id="secAdv"><summary>Altro</summary>
     <div class="card">
-      <label style="display:flex;align-items:center;gap:8px"><input type="checkbox" id="linesOn"> Mostra le righe del campo durante la partita</label>
-      <label style="display:flex;gap:8px;align-items:center;margin-top:8px"><input type="checkbox" id="penOn"> Mostra i pulsanti Rigore</label>
-      <label style="display:flex;gap:8px;align-items:center;margin-top:8px"><input type="checkbox" id="h264On"> Video fluido (prova): anteprima come video, come l'app Insta360</label>
-      <button class="btn2" id="logBtn" style="width:100%;margin-top:10px">Scarica registro diretta</button>
-      <div class="small" style="opacity:.75">Una riga ogni 3 secondi dell'ultima diretta (dati inviati, immagini scartate, ritardo, temperatura): si apre con Excel.</div>
-      <button class="btn2" id="calibBtn" style="width:100%;margin-top:8px">Calibra col giro automatico del gimbal (tieni premuto)</button>
-      <button class="btn2" id="autoBtn" style="width:100%;margin-top:8px">Ripresa automatica (in prova)</button>
+      <label class="tgl"><span>Righe del campo in partita</span><input type="checkbox" id="linesOn"></label>
+      <label class="tgl"><span>Pulsanti Rigore</span><input type="checkbox" id="penOn"></label>
+      <label class="tgl" id="h264Row"><span>Anteprima video fluida (prova)<br><small>il movimento non va a scatti; l'iPhone lavora un po' di più</small></span><input type="checkbox" id="h264On"></label>
+      <div class="tgl"><span>Registro della diretta<br><small>una riga ogni 3 secondi, si apre con Excel</small></span><button class="btn2" id="logBtn">Scarica</button></div>
+      <div class="small" style="margin-top:6px">Risparmio calore sull'iPhone: <span id="heatTxt">…</span></div>
     </div>
-    <div class="card" id="autoCard">
-      <label style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="azOn"> Zoom automatico (regole della pallanuoto)</label>
-      <div style="font-size:12px;opacity:.75;margin-top:6px">Risparmio calore: con questo monitor collegato, dopo 2 minuti senza tocchi sull'iPhone l'anteprima si spegne e lo schermo va al minimo; un tocco sull'iPhone la riaccende (<span id="heatTxt">…</span>).</div>
-      <label style="margin-top:6px">L'Azzurra attacca verso (1° e 2° tempo)<select id="azzDir"><option value="">Non impostato</option><option value="sinistra">Sinistra</option><option value="destra">Destra</option></select></label>
-      <div style="font-size:12px;opacity:.75">Dal 3° tempo il verso si inverte da solo (cambio campo). Pallini sull'anteprima: azzurri = Azzurra, gialli = avversari, rossi = portieri.</div>
-      <div style="font-size:12px;opacity:.75">Serve il campo calibrato. Transizione larga, attacco sulla metà vasca, zona dei 6 metri; dopo un gol (+1) inquadratura ferma e poi larga verso il centro.</div>
+    <div class="card" id="nativeCard" style="display:none">
+      <button class="btn2" id="setBtn" style="width:100%;background:var(--ios-blue)">⚙ Impostazioni dell'iPhone</button>
+      <button class="btn2" id="nativeBtn" style="width:100%;margin-top:8px">Schermata di riserva (solo fotocamera)</button>
+      <div class="small" style="margin-top:6px">Solo se questa pagina non risponde: lì restano registrazione, diretta e Fine partita. Per tornare qui: pulsante "Regia".</div>
     </div>
     </details>
+    <details class="sec" id="secInfo"><summary>Informazioni</summary>
     <div class="card" id="status">Collegamento…</div>
+    </details>
+    <div id="legacy" style="display:none">
+      <button id="endBtn"></button><button id="pMinus"></button><button id="pPlus"></button>
+      <div id="liveCard"><div id="liveTxt"></div><button id="netBtn"></button><span id="netTxt"></span>
+      <input id="rtmpUrl"><input id="rtmpKey" type="password"><select id="liveQ"><option value="720p">720p</option><option value="1080p">1080p</option></select><button id="liveSave"></button></div>
+      <div id="phaseCard"></div>
+    </div>
   </div>
 </div>
 
@@ -557,6 +578,10 @@ try { PIN = localStorage.getItem('wpPin') || ''; } catch (e) {}
 // Regia sullo schermo dell'iPhone che riprende (app WP Live): non conta come monitor collegato.
 let LOCAL = false;
 try { LOCAL = new URLSearchParams(location.search).get('local') === '1' || sessionStorage.getItem('wpLocal') === '1'; if (LOCAL) sessionStorage.setItem('wpLocal', '1'); } catch (e) {}
+// 23/11: sull'iPhone che riprende la fotocamera vera sta sotto la pagina (anteprima nativa): niente immagini dal server.
+let NATIVE = false;
+try { NATIVE = LOCAL && (new URLSearchParams(location.search).get('native') === '1' || sessionStorage.getItem('wpNative') === '1'); if (NATIVE) sessionStorage.setItem('wpNative', '1'); } catch (e) {}
+if (NATIVE) document.documentElement.classList.add('nativeBg');
 if (LOCAL) document.body.classList.add('local');
 let S = {};
 let wakeLock = null;
@@ -638,7 +663,7 @@ function wsConnect() {
   WS.onmessage = ev => {
     if (typeof ev.data === 'string') {
       let o; try { o = JSON.parse(ev.data); } catch (e) { return; }
-      if (o.ok === true && Object.keys(o).length === 1) { wsOK = true; wsFails = 0; h264Start(); return; }
+      if (o.ok === true && Object.keys(o).length === 1) { wsOK = true; wsFails = 0; if (NATIVE) { try { WS.send('{"video":"none"}'); } catch (e) {} } else h264Start(); return; }
       if (o.h264cfg) { h264Configure(o); return; }
       S = o; wsStatusT = Date.now(); render();
     } else {
@@ -664,7 +689,7 @@ function h264Start() {
   // Solo con app 0.12.0 o successiva (le precedenti non sanno mandare il video).
   const v = String((S && S.version) || '0').split('.').map(Number), app12 = v[0] > 0 || (v[1] || 0) >= 12;
   // 22/11: anche sull'iPhone che riprende (prima solo immagini JPEG, che scaldavano).
-  if (!app12 || !('VideoDecoder' in window) || !h264Pref() || H.fails >= 2 || !wsOK) return;
+  if (NATIVE || !app12 || !('VideoDecoder' in window) || !h264Pref() || H.fails >= 2 || !wsOK) return;
   H.on = true; H.seen = 0;
   try { WS.send('{"video":"h264"}'); } catch (e) {}
   clearTimeout(H.timer);
@@ -762,6 +787,7 @@ if (PIN) { $('pinIn').value = PIN; login(PIN); }
 let lastUrl = null;
 async function frameLoop() {
   if (disconnected) return;
+  if (NATIVE) { setTimeout(frameLoop, 2000); return; }
   if (wsOK && Date.now() - wsFrameT < 1500) { setTimeout(frameLoop, 400); return; }
   try {
     const r = await api('/frame.jpg');
@@ -813,13 +839,15 @@ function render() {
   if (S.atLimit && !renderEnd.limitShown) { toast('Bordo del campo: il gimbal non va oltre', 1500); renderEnd.limitShown = true; }
   if (!S.atLimit) renderEnd.limitShown = false;
   const bc = v => v >= 0 && v < 20 ? 'bad' : '';
-  let sb = '<span class="chip" style="background:' + (S.auto ? '#1e8e3e' : S.assisted ? '#1565c0' : '#e07b00') + '">' + (S.auto ? 'AUTO' : S.assisted ? 'ASSISTITA' : 'MANUALE') + '</span>';
+  // 23/11: Manuale/Assistita si leggono già sul pulsante evidenziato in basso: qui solo AUTO (non ha pulsante).
+  let sb = S.auto ? '<span class="chip" style="background:#1e8e3e">AUTO</span>' : '';
   sb += '<span>' + (S.docked ? '<span class="ok">●</span>' : '<span class="bad">●</span>') + ' Gimbal</span>';
   sb += '<span>' + (S.corners && S.corners.length === 4 ? '<span class="ok">●</span>' : '<span class="warn">●</span>') + ' Campo</span>';
   sb += '<span class="' + bc(S.battery) + '">iPhone ' + (S.battery >= 0 ? S.battery + '%' : '?') + '</span>';
   if (S.gimbalBattery >= 0) sb += '<span class="' + bc(S.gimbalBattery) + '">Gimbal ' + S.gimbalBattery + '%</span>';
   if (S.thermal !== 'normale' && S.thermal !== 'tiepido') sb += '<span class="bad">Caldo</span>';
   $('statusBar').innerHTML = sb;
+  renderMenuNotes();
   renderButtons();
   renderGoal();
   renderNet();
@@ -1762,6 +1790,16 @@ function checkEnd() {
   dlg({msg: m, buttons: [{t: 'Nuova partita', cls: 'pri', cb: () => setPhase('start')}, {t: 'Chiudi'}]});
 }
 
+// 23/11: stato in breve accanto al titolo di ogni sezione del menu.
+function renderMenuNotes() {
+  const set = (id, t) => { const e = $(id); if (e && e.textContent !== t) e.textContent = t; };
+  set('nAuto', S.auto ? 'automatica (prova)' : S.assisted ? 'Assistita' : 'Manuale');
+  set('nPrep', (S.corners || []).length === 4 ? 'campo calibrato ✓' : 'campo da calibrare');
+  const b = S.sb || {};
+  set('nTeams', b.home && b.away ? (b.home.short || '') + ' – ' + (b.away.short || '') : '');
+  const capTxt = id => { const e = $(id); return e && e.selectedIndex >= 0 && e.options[e.selectedIndex] ? e.options[e.selectedIndex].text : ''; };
+  set('nCaps', [capTxt('homeCap'), capTxt('awayCap')].filter(x => x).join(' · '));
+}
 function renderPhase() {
   let ph = curPhase();
   const running = !!(S.rec || (S.live && S.live.state && S.live.state !== 'off'));
@@ -1942,8 +1980,8 @@ function buildTeam(side, t) {
     '<label>Sigla (max 4)<input class="txt" data-k="short" maxlength="4" style="text-transform:uppercase"></label>' +
     '<div style="margin-top:6px">Colori standard</div><div class="swatches">' +
     PALETTE.map(c => '<span class="sw" data-c="' + c + '" style="background:' + c + '"></span>').join('') + '</div>' +
-    '<label style="margin-top:6px">Mixer colori (qualsiasi colore) <input type="color" data-k="color"></label>' +
-    '<label>Logo ' + (t.logo ? '✓ caricato' : '(nessuno)') + '<input type="file" accept="image/*" data-k="logo"></label>' +
+    '<label class="tgl" style="margin-top:6px"><span>Altro colore</span><input type="color" data-k="color"></label>' +
+    '<label class="tgl"><span>Logo: ' + (t.logo ? '✓ caricato' : 'nessuno') + '</span><span class="btn2 fileBtn">Scegli logo<input type="file" accept="image/*" data-k="logo" style="display:none"></span></label>' +
     '<div class="row" style="margin-top:6px"><button class="btn2" data-k="save">Salva in libreria</button><button class="btn2" data-k="del">Togli dalla libreria…</button>' + (t.logo ? '<button class="btn2" data-k="nologo">Togli logo</button>' : '') + '</div>';
   const q = k => box.querySelector('[data-k="' + k + '"]');
   q('name').value = t.name; q('short').value = t.short; q('color').value = t.color.toLowerCase();
@@ -2237,7 +2275,9 @@ function renderEnd() {
 }
 if (LOCAL) {
   $('nativeCard').style.display = '';
+  $('h264Row').style.display = 'none';
   $('logoutCard').style.display = 'none';
+  $('setBtn').onclick = () => { try { window.webkit.messageHandlers.wp.postMessage('settings'); } catch (e) {} };
   $('nativeBtn').onclick = () => {
     try { window.webkit.messageHandlers.wp.postMessage('native'); } catch (e) {}
   };
