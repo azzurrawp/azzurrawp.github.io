@@ -1,6 +1,6 @@
 {
-  "latestVersion": "0.12.15",
-  "releaseNotes": "0.12.15: sull'iPhone la regia ha sotto la fotocamera vera (più nitida, scalda meno); menu in vetro riordinato; Impostazioni dell'iPhone dal menu della regia; 'tempo di gioco' al posto di 'cronometro'; tolto Larga.",
+  "latestVersion": "0.12.16",
+  "releaseNotes": "0.12.16: in Impostazioni › Test modello c'è la prova del Modello Azzurra addestrato sulla pallanuoto (calottine blu e bianche, portieri, porte e palla con colori diversi). La ripresa non cambia.",
   "params": {
     "gimbalSpeed": 0.3,
     "zoomRampRate": 1.5
