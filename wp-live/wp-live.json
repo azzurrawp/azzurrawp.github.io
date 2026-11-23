@@ -1,6 +1,6 @@
 {
-  "latestVersion": "0.13.1",
-  "releaseNotes": "0.13.1: la ripresa usa il Modello pallanuoto per calottine e palla gialla; modalità Automatico, Partita, Riscaldamento e Allenamento (Menu › Ripresa automatica); con un pallone non giallo la palla si cerca per colore.",
+  "latestVersion": "0.13.2",
+  "releaseNotes": "0.13.2: niente più tocchi persi nella preparazione; controllo porte e calibrazione degli angoli non si sovrappongono più; 'Insegna il colore della palla' mostra la risposta vera dell'iPhone e chiede conferma se è scelto il modello; il Controllo finale mostra la partita del tablet e le ultime 4 cifre della chiave YouTube.",
   "params": {
     "gimbalSpeed": 0.3,
     "zoomRampRate": 1.5
