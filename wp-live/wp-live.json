@@ -1,6 +1,6 @@
 {
-  "latestVersion": "0.13.0",
-  "releaseNotes": "0.13.0: la ripresa usa il Modello Azzurra per calottine e palla gialla; nuove modalità Automatico, Partita, Riscaldamento e Allenamento (Menu › Ripresa automatica); con un pallone non giallo la palla si cerca per colore.",
+  "latestVersion": "0.13.1",
+  "releaseNotes": "0.13.1: la ripresa usa il Modello pallanuoto per calottine e palla gialla; modalità Automatico, Partita, Riscaldamento e Allenamento (Menu › Ripresa automatica); con un pallone non giallo la palla si cerca per colore.",
   "params": {
     "gimbalSpeed": 0.3,
     "zoomRampRate": 1.5
