@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <!-- WP-LIVE-MONITOR-API:1 -->
-<!-- WP-LIVE-PAGE-STAMP:2026112403 -->
+<!-- WP-LIVE-PAGE-STAMP:2026112404 -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -645,7 +645,7 @@ try { PIN = localStorage.getItem('wpPin') || ''; } catch (e) {}
       set(v) { v = v == null ? '' : String(v); if (d.get.call(this) === v) return; d.set.call(this, v); }});
   });
 })();
-const PAGE_VER = '2026112403';
+const PAGE_VER = '2026112404';
 let LOCAL = false;
 try { LOCAL = new URLSearchParams(location.search).get('local') === '1' || sessionStorage.getItem('wpLocal') === '1'; if (LOCAL) sessionStorage.setItem('wpLocal', '1'); } catch (e) {}
 // 23/11: sull'iPhone che riprende la fotocamera vera sta sotto la pagina (anteprima nativa): niente immagini dal server.
@@ -1119,11 +1119,28 @@ document.querySelectorAll('[data-preset]').forEach(b => b.onclick = () => {
   cmd({a: 'preset', name: b.dataset.preset});
   toast(b.textContent.replace(/[◀▶]/g, '').trim(), 1500);
 });
-let lastBtnMsg = '';
+let lastBtnMsg = '', learnSeq = -1, learnWait = false;
 function renderButtons() {
   const g = $('gbTxt'); if (g) g.textContent = S.gimbalButton ? 'Ultimo pulsante: ' + S.gimbalButton : '';
-  if (S.buttonMsg && S.buttonMsg !== lastBtnMsg) toast(S.buttonMsg, 2500);
-  lastBtnMsg = S.buttonMsg || '';
+  // 24/11: con l'app 0.13.2 ogni avviso ha un numero: lo stesso messaggio ripetuto si rivede.
+  const k = S.buttonMsg ? S.buttonMsg + '#' + (S.buttonSeq || '') : '';
+  if (k && k !== lastBtnMsg) toast(S.buttonMsg, 2500);
+  lastBtnMsg = k;
+  // Risposta vera dell'iPhone a "Insegna il colore della palla".
+  if (typeof S.ballLearnSeq === 'number') {
+    if (learnSeq < 0) learnSeq = S.ballLearnSeq;
+    else if (S.ballLearnSeq !== learnSeq) {
+      learnSeq = S.ballLearnSeq;
+      if (learnWait) {
+        learnWait = false;
+        if (S.ballLearnOK) {
+          learnLeft--;
+          toast(learnLeft > 0 ? 'Bene. Tocca di nuovo la palla, in un altro punto (' + (3 - learnLeft) + '/3)'
+                              : 'Colore imparato. Ora la palla è: colore imparato (per tornare al modello: menu › Preparazione › Palla)', learnLeft > 0 ? 2500 : 5000);
+        } else toast((S.ballLearn || 'Lì non vedo un colore') + ' (' + (4 - learnLeft) + '/3)', 3000);
+      }
+    }
+  }
 }
 $('calibBtn').onclick = null;
 $('calibClear').onclick = null;
@@ -1156,11 +1173,14 @@ $('viewBox').addEventListener('click', e => {
     // Insegna il colore della palla: ogni tocco sulla palla è un campione.
     const r = $('view').getBoundingClientRect();
     cmd({a: 'ballLearn', x: (e.clientX - r.left) / r.width, y: (e.clientY - r.top) / r.height});
+    learnAt = Date.now();
+    if (typeof S.ballLearnSeq === 'number') { learnWait = true; return; }  // il messaggio arriva dall'iPhone
     learnLeft--;
     toast(learnLeft > 0 ? 'Bene. Tocca di nuovo la palla, in un altro punto (' + (3 - learnLeft) + '/3)' : 'Colore della palla imparato', 2500);
     return;
   }
-  if (S.goalCheck) {
+  // 24/11: durante "Angolo per angolo" i tocchi sono degli angoli, anche se il controllo porte non si è ancora chiuso.
+  if (S.goalCheck && !mapping) {
     const r = $('view').getBoundingClientRect();
     cmd({a: 'goalMark', x: (e.clientX - r.left) / r.width, y: (e.clientY - r.top) / r.height});
     toast('Centro della porta segnato', 1500);
@@ -1262,6 +1282,8 @@ function gDist() { const p = [...touches.values()]; return Math.hypot(p[0][0] - 
 const vb = $('viewBox');
 vb.addEventListener('pointerdown', e => {
   if (e.pointerType !== 'touch') return;
+  // 24/11: primo dito = nessun altro tocco in corso; un tocco "appeso" non blocca più l'anteprima.
+  if (e.isPrimary) { touches.clear(); if (G) { clearInterval(G.timer); G = null; } }
   touches.set(e.pointerId, [e.clientX, e.clientY]);
   if (touches.size === 2) {
     G = {mid: gMid(), dist: Math.max(gDist(), 1), zoom: S.zoomValue || 1, x: 0, y: 0, lastZoom: 0};
@@ -1475,7 +1497,7 @@ function setPhase(p) {
   renderPhase();
 }
 // Passo della preparazione e conferme di questa partita (per questo telefono).
-let wz = 0, OK = {};
+let wz = 0, OK = {}, wzDown = 0;
 try { wz = +(sessionStorage.getItem('wpWz') || 0); OK = JSON.parse(sessionStorage.getItem('wpOk') || '{}'); } catch (e) {}
 function saveWz() { try { sessionStorage.setItem('wpWz', wz); sessionStorage.setItem('wpOk', JSON.stringify(OK)); } catch (e) {} }
 function goStep(i) { wz = Math.max(0, Math.min(4, i)); wzLidar = wzCalib = false; okSince = 0; saveWz(); renderWizard(); renderFieldBtns(); }
@@ -1524,7 +1546,8 @@ function doLidar() { if (S.busyGeo) { toast('Misura già in corso', 2000); retur
 function doCalib(auto) {
   if (S.busyGeo) { toast('Aspetta che finisca la misura in corso', 2500); return; }
   wzCalib = true;
-  learnLeft = 0;
+  learnLeft = 0; learnWait = false;
+  if (S.goalCheck) cmd({a: 'goalCancel'});
   if (auto && S.docked) { cmd({a: 'scanStart'}); toast('Calibrazione automatica: il gimbal fa un giro del campo', 3500); }
   else {
     // Un angolo alla volta: lo zoom va al più largo, poi ogni tocco viene registrato con la posizione
@@ -1689,10 +1712,12 @@ function renderWizard() {
     h += '<div class="st"><b>Che calottine hanno stasera?</b></div>' +
       '<div class="st">Azzurra: <select id="wzHome" style="width:auto">' + opt(S.home) + '</select></div>' +
       '<div class="st">Avversari: <select id="wzAway" style="width:auto">' + opt(S.away) + '</select></div>' +
-      '<div class="st">Palla: <b>' + esc(S.ballColor === 'imparato' ? 'colore insegnato sullo schermo' : S.ballColor) + '</b></div>';
+      '<div class="st">Palla: <b>' + esc(S.ballColor === 'imparato' ? 'colore insegnato sullo schermo' : (S.ballColor || 'modello') === 'modello' ? 'gialla del campionato (Modello pallanuoto)' : S.ballColor) + '</b></div>';
     h += '<div class="st" style="opacity:.85">Riconosciuti adesso: ' + nA + ' Azzurra · ' + nO + ' avversari · palla ' + (S.ball ? 'sì' : 'no') + ' <small>(normale se la vasca è vuota)</small></div>';
     if (S.ballWarn) h += '<div class="st warn">' + esc(S.ballWarn) + '</div>';
-    h += B('kok', '✓ Colori giusti, avanti', true) + B('learn', 'Insegna il colore della palla');
+    h += B('kok', '✓ Colori giusti, avanti', true);
+    if ((S.ballColor || 'modello') !== 'modello' && (S.ballColors || []).includes('modello')) h += B('bmod', 'Usa la palla gialla del campionato (modello)');
+    h += B('learn', (S.ballColor || 'modello') === 'modello' ? 'Pallone di altro colore? Insegnalo' : 'Insegna il colore della palla');
   } else {
     const newApp = S.freeGB !== undefined;
     const bat = S.battery, gb = S.gimbalBattery;
@@ -1711,19 +1736,25 @@ function renderWizard() {
     if (gc && !gc.home) h += line(gc.ok ? 'okt' : 'warn', 'Misure della vasca', gc.ok ? 'giuste' : 'da ricontrollare (passo 3)');
     const T = S.tablet || {};
     h += line(!T.linked ? 'warn' : T.ok ? 'okt' : 'warn', 'Tablet (risultato)', !T.linked ? 'non collegato: punteggio a mano' : T.ok ? 'collegato' : 'collegato, in attesa dei dati');
-    const hk = S.live && S.live.hasKey;
-    h += line(hk ? 'okt' : 'warn', 'Chiave YouTube', hk ? 'inserita' : 'manca (solo registrazione)');
+    if (T.linked && T.match) h += line('okt', 'Partita del tablet', esc(T.match));
+    const hk = S.live && S.live.hasKey, kt = (S.live && S.live.keyTail) || '';
+    h += line(hk ? 'okt' : 'warn', 'Chiave YouTube', hk ? (kt ? 'inserita · finisce con …' + esc(kt) : 'inserita') : 'manca (solo registrazione)');
     if (newApp) h += B('net', S.netTesting ? 'Prova in corso…' : 'Prova la velocità');
     if (!hk) h += B('key', 'Inserisci la chiave YouTube');
     h += B('done', 'Preparazione finita ▶', true);
   }
   const ae = document.activeElement;
-  if (h !== wzHtml && !(ae && (ae.id === 'wzHome' || ae.id === 'wzAway'))) { wzHtml = h; $('wzBody').innerHTML = h; }
+  // 24/11: col dito appoggiato il riquadro non si ridisegna (il pulsante sostituito perdeva il tocco).
+  const fingerDown = wzDown && Date.now() - wzDown < 1500;
+  if (h !== wzHtml && !fingerDown && !(ae && (ae.id === 'wzHome' || ae.id === 'wzAway'))) { wzHtml = h; $('wzBody').innerHTML = h; }
   $('wzBack').style.visibility = wz > 0 ? '' : 'hidden';
   $('wzSkip').style.visibility = wz < 4 ? '' : 'hidden';
 }
 // pointerup e non click: il riquadro si ridisegna spesso e un click a metà andrebbe perso.
+$('wzBody').addEventListener('pointerdown', () => { wzDown = Date.now(); });
+$('wzBody').addEventListener('pointercancel', () => { wzDown = 0; });
 $('wzBody').addEventListener('pointerup', e => {
+  wzDown = 0;
   const b = e.target.closest('button[data-act]'); if (!b) return;
   const a = b.dataset.act;
   if (a === 'next') goStep(wz + 1);
@@ -1737,6 +1768,7 @@ $('wzBody').addEventListener('pointerup', e => {
   else if (a === 'kok') { OK.k = true; saveWz(); goStep(4); }
   else if (a === 'caps') openCard('capsCard');
   else if (a === 'learn') $('learnBtn').click();
+  else if (a === 'bmod') { cmd({a: 'ballColor', name: 'modello'}); S.ballColor = 'modello'; wzHtml = ''; renderWizard(); toast('Palla: gialla del campionato (Modello pallanuoto)', 2500); }
   else if (a === 'net') { if (!S.netTesting) { S.netTesting = true; cmd({a: 'netTest'}); renderWizard(); } }
   else if (a === 'key') openLivePanel();
   // Con il tablet collegato il tabellone si accende da solo: niente domanda.
@@ -1955,11 +1987,18 @@ function renderGeo() {
   $('geoTxt').textContent = S.geo || '';
 }
 $('ballSel').onchange = e => cmd({a: 'ballColor', name: e.target.value});
-$('learnBtn').onclick = () => {
+function startLearn() {
   cmd({a: 'ballLearnReset'});
-  learnLeft = 3; learnAt = Date.now();
+  learnLeft = 3; learnAt = Date.now(); learnWait = false; mouseDragged = false;
   $('prep').style.display = 'none';
   toast('Tocca la palla sull\'immagine (1/3)', 3000);
+}
+$('learnBtn').onclick = () => {
+  // 24/11: col Modello pallanuoto il colore si insegna solo per palloni non gialli (amichevoli).
+  if ((S.ballColor || 'modello') === 'modello')
+    dlg({msg: 'Adesso la palla gialla del campionato la trova il <b>Modello pallanuoto</b>.<br>Insegnare un colore serve solo con un pallone di altro colore (amichevoli): il modello smette di cercare la palla.',
+         buttons: [{t: 'Tieni il modello', cls: 'pri'}, {t: 'Insegna un altro colore', cb: startLearn}]});
+  else startLearn();
 };
 
 // Calottine
@@ -2227,6 +2266,8 @@ async function loadFLoupe() {
 }
 vb.addEventListener('pointerdown', e => {
   if (e.pointerType === 'mouse' && e.button !== 0) return;
+  // 24/11: un trascinamento finito prima non fa perdere il tocco successivo.
+  if (e.isPrimary) mouseDragged = false;
   if (e.pointerType === 'touch' && touches.size > 1) return;
   const i = hitCorner(e); if (i < 0) return;
   const base = (calibPts || S.corners || []).map(p => p.slice());
@@ -2373,7 +2414,7 @@ hold($('calibBtn'), () => true, 'ricalibrare il campo', () => { $('prep').style.
 hold($('calibClear'), () => true, 'cancellare la calibrazione', () => { calibPts = null; $('viewBox').classList.remove('calib'); cmd({a: 'calibClear'}); });
 hold($('sbReset'), () => true, 'azzerare la partita', () => cmd({a: 'sbReset'}));
 // Scollega il monitor: smette di chiedere immagini e stato, dimentica la password.
-hold($('endBtn'), () => true, 'terminare la partita', () => { $('prep').style.display = 'none'; cmd({a: 'endMatch'}); });
+hold($('endBtn'), () => true, 'terminare la partita', () => { $('prep').style.display = 'none'; endFlow = true; cmd({a: 'endMatch'}); });
 let endHidden = '';
 $('endBanner').onclick = () => { endHidden = (S.end || {}).message || ''; $('endBanner').style.display = 'none'; };
 let endSeen = '', endSeenT = 0;
