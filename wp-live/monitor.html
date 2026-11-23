@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <!-- WP-LIVE-MONITOR-API:1 -->
-<!-- WP-LIVE-PAGE-STAMP:2026112402 -->
+<!-- WP-LIVE-PAGE-STAMP:2026112403 -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -645,7 +645,7 @@ try { PIN = localStorage.getItem('wpPin') || ''; } catch (e) {}
       set(v) { v = v == null ? '' : String(v); if (d.get.call(this) === v) return; d.set.call(this, v); }});
   });
 })();
-const PAGE_VER = '2026112402';
+const PAGE_VER = '2026112403';
 let LOCAL = false;
 try { LOCAL = new URLSearchParams(location.search).get('local') === '1' || sessionStorage.getItem('wpLocal') === '1'; if (LOCAL) sessionStorage.setItem('wpLocal', '1'); } catch (e) {}
 // 23/11: sull'iPhone che riprende la fotocamera vera sta sotto la pagina (anteprima nativa): niente immagini dal server.
@@ -1143,13 +1143,15 @@ function hitCorner(e) {
   }
   return -1;
 }
-let learnLeft = 0;
+let learnLeft = 0, learnAt = 0;
 $('viewBox').addEventListener('click', e => {
   // I pulsanti dentro la vista (Giusto, Salta, Annulla calibrazione) non sono tocchi sull'immagine:
   // prima del 20/11 "Giusto" segnava anche il centro porta nel punto del pulsante.
   if (e.target.closest('button, #goalBox')) return;
   if (G || touches.size > 0) return;
   if (mouseDragged) { mouseDragged = false; return; }
+  // 24/11: "Insegna il colore della palla" scade dopo 30 s e non ruba i tocchi della calibrazione.
+  if (learnLeft > 0 && (mapping || calibPts || Date.now() - learnAt > 30000)) learnLeft = 0;
   if (learnLeft > 0) {
     // Insegna il colore della palla: ogni tocco sulla palla è un campione.
     const r = $('view').getBoundingClientRect();
@@ -1522,6 +1524,7 @@ function doLidar() { if (S.busyGeo) { toast('Misura già in corso', 2000); retur
 function doCalib(auto) {
   if (S.busyGeo) { toast('Aspetta che finisca la misura in corso', 2500); return; }
   wzCalib = true;
+  learnLeft = 0;
   if (auto && S.docked) { cmd({a: 'scanStart'}); toast('Calibrazione automatica: il gimbal fa un giro del campo', 3500); }
   else {
     // Un angolo alla volta: lo zoom va al più largo, poi ogni tocco viene registrato con la posizione
@@ -1954,7 +1957,7 @@ function renderGeo() {
 $('ballSel').onchange = e => cmd({a: 'ballColor', name: e.target.value});
 $('learnBtn').onclick = () => {
   cmd({a: 'ballLearnReset'});
-  learnLeft = 3;
+  learnLeft = 3; learnAt = Date.now();
   $('prep').style.display = 'none';
   toast('Tocca la palla sull\'immagine (1/3)', 3000);
 };
