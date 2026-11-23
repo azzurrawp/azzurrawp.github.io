@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <!-- WP-LIVE-MONITOR-API:1 -->
-<!-- WP-LIVE-PAGE-STAMP:2026112304 -->
+<!-- WP-LIVE-PAGE-STAMP:2026112305 -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -333,6 +333,58 @@ html.nativeBg #view,html.nativeBg #vcan{visibility:hidden}
    la pagina e i tocchi arrivano in ritardo: pannello scuro pieno, senza sfocatura. */
 html.nativeBg #prepPanel{-webkit-backdrop-filter:none;backdrop-filter:none;background:rgba(28,28,30,.96)}
 html.nativeBg #prepPanel details.sec>summary{-webkit-tap-highlight-color:rgba(255,255,255,.15)}
+/* ===== Finestre, preparazione guidata, calibrazione e tabellone in stile iOS 26/27 (23/11 notte) ===== */
+#startBox,#dlg,#regBox,#sbAsk,#loupe{background:rgba(0,0,0,.42)}
+#cdBox{background:rgba(0,0,0,.55)}
+#startBox>div,#dlg>div,#regBox>div,#sbAsk>div,#loupeBox{border:0;border-radius:28px;padding:22px 20px 18px;color:#fff;
+  background:rgba(28,28,30,.62);-webkit-backdrop-filter:blur(30px) saturate(180%);backdrop-filter:blur(30px) saturate(180%);
+  box-shadow:inset 0 1px 0 var(--glassHi),inset 0 0 0 .5px var(--glassEdge),0 20px 50px rgba(0,0,0,.45);line-height:1.35}
+#startBox>div>div:first-child,#regBox>div>div:first-child,#sbAsk>div>div:first-child{font-size:20px !important;font-weight:700 !important}
+#startBox button,#dlg button,#regBox button,#sbAsk button,#cdBox button{min-height:50px;min-width:140px;margin:12px 5px 0;padding:0 20px;border:0;border-radius:999px;
+  font-size:17px;font-weight:600;color:#fff;background:rgba(255,255,255,.16);box-shadow:inset 0 0 0 .5px rgba(255,255,255,.22);line-height:1.15}
+#startBox .pri,#dlg .pri,#regBox .pri,#sbAsk .pri{background:var(--ios-blue);box-shadow:none}
+#dlg .red{background:var(--ios-red);box-shadow:none}
+#startBox .small,#regBox .small,#sbAsk .small{color:rgba(235,235,245,.65)}
+#dlgIn{border:0;border-radius:12px;background:rgba(255,255,255,.12);min-height:46px}
+#regQR{border-radius:16px;padding:6px}
+#cdBox button{min-width:180px}
+#loupeBox .btn2{border-radius:999px;min-height:44px;background:rgba(255,255,255,.16);font-weight:600}
+#loupeBox .btn2:last-child{background:var(--ios-blue)}
+/* Preparazione guidata (dentro il menu) */
+#wzBody button{min-height:48px;border-radius:14px;background:rgba(255,255,255,.16);font-size:16px;font-weight:600;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.18),inset 0 0 0 .5px rgba(255,255,255,.2)}
+#wzBody button.pri{background:var(--ios-blue);box-shadow:none}
+#wzBody .okt{color:var(--ios-green)}#wzBody .bad{color:#FF6961}#wzBody .warn{color:var(--ios-yellow)}
+#wzNav button{color:var(--ios-blue);font-size:16px;font-weight:600;min-height:44px;padding:6px 4px}
+/* Calibrazione */
+#calibHint{left:50%;right:auto;transform:translateX(-50%);top:52px;max-width:min(92%,640px);border-radius:16px;padding:9px 16px;font-weight:600;
+  background:rgba(28,28,30,.72);-webkit-backdrop-filter:blur(22px);backdrop-filter:blur(22px);color:var(--ios-yellow)}
+#mapCancelBtn{background:var(--ios-red);border-radius:999px;font-weight:600;min-height:48px;padding:0 22px}
+#fLoupe{border-radius:22px;border-color:var(--ios-yellow)}
+/* Avvisi */
+#portraitBanner{border-radius:24px;background:rgba(255,59,48,.94);font-weight:700}
+#endBanner{border-radius:24px !important;font-weight:700 !important}
+/* Barra del tabellone */
+#sbClock,#pPrev,#pNext,#pNextT{background:rgba(255,255,255,.14) !important;border-radius:14px !important;font-weight:600}
+/* Pagina della password del monitor */
+#login{background:#000}
+#login input{border:0;border-radius:16px;background:rgba(255,255,255,.12)}
+#login button{border-radius:999px;background:var(--ios-blue);font-weight:600}
+/* Riquadro della preparazione guidata sopra il video e pulsanti del campo */
+#ckBox{border:0;border-radius:24px;padding:12px 14px;background:rgba(28,28,30,.62);-webkit-backdrop-filter:blur(26px) saturate(180%);backdrop-filter:blur(26px) saturate(180%);
+  box-shadow:inset 0 1px 0 var(--glassHi),inset 0 0 0 .5px var(--glassEdge),0 10px 30px rgba(0,0,0,.4)}
+#ckTitle{color:var(--ios-yellow) !important;font-weight:700 !important;font-size:15px}
+#ckBox .ck{border:0;border-radius:14px;background:rgba(255,255,255,.1)}
+#ckBox .ck.ok{box-shadow:inset 0 0 0 1.5px var(--ios-green)}
+#fbDone{background:var(--ios-green)}
+#fbCalib{background:var(--ios-blue);font-weight:700}
+#fbRedo,#fbScan{background:rgba(28,28,30,.72);-webkit-backdrop-filter:blur(22px);backdrop-filter:blur(22px);font-weight:600;
+  box-shadow:inset 0 0 0 .5px var(--glassEdge),0 4px 14px rgba(0,0,0,.45)}
+#fbHelp{border-radius:16px;background:rgba(28,28,30,.78)}
+html.nativeBg #ckBox,html.nativeBg #fbRedo,html.nativeBg #fbScan{-webkit-backdrop-filter:none;backdrop-filter:none;background:rgba(28,28,30,.95)}
+/* Sull'iPhone che riprende niente sfocatura (rallenta i tocchi sopra la fotocamera): fondo scuro pieno. */
+html.nativeBg #startBox>div,html.nativeBg #dlg>div,html.nativeBg #regBox>div,html.nativeBg #sbAsk>div,html.nativeBg #loupeBox,
+html.nativeBg #calibHint,html.nativeBg #livePanel .lp{-webkit-backdrop-filter:none;backdrop-filter:none;background:rgba(28,28,30,.97)}
 </style>
 </head>
 <body>
@@ -495,7 +547,7 @@ html.nativeBg #prepPanel details.sec>summary{-webkit-tap-highlight-color:rgba(25
 <div id="sbAsk"><div>
   <div style="font-size:19px;font-weight:800">Preparazione finita</div>
   <div style="margin-top:8px">Vuoi il tabellone in sovrimpressione (nomi delle squadre e punteggio) nella diretta e nella registrazione?</div>
-  <button id="sbAskYes" style="background:#1e8e3e">Sì</button><button id="sbAskNo" style="background:#3a3f4b">No</button>
+  <button id="sbAskYes" class="pri">Sì</button><button id="sbAskNo">No</button>
 </div></div>
 <div id="startBox"><div>
   <div style="font-size:20px;font-weight:800">WP Live</div>
@@ -591,7 +643,7 @@ try { PIN = localStorage.getItem('wpPin') || ''; } catch (e) {}
       set(v) { v = v == null ? '' : String(v); if (d.get.call(this) === v) return; d.set.call(this, v); }});
   });
 })();
-const PAGE_VER = '2026112304';
+const PAGE_VER = '2026112305';
 let LOCAL = false;
 try { LOCAL = new URLSearchParams(location.search).get('local') === '1' || sessionStorage.getItem('wpLocal') === '1'; if (LOCAL) sessionStorage.setItem('wpLocal', '1'); } catch (e) {}
 // 23/11: sull'iPhone che riprende la fotocamera vera sta sotto la pagina (anteprima nativa): niente immagini dal server.
@@ -2089,8 +2141,9 @@ $('prepClose').onclick = () => { $('prep').style.display = 'none'; };
 // 23/11: sull'iPhone che riprende (WKWebView) molti tocchi nel menu si perdevano: con la pagina che si
 // aggiorna 5 volte al secondo, iOS a volte non trasforma il tocco in "click". Un tocco breve e fermo ora
 // agisce subito al rilascio del dito. Esclusi campi di testo, menu a tendina e pulsanti "tieni premuto".
-(function () {
-  const P = $('prepPanel'); let sx = 0, sy = 0, t0 = 0, tgt = null;
+// 23/11 notte: lo stesso tocco rapido vale anche per finestre, tabellone, calibrazione e pannello LIVE.
+['prepPanel', 'ckBox', 'fieldBtns', 'startBox', 'dlg', 'regBox', 'sbAsk', 'cdBox', 'loupe', 'livePanel', 'sbBar', 'goalBox', 'penBox', 'mapCancelBtn', 'portraitBanner'].forEach(id => { const P = $(id); if (!P) return; (function () {
+  let sx = 0, sy = 0, t0 = 0, tgt = null;
   P.addEventListener('touchstart', e => { const t = e.touches[0]; sx = t.clientX; sy = t.clientY; t0 = Date.now(); tgt = e.target; }, {passive: true});
   P.addEventListener('touchend', e => {
     if (e.touches.length || !tgt) return;
@@ -2102,7 +2155,7 @@ $('prepClose').onclick = () => { $('prep').style.display = 'none'; };
     e.preventDefault();
     el.click();
   }, {passive: false});
-})();
+})(); });
 $('prep').addEventListener('click', e => { if (e.target === $('prep')) $('prep').style.display = 'none'; });
 
 // PC: trascina col mouse sull'anteprima per muovere la telecamera
