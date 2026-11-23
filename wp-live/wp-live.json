@@ -1,6 +1,6 @@
 {
-  "latestVersion": "0.12.16",
-  "releaseNotes": "0.12.16: in Impostazioni › Test modello c'è la prova del Modello Azzurra addestrato sulla pallanuoto (calottine blu e bianche, portieri, porte e palla con colori diversi). La ripresa non cambia.",
+  "latestVersion": "0.13.0",
+  "releaseNotes": "0.13.0: la ripresa usa il Modello Azzurra per calottine e palla gialla; nuove modalità Automatico, Partita, Riscaldamento e Allenamento (Menu › Ripresa automatica); con un pallone non giallo la palla si cerca per colore.",
   "params": {
     "gimbalSpeed": 0.3,
     "zoomRampRate": 1.5

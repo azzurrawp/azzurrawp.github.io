@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <!-- WP-LIVE-MONITOR-API:1 -->
-<!-- WP-LIVE-PAGE-STAMP:2026112305 -->
+<!-- WP-LIVE-PAGE-STAMP:2026112401 -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -449,6 +449,8 @@ html.nativeBg #calibHint,html.nativeBg #livePanel .lp{-webkit-backdrop-filter:no
     <details class="sec" id="secAuto"><summary>Ripresa automatica<span class="n" id="nAuto"></span></summary>
     <div class="card" id="autoCard">
       <div class="small">Con <b>Assistita</b> la camera segue il gioco e zooma da sola. Serve il campo calibrato.</div>
+      <label class="tgl"><span>Modalità della ripresa<br><small id="smHelp"></small></span><select id="shootMode"><option value="automatico">Automatico</option><option value="partita">Partita</option><option value="riscaldamento">Riscaldamento</option><option value="allenamento">Allenamento</option></select></label>
+      <button class="btn2" id="followStop" style="width:100%;margin-top:6px;display:none">Smetti di seguire il pallone</button>
       <label class="tgl"><span>Zoom automatico (regole pallanuoto)</span><input type="checkbox" id="azOn"></label>
       <label class="tgl"><span>Azzurra attacca verso<br><small>1° e 2° tempo; poi si inverte da solo</small></span><select id="azzDir"><option value="">Non impostato</option><option value="sinistra">Sinistra</option><option value="destra">Destra</option></select></label>
       <button class="btn2" id="autoBtn" style="width:100%;margin-top:8px">Ripresa automatica completa (in prova)</button>
@@ -643,7 +645,7 @@ try { PIN = localStorage.getItem('wpPin') || ''; } catch (e) {}
       set(v) { v = v == null ? '' : String(v); if (d.get.call(this) === v) return; d.set.call(this, v); }});
   });
 })();
-const PAGE_VER = '2026112305';
+const PAGE_VER = '2026112401';
 let LOCAL = false;
 try { LOCAL = new URLSearchParams(location.search).get('local') === '1' || sessionStorage.getItem('wpLocal') === '1'; if (LOCAL) sessionStorage.setItem('wpLocal', '1'); } catch (e) {}
 // 23/11: sull'iPhone che riprende la fotocamera vera sta sotto la pagina (anteprima nativa): niente immagini dal server.
@@ -892,7 +894,7 @@ function render() {
   let h = g + ' · Zoom ' + S.zoom + '<br>Batteria <span class="' + batCls + '">' + bat + '</span> · Temperatura ' + th + '<br>Palla: ' + ball + ' · Campo ' + (S.corners && S.corners.length === 4 ? '<span class="ok">calibrato</span>' : '<span class="warn">da calibrare</span>');
   if (S.lastSaved) h += '<br><span class="small">Ultima registrazione: ' + S.lastSaved + '</span>';
   if (S.error) h += '<br><span class="bad">' + S.error + '</span>';
-  h += '<br><span class="small">Versione ' + S.version + ' · pagina ' + PAGE_VER + '</span>';
+  h += '<br><span class="small">Versione ' + S.version + ' · pagina ' + PAGE_VER + (S.model ? ' · modello ' + S.model : '') + '</span>';
   $('status').innerHTML = h;
   renderScan();
   renderLive();
@@ -1039,6 +1041,11 @@ function drawOverlay() {
     x.strokeStyle = '#000'; x.lineWidth = 1.5;
     x.beginPath(); x.arc(cp[0] * w, cp[1] * h, 5, 0, 7); x.fill(); x.stroke();
   });
+  // 0.13.0: tutti i palloni visti in vasca, cerchio sottile (in allenamento si toccano per sceglierne uno).
+  if ((S.auto || S.assisted) && (S.balls || []).length > 1) {
+    x.strokeStyle = 'rgba(255,214,10,.9)'; x.lineWidth = 2;
+    S.balls.forEach(b => { x.beginPath(); x.arc(b[0] * w, b[1] * h, 14, 0, 7); x.stroke(); });
+  }
   if (S.ball) {
     lastBall = S.ball; lastBallT = Date.now();
     if (!S.auto && !S.assisted) return;
@@ -1165,6 +1172,11 @@ $('viewBox').addEventListener('click', e => {
     return;
   }
   if (hitCorner(e) >= 0) { toast('Trascina il pallino: la lente mostra il punto preciso', 2200); return; }
+  if (!calibPts && S.shootMode === 'allenamento' && (S.auto || S.assisted)) {
+    const r = $('view').getBoundingClientRect();
+    cmd({a: 'followBall', x: (e.clientX - r.left) / r.width, y: (e.clientY - r.top) / r.height});
+    return;
+  }
   if (!calibPts) return;
   const r = $('view').getBoundingClientRect();
   calibPts.push([(e.clientX - r.left) / r.width, (e.clientY - r.top) / r.height]);
@@ -1434,9 +1446,9 @@ function renderBall() {
   const list = S.ballColors || [];
   if (sel.dataset.k !== list.join()) {
     sel.dataset.k = list.join();
-    sel.innerHTML = list.map(c => '<option value="' + c + '">' + (c === 'imparato' ? 'imparato (toccando la palla)' : c) + '</option>').join('');
+    sel.innerHTML = list.map(c => '<option value="' + c + '">' + (c === 'imparato' ? 'imparato (toccando la palla)' : c === 'modello' ? 'gialla del campionato (Modello Azzurra)' : c) + '</option>').join('');
   }
-  if (document.activeElement !== sel) sel.value = S.ballColor || 'arancione';
+  if (document.activeElement !== sel) sel.value = S.ballColor || 'modello';
   $('ballMsg').textContent = S.ballLearn || '';
   $('ballWarn').textContent = S.ballWarn || '';
 }
@@ -1861,7 +1873,8 @@ function checkEnd() {
 // 23/11: stato in breve accanto al titolo di ogni sezione del menu.
 function renderMenuNotes() {
   const set = (id, t) => { const e = $(id); if (e && e.textContent !== t) e.textContent = t; };
-  set('nAuto', S.auto ? 'automatica (prova)' : S.assisted ? 'Assistita' : 'Manuale');
+  set('nAuto', (S.auto ? 'automatica (prova)' : S.assisted ? 'Assistita' : 'Manuale')
+    + (S.shootMode && S.shootMode !== 'automatico' ? ' · ' + S.shootMode : ''));
   set('nPrep', (S.corners || []).length === 4 ? 'campo calibrato ✓' : 'campo da calibrare');
   const b = S.sb || {};
   set('nTeams', b.home && b.away ? (b.home.short || '') + ' – ' + (b.away.short || '') : '');
@@ -2032,6 +2045,7 @@ function renderScore() {
   $('azOn').checked = S.autoZoom;
   $('heatTxt').textContent = S.heatSaver ? 'attivo' : 'anteprima accesa';
   if (document.activeElement !== $('azzDir')) $('azzDir').value = S.azzDir || '';
+  renderShootMode();
   $('sbClkOn').checked = b.clockOn;
   $('sbFull').checked = b.full;
   if (document.activeElement !== $('sbTitle')) $('sbTitle').value = b.title;
@@ -2117,6 +2131,18 @@ $('pPlus').onclick = $('pNext').onclick = $('pNextT').onclick = () => cmd({a: 's
 $('pMinus').onclick = $('pPrev').onclick = () => cmd({a: 'sbPeriod', d: -1});
 $('sbLen').onchange = e => cmd({a: 'sbLen', m: parseInt(e.target.value)});
 $('azzDir').onchange = e => cmd({a: 'azzDir', d: e.target.value});
+// 0.13.0: modalità della ripresa.
+const SM_HELP = {automatico: 'un pallone: lo segue; più palloni o nessuno: inquadra i giocatori',
+  partita: 'segue sempre il pallone in campo', riscaldamento: 'inquadra le squadre, 20 secondi ciascuna',
+  allenamento: 'tocca un pallone sull\'anteprima per seguirlo'};
+$('shootMode').onchange = e => { cmd({a: 'shootMode', m: e.target.value}); S.shootMode = e.target.value; renderShootMode(); };
+$('followStop').onclick = () => cmd({a: 'followStop'});
+function renderShootMode() {
+  const m = S.shootMode || 'automatico';
+  if (document.activeElement !== $('shootMode')) $('shootMode').value = m;
+  const h = SM_HELP[m] || ''; if ($('smHelp').textContent !== h) $('smHelp').textContent = h;
+  $('followStop').style.display = m === 'allenamento' && S.following ? '' : 'none';
+}
 $('azOn').onchange = e => cmd({a: 'autoZoom', on: e.target.checked});
 $('sbVis').onchange = e => cmd({a: 'sbVisible', on: e.target.checked});
 $('sbTitle').onchange = e => cmd({a: 'sbTitle', text: e.target.value});
