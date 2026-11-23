@@ -159,9 +159,9 @@ body.pend-g #g .c[data-f="g"],body.pend-gu #g .c[data-f="gu"]{box-shadow:inset 0
 body.pend-g #last,body.pend-gu #last{color:#ffd600;font-weight:700;opacity:1}
 
 #ph{display:none}
-body.ph.phm #ph{display:flex;position:fixed;inset:0;z-index:8;flex-direction:column;color:#10151f;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
+body.ph.phm #ph{display:flex;position:fixed;top:0;left:0;right:0;height:100dvh;height:var(--ah,100dvh);z-index:8;flex-direction:column;color:#10151f;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
 body.ph #rgb{display:none!important}body.ph #ph button{font-family:inherit;cursor:pointer;-webkit-appearance:none;appearance:none}
-#phb{flex:1 1 auto;min-height:0;overflow:auto;padding:14px 16px;display:flex;flex-direction:column;gap:10px}#phb>*{flex-shrink:0}
+#phb{flex:1 1 auto;min-height:0;overflow:auto;padding:14px 16px;display:flex;flex-direction:column;gap:10px}#phb>*{flex-shrink:0}#phb{overscroll-behavior:contain;-webkit-overflow-scrolling:touch}#ph button{touch-action:manipulation}
 .phr{display:flex;align-items:center;gap:10px}.phsc{flex:1;min-width:0;display:flex;flex-direction:column}.phsc small{font-size:12px;font-weight:600}.phsc b{font-size:32px;font-weight:800;line-height:1.05;letter-spacing:-.02em}.phsc em{font-style:normal;font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .phrr{display:flex;flex-direction:column;align-items:flex-end;gap:8px}.phl{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:700}.phl u{width:9px;height:9px;border-radius:50%;background:#1fa653}.phl.ko u{background:#d93025}
 .phi{width:46px;height:46px;border:0;font-size:22px;flex:0 0 auto}.phx{height:44px;padding:0 16px;font-size:15px;font-weight:600;flex:0 0 auto}
@@ -710,12 +710,12 @@ function phUI(){phT=null;var el=document.getElementById('ph');if(!PH||!el)return
   else if(PHS&&PHS.k=='foul'){var our=PHS.f=='e';b=phHead({t:(PHS.r?(our?'Rigore contro':'Rigore a favore'):'Fallo grave')+' · '+(our?'Azzurra':O),o:!our},our?'Chi ha fatto fallo?':'Calotta avversaria?','Indietro')+phPad({opp:!our,off:function(i){return phOut(PHS.f,i)}})}
   else{b='<h2 class="phq1">Cosa è successo?</h2><small class="phg">Azzurra</small><div class="pha"><button data-pa="g" class="a1">Gol</button><button data-pa="gu" class="a2">Gol uomo +</button><button data-pa="e" class="a3">Fallo grave</button><button data-pa="rx" class="a4">Rigore a favore</button></div>'+
     '<small class="phg o">'+esc(O)+'</small><div class="pha"><button data-pa="og" class="o1">Gol</button><button data-pa="ogu" class="o2">Gol uomo +</button><button data-pa="x" class="o3">Fallo grave</button><button data-pa="re" class="o4">Rigore contro</button></div>'}
-  document.getElementById('phh').innerHTML=h;document.getElementById('phb').innerHTML=b;var lt=document.getElementById('last').textContent;if(!ro&&/sola lettura/.test(lt))lt='';document.getElementById('phlast').textContent=lt||'nessuna azione';
+  if(phUI.h!==h){phUI.h=h;document.getElementById('phh').innerHTML=h}if(phUI.b!==b){phUI.b=b;var pb=document.getElementById('phb');pb.innerHTML=b;pb.scrollTop=0}var lt=document.getElementById('last').textContent;if(!ro&&/sola lettura/.test(lt))lt='';document.getElementById('phlast').textContent=lt||'nessuna azione';
   document.getElementById('phu').style.visibility=(S.done||ro)?'hidden':''}
 function phKick(){if(PH&&phT==null)phT=setTimeout(phUI,0)}
 function phGoal(f,i,ai){PHS=null;if(ai!=null){PEND={f:f=='gu'?'au':'a',i:ai}}add(f,i);
   if(PEND){if(document.getElementById('pconf').style.display=='flex'){var y=bigYes,n=bigNo;bigYes=function(){if(y)y();if(PEND){PEND=null;pendUI()}phUI()};bigNo=function(){PEND=null;pendUI();toast('Gol non registrato');phUI()}}else{PEND=null;pendUI()}}phUI()}
-if(PH){document.getElementById('ph').addEventListener('click',function(ev){if(!S)return;var t=ev.target.closest('[data-pa],[data-pc],[data-pp]');if(!t||t.disabled)return;
+function phAct(D){if(!S||!D)return;var t={dataset:D};
     if(t.dataset.pp){var np=+t.dataset.pp;if(np!==S.per&&!S.done)askPeriod(np);return}
     if(t.dataset.pc!=null){if(S.done||document.body.classList.contains('ro'))return;var i=+t.dataset.pc;
       if(SHOT){shotPick(i)}else if(RIG&&RIG.us){add('g',i)}
@@ -730,7 +730,15 @@ if(PH){document.getElementById('ph').addEventListener('click',function(ev){if(!S
     if(a=='back')PHS=null;else if(a=='g'||a=='gu')PHS={k:'goal',f:a,i:null};else if(a=='e'||a=='x')PHS={k:'foul',f:a};else if(a=='rx')PHS={k:'foul',f:'x',r:1};else if(a=='re')PHS={k:'foul',f:'e',r:1};
     else if(a=='og'||a=='ogu'){PHS=null;add(a,-1)}else if(a=='noast'){if(PHS&&PHS.k=='goal'&&PHS.i!=null){phGoal(PHS.f,PHS.i,null);return}}
     else if(a=='miss')rigMiss(0);else if(a=='save')rigMiss(2);else if(a=='shotno')shotEnd();
-    phUI()});
+    phUI()}
+// tocco rapido: l'azione parte al rilascio del dito, anche se il dito si è mosso di poco o il browser ritarda il click
+if(PH){(function(){var el=document.getElementById('ph'),ts=null,lastT=0,SEL='[data-pa],[data-pc],[data-pp]';
+    function key(n){var t=n&&n.closest?n.closest(SEL):null;if(!t||t.disabled)return null;var d=t.dataset;return {pa:d.pa,pc:d.pc,pp:d.pp}}
+    el.addEventListener('touchstart',function(e){var k=e.touches.length==1?key(e.target):null,p=e.touches[0];ts=k?{k:k,x:p.clientX,y:p.clientY,t:Date.now()}:null},{passive:true});
+    el.addEventListener('touchcancel',function(){ts=null});
+    el.addEventListener('touchend',function(e){var s=ts;ts=null;if(!s)return;var p=e.changedTouches[0];if(Math.abs(p.clientX-s.x)>16||Math.abs(p.clientY-s.y)>16||Date.now()-s.t>1200)return;
+      if(e.cancelable)e.preventDefault();lastT=Date.now();phAct(s.k)},{passive:false});
+    el.addEventListener('click',function(e){if(Date.now()-lastT<800)return;phAct(key(e.target))})})();
   try{var phO=new MutationObserver(phKick);['top','rgb','home','season','pconf','rgc'].forEach(function(id){var n=document.getElementById(id);if(n)phO.observe(n,{subtree:id=='top'||id=='rgb',childList:true,characterData:true,attributes:true})})}catch(e){}
   window.addEventListener('resize',phKick)}
 var lastPen=0;
@@ -792,7 +800,7 @@ document.getElementById('undo').addEventListener('click',function(){if(PEND){PEN
 
 // ---------- schermo intero ----------
 var APP=false;try{APP=matchMedia('(display-mode: fullscreen)').matches||matchMedia('(display-mode: standalone)').matches}catch(e){}
-function goFS(){if(VIEW)return;if(APP){try{screen.orientation.lock('landscape').catch(function(){})}catch(e){}return}
+function goFS(){if(VIEW||PH)return;if(APP){try{screen.orientation.lock('landscape').catch(function(){})}catch(e){}return}
   try{var q=document.documentElement.requestFullscreen({navigationUI:'hide'});if(q&&q.then)q.then(function(){try{screen.orientation.lock('landscape').catch(function(){})}catch(x){}}).catch(function(){})}catch(e){}}
 var fsb=document.getElementById('fs');if(APP)fsb.style.display='none';
 fsb.addEventListener('click',function(){if(document.fullscreenElement){try{document.exitFullscreen()}catch(e){}}else goFS()});
@@ -1412,7 +1420,7 @@ fetchStats();livePoll();viewAuto();
 window.addEventListener('online',function(){syncDistinte(false);livePoll()});
 document.addEventListener('visibilitychange',function(){if(document.visibilityState=='visible')livePoll()});
 // aggiornamenti: controlla a ogni riapertura; la nuova versione si carica da sola quando si è nell'elenco partite (mai durante la registrazione)
-var APPV=105,swReg=null,swReload=false;document.getElementById('appv').textContent='Versione '+APPV;document.getElementById('appv').dataset.b=document.getElementById('appv').textContent;fitH.h=0;fitH();
+var APPV=106,swReg=null,swReload=false;document.getElementById('appv').textContent='Versione '+APPV;document.getElementById('appv').dataset.b=document.getElementById('appv').textContent;fitH.h=0;fitH();
 if('serviceWorker' in navigator&&!VIEW){var hadCtrl=!!navigator.serviceWorker.controller;
   navigator.serviceWorker.register('sw.js').then(function(r){swReg=r}).catch(function(){});
   document.addEventListener('visibilitychange',function(){if(!document.hidden&&swReg)swReg.update().catch(function(){})});
