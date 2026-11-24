@@ -1,6 +1,6 @@
 {
-  "latestVersion": "0.13.2",
-  "releaseNotes": "0.13.2: niente più tocchi persi nella preparazione; controllo porte e calibrazione degli angoli non si sovrappongono più; 'Insegna il colore della palla' mostra la risposta vera dell'iPhone e chiede conferma se è scelto il modello; il Controllo finale mostra la partita del tablet e le ultime 4 cifre della chiave YouTube.",
+  "latestVersion": "0.13.3",
+  "releaseNotes": "0.13.3: calibrazione del campo più precisa: ogni angolo si segna col teleobiettivo a camera ferma (primo tocco = dove, secondo tocco = punto esatto) e il campo viene raddrizzato con le misure della vasca (25 × 20 m) e l'altezza, indicando l'angolo toccato male. Contiene anche le correzioni della 0.13.2.",
   "params": {
     "gimbalSpeed": 0.3,
     "zoomRampRate": 1.5
