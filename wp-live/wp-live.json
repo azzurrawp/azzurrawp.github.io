@@ -1,6 +1,6 @@
 {
-  "latestVersion": "0.13.6",
-  "releaseNotes": "0.13.6: angoli col cerchio verde (tocco → 1,7x, sposti il cerchio → 5x, regoli e premi ✓ Segna angolo); 'Le mie piscine' create dall'utente (nome, larghezza, altezza della camera); pulsante Indietro nel passo Campo.",
+  "latestVersion": "0.13.7",
+  "releaseNotes": "0.13.7: corretto il verso su/giù del gimbal nei calcoli delle misure del campo (controllo misure e raddrizzamento); contiene il cerchio verde, Le mie piscine e Indietro (0.13.6).",
   "params": {
     "gimbalSpeed": 0.3,
     "zoomRampRate": 1.5
