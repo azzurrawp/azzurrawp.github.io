@@ -1,6 +1,6 @@
 {
-  "latestVersion": "0.13.4",
-  "releaseNotes": "0.13.4: nel passo Campo si sceglie categoria (lunghezza 20 o 25 m, porte) e piscina; la larghezza si può sempre correggere e, se non è nota, la misura l'app dai 4 angoli e la ricorda per quella piscina. Contiene anche le novità della 0.13.3 (angoli col teleobiettivo, campo raddrizzato).",
+  "latestVersion": "0.13.5",
+  "releaseNotes": "0.13.5: calibrazione 'Angolo per angolo' a passi: ogni tocco centra l'angolo e ingrandisce (0,5x → 1,7x → 5x); a 5x il tocco vicino al centro, a camera ferma, segna l'angolo; pulsante Allarga. Contiene categoria e piscina del campo (0.13.4).",
   "params": {
     "gimbalSpeed": 0.3,
     "zoomRampRate": 1.5
