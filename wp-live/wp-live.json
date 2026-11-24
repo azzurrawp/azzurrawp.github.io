@@ -1,6 +1,6 @@
 {
-  "latestVersion": "0.13.3",
-  "releaseNotes": "0.13.3: calibrazione del campo più precisa: ogni angolo si segna col teleobiettivo a camera ferma (primo tocco = dove, secondo tocco = punto esatto) e il campo viene raddrizzato con le misure della vasca (25 × 20 m) e l'altezza, indicando l'angolo toccato male. Contiene anche le correzioni della 0.13.2.",
+  "latestVersion": "0.13.4",
+  "releaseNotes": "0.13.4: nel passo Campo si sceglie categoria (lunghezza 20 o 25 m, porte) e piscina; la larghezza si può sempre correggere e, se non è nota, la misura l'app dai 4 angoli e la ricorda per quella piscina. Contiene anche le novità della 0.13.3 (angoli col teleobiettivo, campo raddrizzato).",
   "params": {
     "gimbalSpeed": 0.3,
     "zoomRampRate": 1.5
