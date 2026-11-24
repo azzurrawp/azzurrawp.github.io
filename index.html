@@ -250,6 +250,7 @@ body.ph-ios .phpl button{border-radius:22px;background:#fff;color:#0c1424;box-sh
 body.ph-and .phpl button{border-radius:20px;background:#e3e9f8;color:#001b47}body.ph-and .phpl span{color:#434a57}body.ph-and .phpl u{color:#001b47}
 .phpl em{font-style:normal;display:flex;flex-direction:column;align-items:flex-end;gap:1px}.phpl span{font-size:13.5px;white-space:nowrap}.phpl button{min-height:64px}
 .cap.r.kw:before,.cap.r.kw:after,.pcap.r.kw:before,.pcap.r.kw:after{background:#fff;border-color:#0b3d91}.cap.r.kb:before,.cap.r.kb:after,.pcap.r.kb:before,.pcap.r.kb:after{background:#0d47a1;border-color:#062a63}
+.phgo{height:56px;border:0;width:100%;background:#2e7d32;color:#fff;font-size:19px;font-weight:800;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.1}.phgo small{font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.03em}body.ph-ios .phgo{border-radius:999px;box-shadow:0 4px 14px rgba(46,125,50,.3)}body.ph-and .phgo{border-radius:28px}body.ph #msg{z-index:70}body.ph #msg button{font-size:15px;padding:7px 12px}@media (max-height:760px){.phgo{height:48px}.phgo+.phq1{display:none}}
 </style>
 </head>
 <body>
@@ -699,7 +700,7 @@ function tooClose(f,i){if(!GOALS[f])return false;for(var k=S.log.length-1;k>=0;k
     onYes:function(){add(f,i,true)},onNo:function(){toast(PEND?'Gol non registrato: tocca il marcatore giusto':'Gol non registrato')}});return true}return false}
 var RIG=null,RIG_last={},RGQ=null,SHOT=null,FTend=null;
 function goOn(){return !!(S&&!VIEW&&!S.done&&!document.body.classList.contains('ro')&&S.per===1&&!(S.go&&S.go[0]))}
-function goUI(){var b=document.getElementById('gob');if(!b)return;var on=goOn();b.style.display=on?'flex':'none';document.getElementById('nlt').style.visibility=on?'hidden':''}
+function goUI(){if(PH)phKick();var b=document.getElementById('gob');if(!b)return;var on=goOn();b.style.display=on?'flex':'none';document.getElementById('nlt').style.visibility=on?'hidden':''}
 function ftUI(){goUI();var b=document.getElementById('ftb');if(b){var on=S&&!VIEW&&!S.done&&S.foto===0;b.style.display=on?'flex':'none';document.getElementById('calt').style.visibility=on?'hidden':''}}
 function ftAsk(end){if(VIEW||window.NOFOTO)return false;FTend=end||null;
   document.getElementById('ftq').textContent=end?'Ultima occasione!':'Foto di squadra!';
@@ -767,7 +768,7 @@ function phUI(){phT=null;var el=document.getElementById('ph');if(!PH||!el)return
   else if(PHS&&PHS.k=='goal'){if(PHS.i==null)b=phHead({t:LB[PHS.f]+' · Azzurra'},'Chi ha segnato?','Indietro')+phPad({off:function(i){return phOut('e',i)}});
     else b=phHead({t:LB[PHS.f]+' di '+nm(PHS.i)},'Chi ha fatto l\'assist?','Indietro')+'<button data-pa="noast" class="phw">Nessun assist</button>'+phPad({cmp:1,sel:PHS.i,off:function(i){return i===PHS.i||phOut('e',i)}})}
   else if(PHS&&PHS.k=='foul'){var our=PHS.f=='e';b=phHead({t:(PHS.r?(our?'Rigore contro':'Rigore a favore'):'Fallo grave')+' · '+(our?'Azzurra':O),o:!our},our?'Chi ha fatto fallo?':'Calotta avversaria?','Indietro')+phPad({opp:!our,off:function(i){return phOut(PHS.f,i)}})}
-  else{b='<h2 class="phq1">Cosa è successo?</h2><small class="phg">Azzurra</small><div class="pha"><button data-pa="g" class="a1">Gol</button><button data-pa="gu" class="a2">Gol uomo +</button><button data-pa="e" class="a3">Fallo grave</button><button data-pa="rx" class="a4">Rigore a favore</button></div>'+
+  else{b=(goOn()?'<button data-pa="go" class="phgo">▶ FISCHIO<small>inizio partita</small></button>':'')+'<h2 class="phq1">Cosa è successo?</h2><small class="phg">Azzurra</small><div class="pha"><button data-pa="g" class="a1">Gol</button><button data-pa="gu" class="a2">Gol uomo +</button><button data-pa="e" class="a3">Fallo grave</button><button data-pa="rx" class="a4">Rigore a favore</button></div>'+
     '<small class="phg o">'+esc(O)+'</small><div class="pha"><button data-pa="og" class="o1">Gol</button><button data-pa="ogu" class="o2">Gol uomo +</button><button data-pa="x" class="o3">Fallo grave</button><button data-pa="re" class="o4">Rigore contro</button></div>'}
   if(phUI.h!==h){phUI.h=h;document.getElementById('phh').innerHTML=h}if(phUI.b!==b){phUI.b=b;var pb=document.getElementById('phb');pb.innerHTML=b;pb.scrollTop=0}var lt=document.getElementById('last').textContent;if(!ro&&/sola lettura/.test(lt))lt='';document.getElementById('phlast').textContent=lt||'nessuna azione';
   document.getElementById('phu').style.visibility=(S.done||ro)?'hidden':''}
@@ -787,6 +788,7 @@ function phAct(D){if(!S||!D)return;var t={dataset:D};
     if(a=='reopen'){PHV=null;document.getElementById('rob').click();phUI();return}
     if(a=='back'&&S.done){PHV=null;phUI();return}
     if(S.done||document.body.classList.contains('ro'))return;
+    if(a=='go'){PHS=null;goTap();phUI();return}
     if(a=='back')PHS=null;else if(a=='g'||a=='gu')PHS={k:'goal',f:a,i:null};else if(a=='e'||a=='x')PHS={k:'foul',f:a};else if(a=='rx')PHS={k:'foul',f:'x',r:1};else if(a=='re')PHS={k:'foul',f:'e',r:1};
     else if(a=='og'||a=='ogu'){PHS=null;add(a,-1)}else if(a=='noast'){if(PHS&&PHS.k=='goal'&&PHS.i!=null){phGoal(PHS.f,PHS.i,null);return}}
     else if(a=='miss')rigMiss(0);else if(a=='save')rigMiss(2);else if(a=='shotno')shotEnd();
@@ -1208,7 +1210,7 @@ function pTable(P,y,head,rows,ws,al){var x0=28,W=P.p.w-56,tot=ws.reduce(function
 function goalsPDF(P,m,o){if(!o.A&&!o.B)return;P.page();pHead(P,'Gol tempo per tempo');var O=m.opp||'Avversario',W=(P.p.w-56-12)/2,rh=15;
   pParts(P,28,72,[['AZZURRA',PC.blu],[' – ','#455a64'],[O,'#e65100'],['  '+o.A,PC.blu],[' – ','#455a64'],[String(o.B),'#e65100'],['  · chi ha segnato, chi ha fatto assist e rigori sbagliati, tempo per tempo',PC.gy]],10);
   var cc={r:['#d32f2f','#ffffff','#8e1b1b'],w:['#ffffff','#0b3d91','#0b3d91'],b:['#0d47a1','#ffffff','#062a63']};
-  function cap(x,y,n,us){if(!n){P.rect(x,y-8,18,10,'#eceff1','#b0bec5',.6);P.text(x+9,y,'?',7,true,'#78909c','c');return}var c=cc[capOf(n,us,m.home)];P.rect(x,y-8,18,10,c[0],c[2],.7);P.text(x+9,y,String(n),7.5,true,c[1],'c')}
+  function cap(x,y,n,us){if(!n){P.rect(x,y-8,18,10,'#eceff1','#b0bec5',.6);P.text(x+9,y,'?',7,true,'#78909c','c');return}var c=cc[capOf(n,us,m.home)],k=(n==1||n==13)?cc[(us?m.home:!m.home)?'w':'b']:c;P.rect(x,y-8,18,10,c[0],c[2],.7);P.rect(x-1.7,y-1.4,3.6,3.6,k[0],k[2],.6);P.rect(x+16.1,y-1.4,3.6,3.6,k[0],k[2],.6);P.text(x+9,y,String(n),7.5,true,c[1],'c')}
   var G=[1,2,3,4].map(function(p){return goalsOf(m,p)}),y=88;
   [[0,1],[2,3]].forEach(function(pr){var hgt=Math.max(G[pr[0]].length,G[pr[1]].length,1)*rh+36;
     pr.forEach(function(i,j){var x=28+j*(W+12),q=o.P[i];P.rect(x,y,W,hgt,'#ffffff','#cfd8dc',.5);
@@ -1339,15 +1341,15 @@ function title_(m){return title(m)+' · '+fdate(m)}
 function gridPDF(m){var P=new PDF(),o=mstat(m),O=m.opp||'Avversario';P.page(true);var p=P.p;pHead(P,'Griglia di registrazione');
   pParts(P,28,74,[['AZZURRA',PC.blu],[' – ','#455a64'],[O,'#e65100'],['   '+o.A,PC.blu],[' – ','#455a64'],[String(o.B),'#e65100']],16);
   P.text(28,89,[m.gio,fdate(m)+(m.time?' · '+m.time:''),m.place,m.home?'In casa':'In trasferta','Parziali '+parz(m,o.P),m.done?'Conclusa':'In corso'].filter(Boolean).join(' · '),8.5,false,PC.gy);
-  var cols=[['Cal.',30,'#0b3d91'],['Giocatore',150,'#0b3d91'],['GOL',62,'#2e7d32'],['ASSIST',62,'#1565c0'],['GOL uomo +',62,'#e65100'],['ASSIST uomo +',62,'#e65100'],['ESPULS.',78,'#c62828'],['',8,null],['Cal.',30,'#6a1b9a'],['ESPULS. avversari',90,'#6a1b9a']];
+  var cols=[['Cal.',30,'#0b3d91'],['Giocatore',150,'#0b3d91'],['GOL',62,'#2e7d32'],['ASSIST',62,'#1565c0'],['GOL uomo +',62,'#e65100'],['ASSIST uomo +',62,'#e65100'],['FALLI GRAVI',78,'#c62828'],['',8,null],['Cal.',30,'#6a1b9a'],['ESPULS. avversari',90,'#6a1b9a']];
   var tot=cols.reduce(function(a,c){return a+c[1]},0),k=(p.w-56)/tot,x0=28,y=100,hh=24,rh=(p.h-y-hh-40-20)/16;
   var X=[],xx=x0;cols.forEach(function(c){X.push(xx);xx+=c[1]*k});
   cols.forEach(function(c,i){if(!c[2])return;P.rect(X[i],y,c[1]*k,hh,c[2]);var L=c[0].split(' ');var top=L.length>1?L.slice(0,-2).join(' ')||L[0]:c[0];
     if(c[0].indexOf('uomo')>0){P.text(X[i]+c[1]*k/2,y+11,L[0],8,true,'#fff','c');P.text(X[i]+c[1]*k/2,y+20,'uomo +',7,true,'#fff','c')}
-    else if(c[0]=='ESPULS. avversari'){P.text(X[i]+c[1]*k/2,y+11,'ESPULS.',8,true,'#fff','c');P.text(X[i]+c[1]*k/2,y+20,'avversari',7,true,'#fff','c')}
+    else if(c[0]=='ESPULS. avversari'){P.text(X[i]+c[1]*k/2,y+11,'FALLI GRAVI',8,true,'#fff','c');P.text(X[i]+c[1]*k/2,y+20,'avversari',7,true,'#fff','c')}
     else P.text(X[i]+c[1]*k/2,y+15,c[0],8.5,true,'#fff','c')});
   y+=hh;var capC=function(i,ours){return (i==0||i==12)?['#d32f2f','#fff']:((ours?m.home:!m.home)?['#ffffff','#0b3d91']:['#0d47a1','#fff'])};
-  function cap(x,yy,i,ours,dim){var c=capC(i,ours),w=22,h=rh-6;P.rect(x-w/2,yy+3,w,h,c[0],'#0b3d91',.8);P.text(x,yy+3+h/2+3.5,String(i+1),Math.min(11,h*.7),true,c[1],'c');if(dim)P.line(x-w/2,yy+3+h,x+w/2,yy+3,'#c62828',1.4)}
+  function cap(x,yy,i,ours,dim){var c=capC(i,ours),w=22,h=rh-6;P.rect(x-w/2,yy+3,w,h,c[0],'#0b3d91',.8);var kc=(i==0||i==12)?((ours?m.home:!m.home)?'#ffffff':'#0d47a1'):c[0],ks=Math.min(5,h*.3);P.rect(x-w/2-ks/2,yy+3+h-ks+1,ks,ks,kc,'#0b3d91',.7);P.rect(x+w/2-ks/2,yy+3+h-ks+1,ks,ks,kc,'#0b3d91',.7);P.text(x,yy+3+h/2+3.5,String(i+1),Math.min(11,h*.7),true,c[1],'c');if(dim)P.line(x-w/2,yy+3+h,x+w/2,yy+3,'#c62828',1.4)}
   var val=function(n,col){return n?String(n):''};
   for(var i=0;i<N;i++){var yy=y+i*rh,ed=m.e[i]>=3||defOut(m,'e',i),xd=m.x[i]>=3||defOut(m,'x',i);if(i%2)P.rect(x0,yy,p.w-56,rh,'#f3f6fa');
     if(ed)P.rect(X[6],yy,cols[6][1]*k,rh,'#ffcdd2');if(xd)P.rect(X[9],yy,cols[9][1]*k,rh,'#ffcdd2');
@@ -1548,7 +1550,7 @@ fetchStats();livePoll();viewAuto();
 window.addEventListener('online',function(){syncDistinte(false);livePoll()});
 document.addEventListener('visibilitychange',function(){if(document.visibilityState=='visible')livePoll()});
 // aggiornamenti: controlla a ogni riapertura; la nuova versione si carica da sola quando si è nell'elenco partite (mai durante la registrazione)
-var APPV=111,swReg=null,swReload=false;document.getElementById('appv').textContent='Versione '+APPV;document.getElementById('appv').dataset.b=document.getElementById('appv').textContent;fitH.h=0;fitH();
+var APPV=112,swReg=null,swReload=false;document.getElementById('appv').textContent='Versione '+APPV;document.getElementById('appv').dataset.b=document.getElementById('appv').textContent;fitH.h=0;fitH();
 if('serviceWorker' in navigator&&!VIEW){var hadCtrl=!!navigator.serviceWorker.controller;
   navigator.serviceWorker.register('sw.js').then(function(r){swReg=r}).catch(function(){});
   document.addEventListener('visibilitychange',function(){if(!document.hidden&&swReg)swReg.update().catch(function(){})});
