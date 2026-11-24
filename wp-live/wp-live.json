@@ -1,6 +1,6 @@
 {
-  "latestVersion": "0.13.10",
-  "releaseNotes": "0.13.10: menu ripulito: nomi neutri (la tua squadra, noi), Collega un regista in cima, tolto il giro automatico, Torna alla preparazione riparte dal passo a cui eri, registro della diretta in Informazioni, consiglio Schermata Home solo sui telefoni del regista.",
+  "latestVersion": "0.13.12",
+  "releaseNotes": "0.13.12: il campo si calibra solo con registrazione e diretta ferme (pulsanti grigi e avviso durante la ripresa); contiene il menu ripulito della 0.13.10.",
   "params": {
     "gimbalSpeed": 0.3,
     "zoomRampRate": 1.5

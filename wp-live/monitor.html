@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <!-- WP-LIVE-MONITOR-API:1 -->
-<!-- WP-LIVE-PAGE-STAMP:2026112411 -->
+<!-- WP-LIVE-PAGE-STAMP:2026112413 -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -234,6 +234,9 @@ details.sec{background:#0f1c2c;border-radius:12px}
 body.local #seg .zb{display:none}
 /* Calibrazione angolo per angolo: niente pulsanti in mezzo al campo (si toccherebbero al posto degli angoli) */
 body.mapping #fieldBtns{display:none !important}
+/* 0.13.11: con registrazione o diretta accese la calibrazione è bloccata. */
+body.calLock #calibManual,body.calLock #calibClear,body.calLock #goalBtn{opacity:.4}
+#calLockTxt{display:none;color:#ffb347}body.calLock #calLockTxt{display:block}
 /* Mentre si mira (porte o angoli) Mic e REC non coprono il mirino; REC resta se sta registrando. */
 body.goalCheck #micBtn,body.mapping #micBtn,body.goalCheck #recWrap:not(.on),body.mapping #recWrap:not(.on){display:none !important}
 /* Schermata d'avvio: niente avvisi di gimbal o campo */
@@ -494,6 +497,7 @@ html.nativeBg #calibHint,html.nativeBg #livePanel .lp{-webkit-backdrop-filter:no
         <button class="btn2" id="goalBtn">Controlla le porte</button>
         <button class="btn2" id="calibClear">Cancella calibrazione</button>
       </div>
+      <div class="small" id="calLockTxt" style="margin-top:6px">Per ricalibrare ferma registrazione e diretta.</div>
       <div class="small" id="levelTxt" style="margin-top:8px"></div>
       <div id="lidarBox" style="margin-top:10px;display:none">
         <div class="small">Altezza della camera: misura col LiDAR (pavimento asciutto davanti allo stativo, registrazione e diretta ferme) oppure scrivila.</div>
@@ -672,7 +676,7 @@ try { PIN = localStorage.getItem('wpPin') || ''; } catch (e) {}
       set(v) { v = v == null ? '' : String(v); if (d.get.call(this) === v) return; d.set.call(this, v); }});
   });
 })();
-const PAGE_VER = '2026112411';
+const PAGE_VER = '2026112413';
 let LOCAL = false;
 try { LOCAL = new URLSearchParams(location.search).get('local') === '1' || sessionStorage.getItem('wpLocal') === '1'; if (LOCAL) sessionStorage.setItem('wpLocal', '1'); } catch (e) {}
 // 23/11: sull'iPhone che riprende la fotocamera vera sta sotto la pagina (anteprima nativa): niente immagini dal server.
@@ -1637,6 +1641,7 @@ $('fieldBtn').onclick = () => { $('prep').style.display = 'none'; fieldDlg(); };
 // Calibrazione a mano (predefinita): si toccano i 4 angoli; il giro automatico del gimbal resta a scelta.
 let poolAsked = false;
 function doCalib(auto) {
+  if (S.calibLocked) { toast('Per ricalibrare ferma registrazione e diretta', 3000); return; }
   if (S.busyGeo) { toast('Aspetta che finisca la misura in corso', 2500); return; }
   wzCalib = true;
   learnLeft = 0; learnWait = false;
@@ -1757,7 +1762,7 @@ function renderGoal() {
   }
   goalWas = g;
 }
-$('goalBtn').onclick = () => { $('prep').style.display = 'none'; cmd({a: 'goalCheckStart'}); };
+$('goalBtn').onclick = () => { if (S.calibLocked) { toast('Per ricalibrare ferma registrazione e diretta', 3000); return; } $('prep').style.display = 'none'; cmd({a: 'goalCheckStart'}); };
 $('fbRedo').onclick = () => { OK.c = false; saveWz(); doCalib(); };
 $('fbCalib').onclick = () => doCalib(false);
 $('fbBack').onclick = () => goStep(1);
@@ -2039,6 +2044,7 @@ function renderPhase() {
   b.toggle('penOn', pen); $('penOn').checked = pen;
   b.toggle('sbOn', !!(S.sb && S.sb.visible));
   b.toggle('manual', !S.auto && !S.assisted);
+  b.toggle('calLock', !!S.calibLocked);
   const modal = ['dlg', 'regBox', 'sbAsk'].some(id => $(id).style.display === 'flex');
   $('startBox').style.display = ph === 'start' && !modal ? 'flex' : 'none';
   // Prima di "Preparazione finita" il tabellone non va in sovrimpressione: si decide alla domanda.
@@ -2581,7 +2587,8 @@ hold($('liveBtn'), () => S.live && S.live.state && S.live.state !== 'off', 'ferm
   cmd({a: 'liveStop'});
 });
 hold($('rec'), () => !!S.rec, 'fermare la registrazione', () => cmd({a: 'rec', on: false}));
-hold($('calibClear'), () => true, 'cancellare la calibrazione', () => { calibPts = null; $('viewBox').classList.remove('calib'); cmd({a: 'calibClear'}); });
+$('calibClear').addEventListener('pointerdown', () => { if (S.calibLocked) toast('Per ricalibrare ferma registrazione e diretta', 3000); });
+hold($('calibClear'), () => !S.calibLocked, 'cancellare la calibrazione', () => { calibPts = null; $('viewBox').classList.remove('calib'); cmd({a: 'calibClear'}); });
 hold($('sbReset'), () => true, 'azzerare la partita', () => cmd({a: 'sbReset'}));
 // Scollega il monitor: smette di chiedere immagini e stato, dimentica la password.
 let endHidden = '';
