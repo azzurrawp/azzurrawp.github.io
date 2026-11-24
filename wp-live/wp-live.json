@@ -1,6 +1,6 @@
 {
-  "latestVersion": "0.13.5",
-  "releaseNotes": "0.13.5: calibrazione 'Angolo per angolo' a passi: ogni tocco centra l'angolo e ingrandisce (0,5x → 1,7x → 5x); a 5x il tocco vicino al centro, a camera ferma, segna l'angolo; pulsante Allarga. Contiene categoria e piscina del campo (0.13.4).",
+  "latestVersion": "0.13.6",
+  "releaseNotes": "0.13.6: angoli col cerchio verde (tocco → 1,7x, sposti il cerchio → 5x, regoli e premi ✓ Segna angolo); 'Le mie piscine' create dall'utente (nome, larghezza, altezza della camera); pulsante Indietro nel passo Campo.",
   "params": {
     "gimbalSpeed": 0.3,
     "zoomRampRate": 1.5
