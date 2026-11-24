@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <!-- WP-LIVE-MONITOR-API:1 -->
-<!-- WP-LIVE-PAGE-STAMP:2026112406 -->
+<!-- WP-LIVE-PAGE-STAMP:2026112407 -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -109,6 +109,8 @@ img{-webkit-user-drag:none}
 #viewBox.calib #calibHint{display:block}
 #mapCancelBtn{position:absolute;left:50%;transform:translateX(-50%);bottom:12px;z-index:7;display:none;min-height:46px;padding:0 18px;border:0;border-radius:23px;background:rgba(138,28,28,.95);color:#fff;font-weight:800;font-size:15px}
 #viewBox.mapping #mapCancelBtn{display:block}
+#mapWideBtn{position:absolute;right:12px;bottom:12px;z-index:7;display:none;min-height:46px;padding:0 18px;border:0;border-radius:999px;background:rgba(28,28,30,.9);color:#fff;font-weight:600;font-size:15px}
+#viewBox.mapping.fine #mapWideBtn{display:block}
 #goalBox{position:absolute;left:50%;transform:translateX(-50%);bottom:12px;z-index:7;display:none;background:rgba(11,20,32,.9);border:2px solid #ffd400;border-radius:14px;padding:10px 12px;color:#fff;font-size:14px;max-width:min(92vw,520px);text-align:center}
 #goalBox .row{justify-content:center;margin-top:8px}
 #goalBox button{min-height:46px;padding:0 18px;border:0;border-radius:23px;font-weight:800;font-size:15px;color:#fff;background:#2b4a6f}
@@ -604,6 +606,7 @@ html.nativeBg #calibHint,html.nativeBg #livePanel .lp{-webkit-backdrop-filter:no
     <div id="frame"><img id="view" draggable="false" alt="Anteprima"><canvas id="vcan"></canvas><canvas id="ov"></canvas></div>
     <div id="calibHint"></div>
     <button id="mapCancelBtn">Annulla calibrazione</button>
+    <button id="mapWideBtn">Allarga</button>
     <div id="goalBox"><div id="goalTxt"></div><div class="row"><button id="goalOkBtn">✓ Giusto</button><button id="goalSkipBtn">Salta</button></div></div>
   </div>
   <div id="hud">
@@ -648,7 +651,7 @@ try { PIN = localStorage.getItem('wpPin') || ''; } catch (e) {}
       set(v) { v = v == null ? '' : String(v); if (d.get.call(this) === v) return; d.set.call(this, v); }});
   });
 })();
-const PAGE_VER = '2026112406';
+const PAGE_VER = '2026112407';
 let LOCAL = false;
 try { LOCAL = new URLSearchParams(location.search).get('local') === '1' || sessionStorage.getItem('wpLocal') === '1'; if (LOCAL) sessionStorage.setItem('wpLocal', '1'); } catch (e) {}
 // 23/11: sull'iPhone che riprende la fotocamera vera sta sotto la pagina (anteprima nativa): niente immagini dal server.
@@ -1199,7 +1202,8 @@ $('viewBox').addEventListener('click', e => {
     const r = $('view').getBoundingClientRect();
     cmd({a: 'mapMark', x: (e.clientX - r.left) / r.width, y: (e.clientY - r.top) / r.height});
     // 0.13.3: il primo tocco ingrandisce (il messaggio arriva dall'iPhone), il secondo segna.
-    if (S.mapFine === undefined || S.mapFine) toast('Angolo segnato', 1200);
+    // 0.13.5: i messaggi (centro, ingrandisco, segnato) arrivano dall'iPhone.
+    if (S.mapDbg === undefined && (S.mapFine === undefined || S.mapFine)) toast('Angolo segnato', 1200);
     return;
   }
   if (hitCorner(e) >= 0) { toast('Trascina il pallino: la lente mostra il punto preciso', 2200); return; }
@@ -1615,15 +1619,17 @@ function renderMapping() {
   // Si capisce dall'iPhone se si sta rifacendo un angolo: tutti e 4 gli angoli sono già presenti
   // (nella calibrazione da zero ce ne sono meno). Così funziona anche dopo aver ricaricato la pagina.
   if (!dragging) redoIdx = idx >= 0 && (S.corners || []).length === 4 ? idx : -1;
+  $('viewBox').classList.toggle('fine', idx >= 0 && !!S.mapFine);
   if (idx >= 0) {
     if (!mapping) { mapping = true; $('viewBox').classList.add('calib', 'mapping'); }
     document.body.classList.add('mapping');
     $('calibHint').textContent = redoIdx >= 0
       ? 'Angolo ' + (idx + 1) + ' · sposta il pallino giallo su: ' + (S.mapName || '') + ' · se non lo vedi, muovi la camera col dito'
-      : S.mapFine ? 'Angolo ' + (idx + 1) + ' di 4 ingrandito · a immagine ferma tocca il punto esatto: ' + (S.mapName || '')
+      : S.mapFine ? 'Angolo ' + (idx + 1) + ' di 4 · tocca di nuovo l\'angolo: la camera lo centra e ingrandisce; a 5x, al centro e a immagine ferma, il tocco lo segna · ' + (S.mapName || '')
       : 'Angolo ' + (idx + 1) + ' di 4 · tocca: ' + (S.mapName || '') + ' · se non lo vedi, muovi la camera col dito';
   }
 }
+$('mapWideBtn').onclick = () => { cmd({a: 'mapWide'}); toast('Torno largo: tocca di nuovo l\'angolo', 2000); };
 $('mapCancelBtn').onclick = () => { cmd({a: 'mapCancel'}); redoQueue = []; redoFlow = false; redoIdx = -1; mapping = false; mapSeen = false; $('viewBox').classList.remove('calib', 'mapping'); document.body.classList.remove('mapping'); };
 function hManual() {
   dlg({msg: 'Altezza della telecamera dal pavimento, in metri (es. 1.43)', input: true, ph: '1.43', buttons: [{t: 'Salva', cls: 'pri', cb: v => {
@@ -2256,7 +2262,7 @@ $('prepClose').onclick = () => { $('prep').style.display = 'none'; };
 // aggiorna 5 volte al secondo, iOS a volte non trasforma il tocco in "click". Un tocco breve e fermo ora
 // agisce subito al rilascio del dito. Esclusi campi di testo, menu a tendina e pulsanti "tieni premuto".
 // 23/11 notte: lo stesso tocco rapido vale anche per finestre, tabellone, calibrazione e pannello LIVE.
-['prepPanel', 'ckBox', 'fieldBtns', 'startBox', 'dlg', 'regBox', 'sbAsk', 'cdBox', 'loupe', 'livePanel', 'sbBar', 'goalBox', 'penBox', 'mapCancelBtn', 'portraitBanner'].forEach(id => { const P = $(id); if (!P) return; (function () {
+['prepPanel', 'ckBox', 'fieldBtns', 'startBox', 'dlg', 'regBox', 'sbAsk', 'cdBox', 'loupe', 'livePanel', 'sbBar', 'goalBox', 'penBox', 'mapCancelBtn', 'mapWideBtn', 'portraitBanner'].forEach(id => { const P = $(id); if (!P) return; (function () {
   let sx = 0, sy = 0, t0 = 0, tgt = null;
   P.addEventListener('touchstart', e => { const t = e.touches[0]; sx = t.clientX; sy = t.clientY; t0 = Date.now(); tgt = e.target; }, {passive: true});
   P.addEventListener('touchend', e => {
