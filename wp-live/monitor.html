@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <!-- WP-LIVE-MONITOR-API:1 -->
-<!-- WP-LIVE-PAGE-STAMP:2026112405 -->
+<!-- WP-LIVE-PAGE-STAMP:2026112406 -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -459,6 +459,9 @@ html.nativeBg #calibHint,html.nativeBg #livePanel .lp{-webkit-backdrop-filter:no
     <details class="sec" id="secCampo"><summary>Preparazione<span class="n" id="nPrep"></span></summary>
     <div class="card" id="campoCard">
       <button class="btn2" id="backPrep" style="width:100%">Torna alla checklist</button>
+      <div class="small" style="margin-top:10px">Campo della partita</div>
+      <div class="small" id="fieldTxt" style="margin-top:4px;color:#7fd3ff"></div>
+      <button class="btn2" id="fieldBtn" style="width:100%;margin-top:6px">Categoria, piscina e misure del campo</button>
       <div class="small" style="margin-top:10px">Calibrazione del campo</div>
       <div class="grid2" style="margin-top:6px">
         <button class="btn2" id="calibManual" style="background:#1e8e3e">Angolo per angolo</button>
@@ -645,7 +648,7 @@ try { PIN = localStorage.getItem('wpPin') || ''; } catch (e) {}
       set(v) { v = v == null ? '' : String(v); if (d.get.call(this) === v) return; d.set.call(this, v); }});
   });
 })();
-const PAGE_VER = '2026112405';
+const PAGE_VER = '2026112406';
 let LOCAL = false;
 try { LOCAL = new URLSearchParams(location.search).get('local') === '1' || sessionStorage.getItem('wpLocal') === '1'; if (LOCAL) sessionStorage.setItem('wpLocal', '1'); } catch (e) {}
 // 23/11: sull'iPhone che riprende la fotocamera vera sta sotto la pagina (anteprima nativa): niente immagini dal server.
@@ -1533,12 +1536,13 @@ const cDone = () => (S.corners || []).length === 4;
 function geoCheck() {
   const m = /lunghezza misurata ([\d.]+) m vicino, ([\d.]+) m lontano/.exec(S.geo || '');
   if (!m) return null;
-  const near = +m[1], far = +m[2], L = 25, w = /vasca larga ([\d.]+) m/.exec(S.geo || '');
+  const near = +m[1], far = +m[2], L = +S.fieldLen || 25, w = /vasca larga ([\d.]+) m/.exec(S.geo || '');
   // Prova in casa: lunghezze sotto 8 m o larghezza sotto 6 m (una vasca vera è larga almeno 10 m).
   if (Math.max(near, far) < 8 || (w && +w[1] < 6)) return {home: true, near, far};
   const bad = x => Math.abs(x - L) / L > 0.15;
   // 24/11: vasca di via Roma larga 20 m (campo da muro a muro).
-  const wBad = w && Math.abs(+w[1] - 20) / 20 > 0.15;
+  const W = +S.fieldWid || 0;
+  const wBad = w && W > 0 && Math.abs(+w[1] - W) / W > 0.15;
   return {near, far, width: w ? +w[1] : 0, ok: !bad(near) && !bad(far) && !wBad, redo: bad(near) && bad(far) ? [] : bad(near) ? [1, 2] : bad(far) ? [3, 4] : []};
 }
 function geoLine() {
@@ -1546,10 +1550,39 @@ function geoLine() {
   const f = x => x.toFixed(1).replace('.', ',');
   if (g.home) return '<div class="st small">Misure: ' + f(g.near) + ' e ' + f(g.far) + ' m (prova in casa: controllo saltato).</div>';
   if (g.ok) return '<div class="st okt">✓ Misure giuste: vasca ' + f(g.near) + ' m vicino, ' + f(g.far) + ' m lontano' + (g.width ? ', larga ' + f(g.width) + ' m' : '') + '.</div>';
-  return '<div class="st warn">Misure strane: ' + f(g.near) + ' m vicino, ' + f(g.far) + ' m lontano' + (g.width ? ', larga ' + f(g.width) + ' m' : '') + ' (attesi 25 × 20). ' +
+  return '<div class="st warn">Misure strane: ' + f(g.near) + ' m vicino, ' + f(g.far) + ' m lontano' + (g.width ? ', larga ' + f(g.width) + ' m' : '') + ' (attesi ' + f1(+S.fieldLen || 25) + ((+S.fieldWid || 0) > 0 ? ' × ' + f1(S.fieldWid) : '') + '). ' +
     (g.redo.length ? 'Rifai gli angoli ' + g.redo.join(' e ') + '.' : 'Controlla l\'altezza o rifai la calibrazione.') + '</div>';
 }
 function doLidar() { if (S.busyGeo) { toast('Misura già in corso', 2000); return; } wzLidar = true; cmd({a: 'lidar'}); toast('Misuro l\'altezza: la camera si inclina verso il pavimento', 3500); }
+// 0.13.4: categoria (lunghezza e porte) e piscina (larghezza) del campo. La larghezza si può sempre correggere.
+const f1 = x => (+x).toFixed(1).replace('.', ',').replace(',0', '');
+function fieldLine() {
+  if (S.fieldLen === undefined) return '';
+  const cat = (S.cats || []).find(c => c.id === S.fieldCat), w = +S.fieldWid || 0;
+  return (cat ? cat.name.split(' · ')[0] : '') + ' · ' + (S.pool || '') + ' · ' + f1(S.fieldLen) + ' × ' +
+    (w > 0 ? f1(w) + ' m (larghezza ' + (S.fieldWidSrc || '') + ')' : '? m (larghezza da misurare: la misura l\'app con la calibrazione)');
+}
+function fieldDlg() {
+  if (S.fieldLen === undefined) { toast('Serve l\'app 0.13.4', 2500); return; }
+  const opt = (arr, sel) => arr.map(o => '<option value="' + esc(o.v) + '"' + (o.v === sel ? ' selected' : '') + '>' + esc(o.t) + '</option>').join('');
+  const w = +S.fieldWid || 0;
+  dlg({msg: '<b>Campo della partita</b>' +
+    '<div class="small" style="margin-top:8px">Categoria</div><select id="fsCat" style="width:100%">' + opt((S.cats || []).map(c => ({v: c.id, t: c.name})), S.fieldCat) + '</select>' +
+    '<div class="small" style="margin-top:8px">Piscina</div><select id="fsPool" style="width:100%">' + opt((S.pools || []).map(p => ({v: p, t: p})), S.pool) + '</select>' +
+    '<div style="display:flex;gap:8px;margin-top:8px"><label class="small" style="flex:1">Lunghezza (m)<input id="fsLen" class="txt" type="text" inputmode="decimal" step="0.1" min="10" max="35" value="' + S.fieldLen + '" style="width:100%"></label>' +
+    '<label class="small" style="flex:1">Larghezza (m, vuoto = la misura l\'app)<input id="fsWid" class="txt" type="text" inputmode="decimal" step="0.1" min="0" max="30" value="' + (w > 0 ? w : '') + '" style="width:100%"></label></div>' +
+    '<div class="small" style="margin-top:6px;opacity:.8">La categoria mette la lunghezza (20 m Esordienti, 25 m le altre; nelle piscine da 25 m con le porte al bordo può essere 23,7 m). Cambiando piscina la larghezza torna quella ricordata per quella piscina.</div>',
+    buttons: [{t: 'Salva', cls: 'pri', cb: () => {
+      const cat = $('fsCat').value, pool = $('fsPool').value;
+      const o = {a: 'fieldSetup', cat, pool};
+      // Cambiando categoria o piscina si lasciano a lei lunghezza e larghezza; altrimenti valgono i numeri scritti.
+      if (cat === S.fieldCat) { const l = parseFloat(($('fsLen').value || '').replace(',', '.')); if (l >= 10 && l <= 35) o.len = l; }
+      if (pool === S.pool) { const v = ($('fsWid').value || '').trim(); const wv = v === '' ? 0 : parseFloat(v.replace(',', '.')); if (wv === 0 || (wv >= 6 && wv <= 30)) o.wid = wv; }
+      cmd(o); toast('Campo salvato', 1500);
+      if ((S.corners || []).length === 4) setTimeout(() => dlg({msg: 'Le misure valgono dalla prossima calibrazione: per usarle subito rifai "Angolo per angolo".', buttons: [{t: 'OK', cls: 'pri'}]}), 400);
+    }}, {t: 'Annulla'}]});
+}
+$('fieldBtn').onclick = () => { $('prep').style.display = 'none'; fieldDlg(); };
 // Calibrazione a mano (predefinita): si toccano i 4 angoli; il giro automatico del gimbal resta a scelta.
 function doCalib(auto) {
   if (S.busyGeo) { toast('Aspetta che finisca la misura in corso', 2500); return; }
@@ -1707,6 +1740,8 @@ function renderWizard() {
       else h += '<div class="st">Serve l\'altezza della telecamera dal pavimento.</div>' + B('lidar', 'Misura col LiDAR', true) + B('hman', 'Scrivila a mano');
     }
   } else if (wz === 2) {
+    const fl = fieldLine();
+    if (fl) h += '<div class="st small">Campo: <b>' + esc(fl) + '</b></div>' + B('fset', 'Cambia categoria, piscina o misure');
     if (S.busyGeo) h += '<div class="st warn">Calibrazione in corso…</div>';
     else {
       if (wzCalib && cDone() && !calibPts && !OK.c) { OK.c = true; saveWz(); }
@@ -1777,6 +1812,7 @@ $('wzBody').addEventListener('pointerup', e => {
   else if (a === 'kok') { OK.k = true; saveWz(); goStep(4); }
   else if (a === 'caps') openCard('capsCard');
   else if (a === 'learn') $('learnBtn').click();
+  else if (a === 'fset') fieldDlg();
   else if (a === 'bmod') { cmd({a: 'ballColor', name: 'modello'}); S.ballColor = 'modello'; wzHtml = ''; renderWizard(); toast('Palla: gialla del campionato (Modello pallanuoto)', 2500); }
   else if (a === 'net') { if (!S.netTesting) { S.netTesting = true; cmd({a: 'netTest'}); renderWizard(); } }
   else if (a === 'key') openLivePanel();
@@ -1994,6 +2030,7 @@ function renderGeo() {
   b.textContent = busy ? 'Misura altezza: ferma prima registrazione e diretta' : 'Misura altezza (LiDAR)';
   $('lidarMsg').textContent = (S.lidarMsg || '') + (S.lidarDbg ? ' · ' + S.lidarDbg : '');
   $('geoTxt').textContent = S.geo || '';
+  const ft = fieldLine(); if ($('fieldTxt').textContent !== ft) $('fieldTxt').textContent = ft;
 }
 $('ballSel').onchange = e => cmd({a: 'ballColor', name: e.target.value});
 function startLearn() {
