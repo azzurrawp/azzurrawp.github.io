@@ -386,7 +386,7 @@ function merge(list){var n=0,u=0;list.forEach(function(m){if(!m)return;var ex=m.
   if(!ex){var nb=blank(m);if(m.names)nb.dn=nb.names.slice();DB.matches.push(nb);n++;return}
   ['gio','date','time','home','opp','place','ref','pic'].forEach(function(k){if(m[k]!==undefined)ex[k]=m[k]});
   if(m.names){var dn=blank({names:m.names}).names,chg=JSON.stringify(ex.dn||null)!=JSON.stringify(dn);ex.dn=dn;if(!ex.log.length&&(chg||!ex.nm)){ex.names=dn.slice();delete ex.nm}}
-  if(m.log&&m.log.length&&!ex.log.length){F.concat(['x','og','ogu','log','per','done','go']).forEach(function(k){if(m[k]!==undefined)ex[k]=m[k]})}
+  if(m.log&&m.log.length&&!ex.log.length){F.concat(['x','og','ogu','log','per','done','go','t']).forEach(function(k){if(m[k]!==undefined)ex[k]=m[k]})}
   u++});persist();return [n,u]}
 // iPhone/iPad: l'app aggiunta alla Home non condivide i dati con Safari e parte dall'indirizzo salvato:
 // lasciamo il codice nell'indirizzo e togliamo il manifest, così l'icona salva il link completo
@@ -452,7 +452,7 @@ function fetchStats(){if(!DB.pin||!navigator.onLine||!window.crypto||!crypto.sub
     if(DB.statv===o.data)return;return decrypt(o,DB.pin).then(function(d){var n=0;
       (d.matches||[]).forEach(function(rm){var l=byId(rm.id);
         if(!l){var b=blank(rm);b.remote=true;b.sent=rm.upd;DB.matches.push(b);n++;return}
-        if((rm.upd||0)>(l.upd||0)){F.concat(['x','og','ogu','log','per','done','names','upd','opp','gio','date','time','home','place','ref','pic','refv','picv','go']).forEach(function(k){if(rm[k]!==undefined)l[k]=rm[k]});if(rm.go===undefined)delete l.go;l.remote=!DB.gh;l.sent=rm.upd;n++}});
+        if((rm.upd||0)>(l.upd||0)){F.concat(['x','og','ogu','log','per','done','names','upd','opp','gio','date','time','home','place','ref','pic','refv','picv','go','t']).forEach(function(k){if(rm[k]!==undefined)l[k]=rm[k]});if(rm.go===undefined)delete l.go;l.remote=!DB.gh;l.sent=rm.upd;n++}});
       DB.statv=o.data;persist();if(home.style.display!='none')renderHome();else if(!S&&seasonOpen())showSeason(true);if(n&&!VIEW)toast('Statistiche aggiornate')})}).catch(function(){})}
 window.addEventListener('online',function(){setTimeout(function(){publish(false);fetchStats()},1500)});
 setInterval(function(){publish(false)},120000);
@@ -521,7 +521,7 @@ function liveKick(now){if(!DB.gh||!DB.pin||!S||!window.crypto||!crypto.subtle)re
 function liveSet(ok){var was=liveOk;liveOk=ok;if(ok)liveOkAt=Date.now();liveDot();if(!S||S.done)return;if(ok===false&&was!==false)toast('Diretta interrotta: tablet senza internet',4000);else if(ok===true&&was===false)toast('Diretta ripresa',2500)}
 function liveTap(){var a=liveOkAt?Math.round((Date.now()-liveOkAt)/1000):-1,t=a<0?'':a<60?' · ultimo invio '+a+' secondi fa':' · ultimo invio '+Math.round(a/60)+' minuti fa';
   toast(liveOk===true?'Diretta attiva'+t:liveOk===false?'Diretta ferma: tablet senza internet'+(a<0?'':t):'Diretta pronta: il primo invio parte alla prima azione',3500)}
-function liveSend(m){if(!navigator.onLine){liveSet(false);return}liveLast=Date.now();
+function liveSend(m){if(!navigator.onLine){liveSet(false);return}liveLast=Date.now();tApply(m);
   var snap={};for(var k in m)if(k!='remote'&&k!='sent'&&k!='liveAt')snap[k]=m[k];
   liveSeal({t:Date.now(),m:snap}).then(function(enc){return liveTopic().then(function(tp){return fetch(LIVE+tp,{method:'POST',body:JSON.stringify(enc)})})})
    .then(function(r){liveSet(r.ok)}).catch(function(){liveSet(false)})}
@@ -535,7 +535,7 @@ function livePoll(){if(DB.gh||!DB.pin||livePolling||!navigator.onLine||document.
     return Promise.all(msgs.slice(-6).map(function(x){return liveOpen(JSON.parse(x.message)).catch(function(){return null})})).then(function(arr){var ch=false;
       arr.forEach(function(p){if(!p||!p.m||!p.m.id)return;var rm=p.m,l=byId(rm.id);
         if(!l){l=blank(rm);l.remote=true;DB.matches.push(l);ch=true}
-        else if((rm.upd||0)>(l.upd||0)){F.concat(['x','og','ogu','log','per','done','names','upd','opp','gio','date','time','home','place','go']).forEach(function(k){if(rm[k]!==undefined)l[k]=rm[k]});if(rm.go===undefined)delete l.go;l.remote=true;ch=true}
+        else if((rm.upd||0)>(l.upd||0)){F.concat(['x','og','ogu','log','per','done','names','upd','opp','gio','date','time','home','place','go','t']).forEach(function(k){if(rm[k]!==undefined)l[k]=rm[k]});if(rm.go===undefined)delete l.go;l.remote=true;ch=true}
         if((p.t||0)>(l.liveAt||0)){l.liveAt=p.t;ch=true}});
       if(ch){persist();if(home.style.display!='none')renderHome();else if(S){all();liveBadge()}else if(seasonOpen())showSeason(true);viewAuto()}})
   }).catch(function(){}).then(function(){livePolling=false})}
@@ -920,7 +920,7 @@ listEl.addEventListener('click',function(e){var rs=e.target.closest('[data-rst]'
   if(del){var m=byId(del.dataset.del);if(!confirm('Eliminare la partita "'+title(m)+'"?'+(m.log.length?' Prima ne scarico una copia.':'')))return;
     if(m.log.length)backup('eliminata',m);DB.matches=DB.matches.filter(function(x){return x!==m});DB.encv='';persist();renderHome();return}
   var c=e.target.closest('.card');if(c)openMatch(c.dataset.id)});
-function openMatch(id){S=byId(id);if(!S)return;NLU=false;if(VIEW){document.getElementById('season').style.display='none';try{history.pushState({v:1},'',location.href)}catch(e){}}lastRow=null;[].forEach.call(document.querySelectorAll('#g .last'),function(x){x.classList.remove('last')});document.getElementById('last').textContent=(S.done||(S.remote&&!DB.gh))?(S.done?'Partita conclusa':'Partita in corso')+' · sola lettura':(S.gio?S.gio+' · ':'')+fdate(S);
+function openMatch(id){S=byId(id);if(!S)return;if(!VIEW){tApply(S);clsLoad()}NLU=false;if(VIEW){document.getElementById('season').style.display='none';try{history.pushState({v:1},'',location.href)}catch(e){}}lastRow=null;[].forEach.call(document.querySelectorAll('#g .last'),function(x){x.classList.remove('last')});document.getElementById('last').textContent=(S.done||(S.remote&&!DB.gh))?(S.done?'Partita conclusa':'Partita in corso')+' · sola lettura':(S.gio?S.gio+' · ':'')+fdate(S);
   var ro=!!(S.done||(S.remote&&!DB.gh));document.body.classList.toggle('ro',ro);document.getElementById('rob').style.visibility=DB.gh?'':'hidden';all();home.style.display='none';goFS();liveBadge();liveDot();
   ftUI();if(!S.done&&!S.log.length){toast((S.gio?S.gio+': ':'')+title(S)+' – pronta a registrare');if(!ro&&S.foto===undefined)ftAsk()}}
 // ---------- cruscotto statistiche: stagione + una scheda per partita ----------
@@ -1389,7 +1389,17 @@ var CLS=null,CLSt=0;try{CLS=JSON.parse(localStorage.getItem('wp_class')||'null')
 function clsLoad(force){if(!force&&Date.now()-CLSt<600000)return;CLSt=Date.now();
   fetch('classifica.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.ok?r.json():null}).then(function(d){if(!d||!d.table||!d.table.length)return;
     var ch=!CLS||CLS.chk!=d.chk;CLS=d;try{localStorage.setItem('wp_class',JSON.stringify(d))}catch(e){}
+    if(S&&!VIEW&&tApply(S)&&DB.gh&&!S.done&&!S.remote&&(S.log.length||S.go))liveKick(true);
     if(ch&&DSEL=='class'&&document.getElementById('season').style.display!='none')showSeason(true)}).catch(function(){CLSt=0})}
+// ---------- nome ufficiale della partita per WP Live (campo t), dal calendario FIN già scaricato ----------
+function clsKey(x){var t=String(x||'').toLowerCase();try{t=t.normalize('NFD').replace(/[̀-ͯ]/g,'')}catch(e){}return t.replace(/[^a-z0-9 ]+/g,'').replace(/\s+/g,' ').trim()}
+function clsSame(a,b){var A=clsKey(a),B=clsKey(b);if(!A||!B)return false;var ca=A.replace(/ /g,''),cb=B.replace(/ /g,'');if(ca==cb||(ca.length>=5&&cb.indexOf(ca)>=0)||(cb.length>=5&&ca.indexOf(cb)>=0))return true;
+  var ta=A.split(' ').filter(function(w){return w.length>=4}),tb=B.split(' ').filter(function(w){return w.length>=4});if(!ta.length||!tb.length)return false;
+  var sh=ta.length<=tb.length?ta:tb,lg=sh===ta?cb:ca;return sh.every(function(w){return lg.indexOf(w)>=0})}
+function matchT(m){if(!CLS||!CLS.days||!m||!m.date||!m.opp)return '';var n=0;CLS.days.forEach(function(d){(d.m||[]).forEach(function(x){if(n||x.date!==m.date)return;var o=clsAz(x.home)?x.away:clsAz(x.away)?x.home:null;if(o&&clsSame(o,m.opp))n=d.n})});if(!n)return '';
+  var nm=String(CLS.name||''),f=nm.match(/^(.*?)\s*(\d+)\s*[ªa°^]?\s*fase/i),g=nm.match(/girone\s+([A-Za-z0-9]+)/i),cat=(f?f[1]:nm.split('·')[0]).replace(/[·\-–\s]+$/,'').trim(),ph=f?+f[2]:1;if(!cat)return '';
+  return ('Campionato '+cat+' FIN'+(ph>=2?' · '+ph+'ª fase':'')+' · '+n+'ª giornata'+(g?' · Girone '+(g[1].length==1?g[1].toUpperCase():g[1]):'')).slice(0,60)}
+function tApply(m){if(VIEW||!m||!CLS)return false;var t=matchT(m);if(t){if(m.t===t)return false;m.t=t}else{if(m.t===undefined)return false;delete m.t}persist();return true}
 function clsD(m){var d=(m.date||'').split('-');if(d.length!=3)return '';var g='';try{g=new Date(m.date+'T12:00').toLocaleDateString('it-IT',{weekday:'short'})+' '}catch(e){}return g+d[2]+'/'+d[1]+(m.time?' · '+m.time:'')}
 function clsAz(t){return /azzurra/i.test(t||'')}
 var CLSown=false;
@@ -1560,7 +1570,7 @@ fetchStats();livePoll();viewAuto();
 window.addEventListener('online',function(){syncDistinte(false);livePoll()});
 document.addEventListener('visibilitychange',function(){if(document.visibilityState=='visible')livePoll()});
 // aggiornamenti: controlla a ogni riapertura; la nuova versione si carica da sola quando si è nell'elenco partite (mai durante la registrazione)
-var APPV=113,swReg=null,swReload=false;document.getElementById('appv').textContent='Versione '+APPV;document.getElementById('appv').dataset.b=document.getElementById('appv').textContent;fitH.h=0;fitH();
+var APPV=114,swReg=null,swReload=false;document.getElementById('appv').textContent='Versione '+APPV;document.getElementById('appv').dataset.b=document.getElementById('appv').textContent;fitH.h=0;fitH();
 if('serviceWorker' in navigator&&!VIEW){var hadCtrl=!!navigator.serviceWorker.controller;
   navigator.serviceWorker.register('sw.js').then(function(r){swReg=r}).catch(function(){});
   document.addEventListener('visibilitychange',function(){if(!document.hidden&&swReg)swReg.update().catch(function(){})});
