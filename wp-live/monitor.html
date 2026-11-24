@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <!-- WP-LIVE-MONITOR-API:1 -->
-<!-- WP-LIVE-PAGE-STAMP:2026112409 -->
+<!-- WP-LIVE-PAGE-STAMP:2026112410 -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -677,7 +677,7 @@ try { PIN = localStorage.getItem('wpPin') || ''; } catch (e) {}
       set(v) { v = v == null ? '' : String(v); if (d.get.call(this) === v) return; d.set.call(this, v); }});
   });
 })();
-const PAGE_VER = '2026112409';
+const PAGE_VER = '2026112410';
 let LOCAL = false;
 try { LOCAL = new URLSearchParams(location.search).get('local') === '1' || sessionStorage.getItem('wpLocal') === '1'; if (LOCAL) sessionStorage.setItem('wpLocal', '1'); } catch (e) {}
 // 23/11: sull'iPhone che riprende la fotocamera vera sta sotto la pagina (anteprima nativa): niente immagini dal server.
@@ -959,7 +959,6 @@ function render() {
   const md = (S.mode || '').replace(/^(MANUALE|ASSISTITA|AUTOMATICO|AUTOMATICA)( · )?/, '');
   $('modeTxt').textContent = md; $('modeTxt').style.display = md ? '' : 'none';
   $('camName').textContent = cam.name; $('camBtn').style.background = cam.bg;
-  checkMatchStart();
   const micSvg = off => '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21M8.5 21h7"/>' + (off ? '<path d="M4 4l16 16"/>' : '') + '</svg>';
   const micKey = S.audio === false ? 'na' : S.muted ? 'off' : 'on';
   if ($('micIcon').dataset.k !== micKey) { $('micIcon').dataset.k = micKey; $('micIcon').innerHTML = micSvg(micKey !== 'on'); }
@@ -2202,31 +2201,7 @@ $('camBtn').onclick = () => openPick('cam');
 $('statusBar').onclick = () => openPick('mode');
 // Il suggerimento "Per iniziare" sparisce appena si sceglie la camera (e non torna per tutta la partita).
 function hintDone() { try { sessionStorage.setItem('wpStarted', '1'); } catch (e) {} document.body.classList.remove('firstRun'); }
-// 0.13.8: avviso se la partita è cominciata e la ripresa è ancora in Riscaldamento o Allenamento.
-// Il tablet non manda il cronometro: vale il primo cambio di risultato o di tempo dal tablet,
-// oppure il cronometro del tabellone fatto partire qui.
-let msPrev = null, msSnooze = 0, msOpen = false;
-function checkMatchStart() {
-  const T = S.tablet || {}, sb = S.sb || {};
-  const sig = (T.linked && T.match ? T.match : '') + '|' + (sb.running ? 1 : 0);
-  const prev = msPrev; msPrev = sig;
-  const m = S.shootMode || 'automatico';
-  if (msOpen && (m === 'partita' || $('dlg').style.display !== 'flex')) {
-    if (m === 'partita' && $('dlg').style.display === 'flex') $('dlg').style.display = 'none';
-    msOpen = false;
-  }
-  if (prev === null || prev === sig) return;
-  if (!(S.auto || S.assisted) || (m !== 'riscaldamento' && m !== 'allenamento')) return;
-  if (/finita/.test(T.match || '') || Date.now() < msSnooze || $('dlg').style.display === 'flex' || $('pick').style.display === 'flex') return;
-  const [pTab, pRun] = prev.split('|'), [nTab, nRun] = sig.split('|');
-  if (!((pTab && nTab && pTab !== nTab) || (pRun === '0' && nRun === '1'))) return;
-  const name = (MODES.find(x => x.v === m) || MODES[0]).name;
-  msOpen = true;
-  dlg({msg: '<b>La partita è iniziata</b><br>' + (pTab !== nTab ? 'Il tablet sta segnando la partita' : 'Il cronometro è partito')
-    + ', ma la ripresa è in <b>' + name + '</b>. Passo a Partita, così la camera segue il pallone?',
-    buttons: [{t: 'Passa a Partita', cls: 'pri', cb: () => { msOpen = false; cmd({a: 'shootMode', m: 'partita'}); S.shootMode = 'partita'; renderShootMode(); }},
-      {t: 'Resta così', cb: () => { msOpen = false; msSnooze = Date.now() + 10 * 60 * 1000; }}]});
-}
+// 0.13.8: il passaggio a Partita al fischio d'inizio lo fa l'iPhone (dal tablet); qui solo il messaggio.
 
 // Registrazione
 $('rec').onclick = () => {
