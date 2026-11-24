@@ -1,6 +1,6 @@
 {
-  "latestVersion": "0.13.9",
-  "releaseNotes": "0.13.9: al fischio d'inizio segnato sul tablet (app statistiche aggiornata) la ripresa passa da sola da Riscaldamento o Allenamento a Partita; contiene le novità della 0.13.8 (barra di stato con modalità, pulsante CAMERA, cerchi del pallone).",
+  "latestVersion": "0.13.10",
+  "releaseNotes": "0.13.10: menu ripulito: nomi neutri (la tua squadra, noi), Collega un regista in cima, tolto il giro automatico, Torna alla preparazione riparte dal passo a cui eri, registro della diretta in Informazioni, consiglio Schermata Home solo sui telefoni del regista.",
   "params": {
     "gimbalSpeed": 0.3,
     "zoomRampRate": 1.5
