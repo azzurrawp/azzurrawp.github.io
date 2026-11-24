@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <!-- WP-LIVE-MONITOR-API:1 -->
-<!-- WP-LIVE-PAGE-STAMP:2026112407 -->
+<!-- WP-LIVE-PAGE-STAMP:2026112408 -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -80,6 +80,7 @@ body.geoEdit #fieldBtns{display:none !important}
 #fbRedo{min-height:46px;padding:0 14px;border-radius:23px;background:rgba(36,74,122,.95);font-size:14px}
 #fbCalib{min-height:60px;padding:0 24px;border-radius:30px;background:#1e8e3e;font-size:18px}
 #fbScan{min-height:46px;padding:0 14px;border-radius:23px;background:rgba(36,74,122,.95);font-size:14px}
+#fbBack{min-height:46px;padding:0 18px;border-radius:23px;font-size:15px;color:#fff;border:0}
 #flowBar{display:none;position:sticky;top:0;z-index:2}
 #flowBar button{width:100%;min-height:52px;border:0;border-radius:12px;background:#1e8e3e;color:#fff;font-size:17px;font-weight:800}
 #sbAsk{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:20;display:none;align-items:center;justify-content:center}
@@ -111,6 +112,8 @@ img{-webkit-user-drag:none}
 #viewBox.mapping #mapCancelBtn{display:block}
 #mapWideBtn{position:absolute;right:12px;bottom:12px;z-index:7;display:none;min-height:46px;padding:0 18px;border:0;border-radius:999px;background:rgba(28,28,30,.9);color:#fff;font-weight:600;font-size:15px}
 #viewBox.mapping.fine #mapWideBtn{display:block}
+#mapOkBtn{position:absolute;right:12px;bottom:66px;z-index:7;display:none;min-height:50px;padding:0 20px;border:0;border-radius:999px;background:#30d158;color:#000;font-weight:700;font-size:16px}
+#viewBox.mapping.fine #mapOkBtn{display:block}
 #goalBox{position:absolute;left:50%;transform:translateX(-50%);bottom:12px;z-index:7;display:none;background:rgba(11,20,32,.9);border:2px solid #ffd400;border-radius:14px;padding:10px 12px;color:#fff;font-size:14px;max-width:min(92vw,520px);text-align:center}
 #goalBox .row{justify-content:center;margin-top:8px}
 #goalBox button{min-height:46px;padding:0 18px;border:0;border-radius:23px;font-weight:800;font-size:15px;color:#fff;background:#2b4a6f}
@@ -380,10 +383,10 @@ html.nativeBg #prepPanel details.sec>summary{-webkit-tap-highlight-color:rgba(25
 #ckBox .ck.ok{box-shadow:inset 0 0 0 1.5px var(--ios-green)}
 #fbDone{background:var(--ios-green)}
 #fbCalib{background:var(--ios-blue);font-weight:700}
-#fbRedo,#fbScan{background:rgba(28,28,30,.72);-webkit-backdrop-filter:blur(22px);backdrop-filter:blur(22px);font-weight:600;
+#fbRedo,#fbScan,#fbBack{background:rgba(28,28,30,.72);-webkit-backdrop-filter:blur(22px);backdrop-filter:blur(22px);font-weight:600;
   box-shadow:inset 0 0 0 .5px var(--glassEdge),0 4px 14px rgba(0,0,0,.45)}
 #fbHelp{border-radius:16px;background:rgba(28,28,30,.78)}
-html.nativeBg #ckBox,html.nativeBg #fbRedo,html.nativeBg #fbScan{-webkit-backdrop-filter:none;backdrop-filter:none;background:rgba(28,28,30,.95)}
+html.nativeBg #ckBox,html.nativeBg #fbRedo,html.nativeBg #fbScan,html.nativeBg #fbBack{-webkit-backdrop-filter:none;backdrop-filter:none;background:rgba(28,28,30,.95)}
 /* Sull'iPhone che riprende niente sfocatura (rallenta i tocchi sopra la fotocamera): fondo scuro pieno. */
 html.nativeBg #startBox>div,html.nativeBg #dlg>div,html.nativeBg #regBox>div,html.nativeBg #sbAsk>div,html.nativeBg #loupeBox,
 html.nativeBg #calibHint,html.nativeBg #livePanel .lp{-webkit-backdrop-filter:none;backdrop-filter:none;background:rgba(28,28,30,.97)}
@@ -607,6 +610,7 @@ html.nativeBg #calibHint,html.nativeBg #livePanel .lp{-webkit-backdrop-filter:no
     <div id="calibHint"></div>
     <button id="mapCancelBtn">Annulla calibrazione</button>
     <button id="mapWideBtn">Allarga</button>
+    <button id="mapOkBtn">✓ Segna angolo</button>
     <div id="goalBox"><div id="goalTxt"></div><div class="row"><button id="goalOkBtn">✓ Giusto</button><button id="goalSkipBtn">Salta</button></div></div>
   </div>
   <div id="hud">
@@ -622,7 +626,7 @@ html.nativeBg #calibHint,html.nativeBg #livePanel .lp{-webkit-backdrop-filter:no
       <div id="wzBody"></div>
       <div id="wzNav"><button id="wzBack">‹ Indietro</button><button id="wzSkip">Salta ›</button></div>
     </div>
-    <div id="fieldBtns"><div id="fbHelp">Tocca gli <b>angoli del campo</b>: dove le linee di porta incontrano i bordi lunghi della vasca, in quest'ordine:<svg width="200" height="70" viewBox="0 0 200 70"><polygon points="40,10 160,10 190,60 10,60" fill="rgba(30,142,62,.35)" stroke="#7CFC9A" stroke-width="2"/><g font-size="13" font-weight="800" fill="#ffd400"><text x="2" y="58">1</text><text x="190" y="58">2</text><text x="164" y="14">3</text><text x="28" y="14">4</text></g><text x="100" y="40" font-size="11" fill="#fff" text-anchor="middle">lato vicino a te in basso</text></svg></div><button id="fbDone">✓<br>Fatto</button><button id="fbRedo">↺ Rifai</button><button id="fbCalib">Tocca i 4 angoli</button><button id="fbScan">Giro automatico col gimbal</button></div>
+    <div id="fieldBtns"><div id="fbHelp">Tocca gli <b>angoli del campo</b>: dove le linee di porta incontrano i bordi lunghi della vasca, in quest'ordine:<svg width="200" height="70" viewBox="0 0 200 70"><polygon points="40,10 160,10 190,60 10,60" fill="rgba(30,142,62,.35)" stroke="#7CFC9A" stroke-width="2"/><g font-size="13" font-weight="800" fill="#ffd400"><text x="2" y="58">1</text><text x="190" y="58">2</text><text x="164" y="14">3</text><text x="28" y="14">4</text></g><text x="100" y="40" font-size="11" fill="#fff" text-anchor="middle">lato vicino a te in basso</text></svg></div><button id="fbDone">✓<br>Fatto</button><button id="fbRedo">↺ Rifai</button><button id="fbCalib">Tocca i 4 angoli</button><button id="fbScan">Giro automatico col gimbal</button><button id="fbBack">‹ Indietro</button></div>
     <div id="startHint">Per iniziare: scegli <b>Manuale</b> o <b>Assistita</b>, poi tocca <b>REC</b> per registrare (e LIVE per la diretta).</div>
     <button id="goBtn">▶ Inizia</button>
     <button id="finBtn">■ Fine partita</button>
@@ -651,7 +655,7 @@ try { PIN = localStorage.getItem('wpPin') || ''; } catch (e) {}
       set(v) { v = v == null ? '' : String(v); if (d.get.call(this) === v) return; d.set.call(this, v); }});
   });
 })();
-const PAGE_VER = '2026112407';
+const PAGE_VER = '2026112408';
 let LOCAL = false;
 try { LOCAL = new URLSearchParams(location.search).get('local') === '1' || sessionStorage.getItem('wpLocal') === '1'; if (LOCAL) sessionStorage.setItem('wpLocal', '1'); } catch (e) {}
 // 23/11: sull'iPhone che riprende la fotocamera vera sta sotto la pagina (anteprima nativa): niente immagini dal server.
@@ -991,6 +995,14 @@ function drawOverlay() {
     x.strokeStyle = 'rgba(255,255,255,.5)'; x.lineWidth = 2; x.setLineDash([6, 6]);
     x.strokeRect(0, 0, w, h); x.setLineDash([]);
   }
+  // 0.13.6: cerchio verde con pallino bianco = angolo che si sta segnando (segue la camera).
+  const mk = VD && VD.marker ? VD.pts[0] : (mapping && S.mapMarker && S.mapMarker.length === 2 ? S.mapMarker : null);
+  if (mk) {
+    const mx = mk[0] * w, my = mk[1] * h;
+    x.lineWidth = 4; x.strokeStyle = 'rgba(0,0,0,.55)'; x.beginPath(); x.arc(mx, my, 24, 0, 2 * Math.PI); x.stroke();
+    x.lineWidth = 3; x.strokeStyle = '#30d158'; x.beginPath(); x.arc(mx, my, 24, 0, 2 * Math.PI); x.stroke();
+    x.fillStyle = '#fff'; x.strokeStyle = '#000'; x.lineWidth = 1.5; x.beginPath(); x.arc(mx, my, 4.5, 0, 2 * Math.PI); x.fill(); x.stroke();
+  }
   // Controllo porte: mirino giallo dove l'app mette il centro della porta.
   if (S.goalCheck && S.goalPt && S.goalPt.length === 2) {
     const gx = S.goalPt[0] * w, gy = S.goalPt[1] * h, r = 26;
@@ -1158,6 +1170,7 @@ $('calibClear').onclick = null;
 function hitCorner(e) {
   // In partita gli angoli non si spostano per sbaglio: si regolano solo in Preparazione.
   // Rifare un angolo (20/11): si trascina solo il suo pallino (giallo), gli altri restano fermi.
+  if (mapping && S.mapStage !== undefined) return -1;   // 0.13.6: si sposta il cerchio verde
   if (mapping && redoIdx >= 0) {
     const p = (S.corners || [])[redoIdx], r = $('view').getBoundingClientRect();
     return p && Math.hypot(e.clientX - r.left - p[0] * r.width, e.clientY - r.top - p[1] * r.height) < (e.pointerType === 'touch' ? 40 : 30) ? redoIdx : -1;
@@ -1197,7 +1210,7 @@ $('viewBox').addEventListener('click', e => {
     toast('Centro della porta segnato', 1500);
     return;
   }
-  if (mapping && redoIdx >= 0) { toast('Sposta il pallino giallo ' + (redoIdx + 1) + ' sul punto giusto', 2200); return; }
+  if (mapping && redoIdx >= 0 && S.mapStage === undefined) { toast('Sposta il pallino giallo ' + (redoIdx + 1) + ' sul punto giusto', 2200); return; }
   if (mapping) {
     const r = $('view').getBoundingClientRect();
     cmd({a: 'mapMark', x: (e.clientX - r.left) / r.width, y: (e.clientY - r.top) / r.height});
@@ -1563,36 +1576,63 @@ const f1 = x => (+x).toFixed(1).replace('.', ',').replace(',0', '');
 function fieldLine() {
   if (S.fieldLen === undefined) return '';
   const cat = (S.cats || []).find(c => c.id === S.fieldCat), w = +S.fieldWid || 0;
-  return (cat ? cat.name.split(' · ')[0] : '') + ' · ' + (S.pool || '') + ' · ' + f1(S.fieldLen) + ' × ' +
+  if (!S.pool) return (cat ? cat.name.split(' · ')[0] : '') + ' · nessuna piscina scelta';
+  return (cat ? cat.name.split(' · ')[0] : '') + ' · ' + S.pool + ' · ' + f1(S.fieldLen) + ' × ' +
     (w > 0 ? f1(w) + ' m (larghezza ' + (S.fieldWidSrc || '') + ')' : '? m (larghezza da misurare: la misura l\'app con la calibrazione)');
 }
-function fieldDlg() {
-  if (S.fieldLen === undefined) { toast('Serve l\'app 0.13.4', 2500); return; }
+// 0.13.6: "Le mie piscine" — le crea, rinomina e cancella chi usa l'app; nessuna piscina scritta nell'app.
+const poolList = () => (S.pools || []).map(p => typeof p === 'string' ? {name: p, width: 0} : p);
+function fieldDlg(after) {
+  if (S.fieldLen === undefined) { toast('Serve l\'app aggiornata', 2500); return; }
   const opt = (arr, sel) => arr.map(o => '<option value="' + esc(o.v) + '"' + (o.v === sel ? ' selected' : '') + '>' + esc(o.t) + '</option>').join('');
+  const pools = poolList(), cur = S.pool || (pools.length ? pools[0].name : '__new');
   const w = +S.fieldWid || 0;
-  dlg({msg: '<b>Campo della partita</b>' +
-    '<div class="small" style="margin-top:8px">Categoria</div><select id="fsCat" style="width:100%">' + opt((S.cats || []).map(c => ({v: c.id, t: c.name})), S.fieldCat) + '</select>' +
-    '<div class="small" style="margin-top:8px">Piscina</div><select id="fsPool" style="width:100%">' + opt((S.pools || []).map(p => ({v: p, t: p})), S.pool) + '</select>' +
-    '<div style="display:flex;gap:8px;margin-top:8px"><label class="small" style="flex:1">Lunghezza (m)<input id="fsLen" class="txt" type="text" inputmode="decimal" step="0.1" min="10" max="35" value="' + S.fieldLen + '" style="width:100%"></label>' +
-    '<label class="small" style="flex:1">Larghezza (m, vuoto = la misura l\'app)<input id="fsWid" class="txt" type="text" inputmode="decimal" step="0.1" min="0" max="30" value="' + (w > 0 ? w : '') + '" style="width:100%"></label></div>' +
-    '<div class="small" style="margin-top:6px;opacity:.8">La categoria mette la lunghezza (20 m Esordienti, 25 m le altre; nelle piscine da 25 m con le porte al bordo può essere 23,7 m). Cambiando piscina la larghezza torna quella ricordata per quella piscina.</div>',
+  const L2 = (lab, inner) => '<label class="small" style="flex:1;min-width:0;text-align:left">' + lab + inner + '</label>';
+  dlg({msg: '<b>' + (S.pool ? 'Campo della partita' : 'Dove sei? Scegli o crea la piscina') + '</b>' +
+    '<div style="display:flex;gap:8px;margin-top:6px">' +
+      L2('Categoria', '<select id="fsCat" style="width:100%">' + opt((S.cats || []).map(c => ({v: c.id, t: c.name.split(' · ')[0]})), S.fieldCat) + '</select>') +
+      L2('Piscina', '<select id="fsPool" style="width:100%">' + opt(pools.map(p => ({v: p.name, t: p.name})).concat([{v: '__new', t: '＋ Nuova piscina…'}]), cur) + '</select>') + '</div>' +
+    '<div style="display:flex;gap:8px;margin-top:6px">' +
+      L2('Nome della piscina', '<input id="fsName" class="txt" type="text" maxlength="60" value="' + esc(cur === '__new' ? '' : cur) + '" placeholder="es. Comunale via Roma" style="width:100%">') +
+      '<div style="display:flex;gap:8px;flex:1">' +
+      L2('Lunghezza m', '<input id="fsLen" class="txt" type="text" inputmode="decimal" value="' + S.fieldLen + '" style="width:100%">') +
+      L2('Larghezza m', '<input id="fsWid" class="txt" type="text" inputmode="decimal" value="' + (S.pool && w > 0 ? f1(w) : '') + '" placeholder="da misurare" style="width:100%">') + '</div></div>' +
+    '<div class="small" style="margin-top:6px;opacity:.8">Lunghezza: 20 m Esordienti, 25 m le altre categorie (23,7 m nelle vasche da 25 m con le porte al bordo). Larghezza vuota: la misura l\'app. Larghezza e altezza della camera restano salvate nella piscina.</div>',
     buttons: [{t: 'Salva', cls: 'pri', cb: () => {
-      const cat = $('fsCat').value, pool = $('fsPool').value;
+      const cat = $('fsCat').value, sel = $('fsPool').value, name = ($('fsName').value || '').trim();
+      if (sel === '__new' && !name) { toast('Scrivi il nome della piscina', 2500); setTimeout(() => fieldDlg(after), 300); return; }
+      let pool = sel;
+      if (sel === '__new') { cmd({a: 'poolAdd', name}); pool = name; }
+      else if (name && name !== sel) {
+        if (poolList().some(p => p.name === name)) { toast('C\'è già una piscina con questo nome', 2500); return; }
+        cmd({a: 'poolRename', old: sel, name}); pool = name;
+      }
       const o = {a: 'fieldSetup', cat, pool};
-      // Cambiando categoria o piscina si lasciano a lei lunghezza e larghezza; altrimenti valgono i numeri scritti.
       if (cat === S.fieldCat) { const l = parseFloat(($('fsLen').value || '').replace(',', '.')); if (l >= 10 && l <= 35) o.len = l; }
-      if (pool === S.pool) { const v = ($('fsWid').value || '').trim(); const wv = v === '' ? 0 : parseFloat(v.replace(',', '.')); if (wv === 0 || (wv >= 6 && wv <= 30)) o.wid = wv; }
+      const v = ($('fsWid').value || '').trim(), wv = v === '' ? 0 : parseFloat(v.replace(',', '.'));
+      if (wv === 0 || (wv >= 6 && wv <= 30)) o.wid = wv;
       cmd(o); toast('Campo salvato', 1500);
-      if ((S.corners || []).length === 4) setTimeout(() => dlg({msg: 'Le misure valgono dalla prossima calibrazione: per usarle subito rifai "Angolo per angolo".', buttons: [{t: 'OK', cls: 'pri'}]}), 400);
-    }}, {t: 'Annulla'}]});
+      if (after) setTimeout(after, 700);
+      else if ((S.corners || []).length === 4) setTimeout(() => dlg({msg: 'Le misure valgono dalla prossima calibrazione: per usarle subito rifai "Angolo per angolo".', buttons: [{t: 'OK', cls: 'pri'}]}), 400);
+    }}].concat(S.pool ? [{t: 'Elimina piscina', cb: () => setTimeout(() => dlg({msg: 'Eliminare la piscina <b>' + esc(S.pool) + '</b> con le sue misure?',
+      buttons: [{t: 'Elimina', cls: 'pri', cb: () => { cmd({a: 'poolDelete', name: S.pool}); toast('Piscina eliminata', 1500); }}, {t: 'Annulla'}]}), 300)}] : []).concat([{t: 'Annulla'}])});
+  // Cambiando piscina nell'elenco si aggiornano nome e larghezza ricordata.
+  setTimeout(() => { const ps = $('fsPool'); if (!ps) return; ps.onchange = () => {
+    const p = poolList().find(x => x.name === ps.value);
+    $('fsName').value = p ? p.name : ''; $('fsWid').value = p && +p.width > 0 ? f1(p.width) : '';
+    if (!p) $('fsName').focus();
+  }; }, 0);
 }
 $('fieldBtn').onclick = () => { $('prep').style.display = 'none'; fieldDlg(); };
 // Calibrazione a mano (predefinita): si toccano i 4 angoli; il giro automatico del gimbal resta a scelta.
+let poolAsked = false;
 function doCalib(auto) {
   if (S.busyGeo) { toast('Aspetta che finisca la misura in corso', 2500); return; }
   wzCalib = true;
   learnLeft = 0; learnWait = false;
   if (S.goalCheck) cmd({a: 'goalCancel'});
+  // 0.13.6: prima di calibrare si sceglie (o si crea) la piscina.
+  if (S.fieldLen !== undefined && !S.pool && !poolAsked) { fieldDlg(() => { poolAsked = true; doCalib(auto); }); return; }
   if (auto && S.docked) { cmd({a: 'scanStart'}); toast('Calibrazione automatica: il gimbal fa un giro del campo', 3500); }
   else {
     // Un angolo alla volta: lo zoom va al più largo, poi ogni tocco viene registrato con la posizione
@@ -1623,12 +1663,18 @@ function renderMapping() {
   if (idx >= 0) {
     if (!mapping) { mapping = true; $('viewBox').classList.add('calib', 'mapping'); }
     document.body.classList.add('mapping');
-    $('calibHint').textContent = redoIdx >= 0
+    const st = S.mapStage;
+    if (st !== undefined) $('calibHint').textContent = 'Angolo ' + (idx + 1) + (redoIdx >= 0 ? '' : ' di 4') + ' · ' + (S.mapName || '') + ' · ' +
+      (st === 0 ? 'tocca l\'angolo: la camera ci va e ingrandisce'
+       : st === 1 ? 'metti il cerchio verde sull\'angolo (trascinalo o tocca il punto): poi la camera va a 5x'
+       : 'regola il cerchio verde sull\'angolo, poi premi ✓ Segna angolo');
+    else $('calibHint').textContent = redoIdx >= 0
       ? 'Angolo ' + (idx + 1) + ' · sposta il pallino giallo su: ' + (S.mapName || '') + ' · se non lo vedi, muovi la camera col dito'
       : S.mapFine ? 'Angolo ' + (idx + 1) + ' di 4 · tocca di nuovo l\'angolo: la camera lo centra e ingrandisce; a 5x, al centro e a immagine ferma, il tocco lo segna · ' + (S.mapName || '')
       : 'Angolo ' + (idx + 1) + ' di 4 · tocca: ' + (S.mapName || '') + ' · se non lo vedi, muovi la camera col dito';
   }
 }
+$('mapOkBtn').onclick = () => { cmd({a: 'mapConfirm'}); };
 $('mapWideBtn').onclick = () => { cmd({a: 'mapWide'}); toast('Torno largo: tocca di nuovo l\'angolo', 2000); };
 $('mapCancelBtn').onclick = () => { cmd({a: 'mapCancel'}); redoQueue = []; redoFlow = false; redoIdx = -1; mapping = false; mapSeen = false; $('viewBox').classList.remove('calib', 'mapping'); document.body.classList.remove('mapping'); };
 function hManual() {
@@ -1650,6 +1696,7 @@ function renderFieldBtns() {
   $('fbRedo').style.display = done && !busy ? '' : 'none';
   $('fbCalib').style.display = !done && !busy && !calibPts ? '' : 'none';
   $('fbScan').style.display = 'none';  // il giro automatico resta solo nel menu
+  $('fbBack').style.display = !busy ? '' : 'none';  // 24/11: si torna al passo precedente
   $('fbHelp').style.display = !done && !busy && !calibPts ? '' : 'none';
   const r = $('view').getBoundingClientRect(), c = S.corners || [];
   let x = r.left + r.width / 2, y = r.top + r.height / 2;
@@ -1705,6 +1752,7 @@ $('goalBtn').onclick = () => { $('prep').style.display = 'none'; cmd({a: 'goalCh
 $('fbRedo').onclick = () => { OK.c = false; saveWz(); doCalib(); };
 $('fbCalib').onclick = () => doCalib(false);
 $('fbScan').onclick = () => doCalib(true);
+$('fbBack').onclick = () => goStep(1);
 let lvHist = [];
 function renderWizard() {
   renderFieldBtns();
@@ -2262,7 +2310,7 @@ $('prepClose').onclick = () => { $('prep').style.display = 'none'; };
 // aggiorna 5 volte al secondo, iOS a volte non trasforma il tocco in "click". Un tocco breve e fermo ora
 // agisce subito al rilascio del dito. Esclusi campi di testo, menu a tendina e pulsanti "tieni premuto".
 // 23/11 notte: lo stesso tocco rapido vale anche per finestre, tabellone, calibrazione e pannello LIVE.
-['prepPanel', 'ckBox', 'fieldBtns', 'startBox', 'dlg', 'regBox', 'sbAsk', 'cdBox', 'loupe', 'livePanel', 'sbBar', 'goalBox', 'penBox', 'mapCancelBtn', 'mapWideBtn', 'portraitBanner'].forEach(id => { const P = $(id); if (!P) return; (function () {
+['prepPanel', 'ckBox', 'fieldBtns', 'startBox', 'dlg', 'regBox', 'sbAsk', 'cdBox', 'loupe', 'livePanel', 'sbBar', 'goalBox', 'penBox', 'mapCancelBtn', 'mapWideBtn', 'mapOkBtn', 'portraitBanner'].forEach(id => { const P = $(id); if (!P) return; (function () {
   let sx = 0, sy = 0, t0 = 0, tgt = null;
   P.addEventListener('touchstart', e => { const t = e.touches[0]; sx = t.clientX; sy = t.clientY; t0 = Date.now(); tgt = e.target; }, {passive: true});
   P.addEventListener('touchend', e => {
@@ -2321,6 +2369,19 @@ vb.addEventListener('pointerdown', e => {
   // 24/11: un trascinamento finito prima non fa perdere il tocco successivo.
   if (e.isPrimary) mouseDragged = false;
   if (e.pointerType === 'touch' && touches.size > 1) return;
+  if (mapping && S.mapMarker && S.mapMarker.length === 2) {
+    const r0 = $('view').getBoundingClientRect(), m = S.mapMarker;
+    if (Math.hypot(e.clientX - r0.left - m[0] * r0.width, e.clientY - r0.top - m[1] * r0.height) < (e.pointerType === 'touch' ? 46 : 32)) {
+      e.stopImmediatePropagation(); e.preventDefault();
+      VD = {i: 0, pts: [m.slice()], id: e.pointerId, moved: false, size: 0.06, lastMove: Date.now(), marker: true};
+      vb.setPointerCapture(e.pointerId);
+      placeFLoupe(e.clientX, e.clientY);
+      $('fLoupeTxt').textContent = 'Angolo ' + ((S.mapIndex | 0) + 1);
+      $('fLoupe').style.display = 'block';
+      loadFLoupe();
+      return;
+    }
+  }
   const i = hitCorner(e); if (i < 0) return;
   const base = (calibPts || S.corners || []).map(p => p.slice());
   if (base.length !== 4 && !calibPts) return;
@@ -2350,6 +2411,10 @@ function vertexEnd(e) {
   if (e) e.stopImmediatePropagation();
   const v = VD; VD = null;
   $('fLoupe').style.display = 'none';
+  if (v.marker) {
+    if (v.moved) { mouseDragged = true; S.mapMarker = v.pts[0]; cmd({a: 'mapMark', x: v.pts[0][0], y: v.pts[0][1]}); }
+    drawOverlay(); return;
+  }
   if (v.moved) {
     mouseDragged = true;
     if (calibPts) { calibPts = v.pts; dragPts = null; }
