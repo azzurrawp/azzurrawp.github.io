@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <!-- WP-LIVE-MONITOR-API:1 -->
-<!-- WP-LIVE-PAGE-STAMP:2026112408 -->
+<!-- WP-LIVE-PAGE-STAMP:2026112409 -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -125,8 +125,9 @@ body.goalCheck #fieldBtns,body.goalCheck #ckBox,body.goalCheck #seg{display:none
 #hud{position:absolute;inset:0;pointer-events:none;z-index:4}
 #hud > *{pointer-events:auto}
 .ok{color:#5ee08a}.warn{color:#ffb347}.bad{color:#ff6b6b}
-#statusBar{position:absolute;top:8px;left:50%;transform:translateX(-50%);display:flex;gap:12px;align-items:center;padding:5px 14px;border-radius:16px;background:rgba(0,0,0,.6);font-size:13px;white-space:nowrap;pointer-events:none}
-#modeTxt{position:absolute;top:40px;left:50%;transform:translateX(-50%);font-size:12px;background:rgba(0,0,0,.5);padding:2px 10px;border-radius:8px;white-space:nowrap;pointer-events:none}
+#statusBar{position:absolute;top:12px;left:calc(max(12px,var(--sl)) + 80px);display:flex;gap:12px;align-items:center;min-height:52px;padding:0 14px;border:0;border-radius:16px;background:rgba(0,0,0,.6);color:#fff;font:inherit;font-size:13px;white-space:nowrap;cursor:pointer}
+#statusBar .sbm{font-size:15px}#statusBar .sbm b{font-weight:800}#statusBar svg{width:14px;height:14px}
+#modeTxt{position:absolute;top:70px;left:calc(max(12px,var(--sl)) + 80px);font-size:12px;background:rgba(0,0,0,.5);padding:2px 10px;border-radius:8px;white-space:nowrap;pointer-events:none}
 .chip{padding:1px 8px;border-radius:8px}
 .rb{display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:0;color:#fff;font-size:12px;padding:0;cursor:pointer}
 .rc{width:64px;height:64px;border-radius:50%;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;font-size:22px}
@@ -158,6 +159,27 @@ body:not(.clkOn) #sbClock,body:not(.clkOn) #pNextT,body:not(.clkOn) #lenRow,body
 body.clkOn #pPrev,body.clkOn #pNum,body.clkOn #pNext{display:none !important}
 #sbBar.tight .tm{display:none}
 #largaBtn{display:none !important}
+/* 0.13.8: un solo pulsante CAMERA (Manuale / Assistita / Automatica) e rotella per scegliere. */
+#camBtn{display:flex;align-items:center;gap:10px;text-align:left}
+#camBtn .cl{display:block;font-size:11px;letter-spacing:.06em;font-weight:600;opacity:.85}
+#camBtn #camName{display:block;font-size:17px;font-weight:800}
+#pick{position:fixed;inset:0;z-index:26;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.5)}
+#pick .pk{width:min(560px,94vw);border-radius:28px;background:rgba(36,36,38,.97);padding:18px 20px 16px;box-sizing:border-box;color:#fff}
+#pick .pkHead{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+#pick .pkHead b{font-size:18px}#pick .pkHead span{font-size:13px;color:#aeaeb2}
+#pick .pkRow{display:flex;gap:16px}
+#pick .pkWheel{position:relative;width:210px;height:200px;flex-shrink:0}
+#pick .pkBand{position:absolute;left:0;right:0;top:72px;height:56px;border-radius:14px;background:rgba(10,132,255,.22);border:1.5px solid #0a84ff;pointer-events:none}
+#pkList{position:absolute;inset:0;overflow-y:auto;padding:72px 0;box-sizing:border-box;scroll-snap-type:y mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+#pkList::-webkit-scrollbar{display:none}
+#pkList button{display:block;width:100%;height:56px;border:0;background:transparent;color:#8e8e93;font-size:17px;font-weight:500;scroll-snap-align:center;cursor:pointer}
+#pkList button.on{color:#fff;font-size:20px;font-weight:700}
+#pick .pkInfo{flex:1;min-width:0;display:flex;flex-direction:column;gap:8px;padding-top:6px}
+#pkName{font-size:20px}#pkDesc{font-size:15px;line-height:1.4;color:#e5e5ea}#pkWhen{font-size:13px;line-height:1.4;color:#aeaeb2}
+#pick .pkBtns{display:flex;gap:10px;justify-content:flex-end;margin-top:10px}
+#pick .pkBtns button{min-height:48px;padding:0 22px;border-radius:999px;border:0;background:rgba(120,120,128,.32);color:#fff;font-size:16px;font-weight:600}
+#pick .pkBtns .pri{background:#0a84ff;font-weight:700}
+@media (orientation:portrait) and (max-width:600px){#pick .pkRow{flex-direction:column}#pick .pkWheel{width:100%;height:170px}#pick .pkBand{top:57px}#pkList{padding:57px 0}}
 #finBtn.low{top:66px}
 #penBox{position:absolute;left:max(12px,var(--sl));top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:16px}
 #penBox button{min-width:112px;min-height:60px;border:2px solid rgba(255,255,255,.4);border-radius:14px;background:rgba(0,0,0,.65);color:#fff;font-size:16px;font-weight:800;cursor:pointer}
@@ -190,8 +212,8 @@ body.clkOn #pPrev,body.clkOn #pNum,body.clkOn #pNext{display:none !important}
   #ckBox .ck{padding:5px 8px;margin:3px 0}
 }
 @media (orientation:portrait) and (max-width:600px){
-  #statusBar{top:104px;flex-wrap:wrap;justify-content:center;white-space:normal;max-width:94vw;font-size:12px;gap:8px}
-  #modeTxt{top:auto;bottom:150px}
+  #statusBar{top:104px;left:50%;transform:translateX(-50%);flex-wrap:wrap;justify-content:center;white-space:normal;max-width:94vw;font-size:12px;gap:8px}
+  #modeTxt{top:auto;bottom:150px;left:50%;transform:translateX(-50%)}
   #sbBar{left:6px;right:6px;bottom:8px;transform:none;justify-content:space-between;gap:4px}
   #sbBar .tm{display:none}
   #seg{bottom:182px}
@@ -265,6 +287,7 @@ html,body{font-family:-apple-system,"SF Pro Text","SF Pro Display",system-ui,san
 #seg button + button{border-left:.5px solid rgba(255,255,255,.18)}
 #seg button small{font-weight:500;opacity:.75}
 #statusBar{border-radius:999px;font-weight:500}
+@media (orientation:portrait) and (max-width:600px){#statusBar{border-radius:18px;padding:6px 12px;width:min(360px,94vw);box-sizing:border-box}}
 #modeTxt{border-radius:999px;padding:3px 12px;font-weight:600}
 #toast{border-radius:16px;color:#fff;font-weight:600}
 #sbBar{border:0;border-radius:22px}
@@ -451,14 +474,12 @@ html.nativeBg #calibHint,html.nativeBg #livePanel .lp{-webkit-backdrop-filter:no
       <button class="btn2" id="addReg" style="width:100%;margin-top:8px">Collega un regista (QR e link)</button>
     </div>
     </details>
-    <details class="sec" id="secAuto"><summary>Ripresa automatica<span class="n" id="nAuto"></span></summary>
+    <details class="sec" id="secAuto"><summary>Ripresa<span class="n" id="nAuto"></span></summary>
     <div class="card" id="autoCard">
-      <div class="small">Con <b>Assistita</b> la camera segue il gioco e zooma da sola. Serve il campo calibrato.</div>
-      <label class="tgl"><span>Modalità della ripresa<br><small id="smHelp"></small></span><select id="shootMode"><option value="automatico">Automatico</option><option value="partita">Partita</option><option value="riscaldamento">Riscaldamento</option><option value="allenamento">Allenamento</option></select></label>
+      <div class="small">Chi muove la camera (Manuale, Assistita, Automatica) si sceglie col pulsante <b>CAMERA</b> in basso a destra; la modalità anche toccando la barra in alto. Assistita e Automatica vogliono il campo calibrato.</div>
+      <label class="tgl"><span>Modalità della ripresa<br><small id="smHelp"></small></span><select id="shootMode"><option value="automatico">Adattivo</option><option value="partita">Partita</option><option value="riscaldamento">Riscaldamento</option><option value="allenamento">Allenamento</option></select></label>
       <button class="btn2" id="followStop" style="width:100%;margin-top:6px;display:none">Smetti di seguire il pallone</button>
-      <label class="tgl"><span>Zoom automatico (regole pallanuoto)</span><input type="checkbox" id="azOn"></label>
       <label class="tgl"><span>Azzurra attacca verso<br><small>1° e 2° tempo; poi si inverte da solo</small></span><select id="azzDir"><option value="">Non impostato</option><option value="sinistra">Sinistra</option><option value="destra">Destra</option></select></label>
-      <button class="btn2" id="autoBtn" style="width:100%;margin-top:8px">Ripresa automatica completa (in prova)</button>
     </div>
     </details>
     <details class="sec" id="secCampo"><summary>Preparazione<span class="n" id="nPrep"></span></summary>
@@ -572,6 +593,7 @@ html.nativeBg #calibHint,html.nativeBg #livePanel .lp{-webkit-backdrop-filter:no
   </div>
 </div></div>
 <div id="dlg"><div><div id="dlgMsg"></div><input id="dlgIn"><div id="dlgBtns"></div></div></div>
+<div id="pick"><div class="pk" role="dialog"><div class="pkHead"><b id="pkTitle"></b><span>scorri o tocca</span></div><div class="pkRow"><div class="pkWheel"><div class="pkBand"></div><div id="pkList"></div></div><div class="pkInfo"><b id="pkName"></b><div id="pkDesc"></div><div id="pkWhen"></div></div></div><div class="pkBtns"><button id="pkNo">Annulla</button><button id="pkOk" class="pri">Usa questa</button></div></div></div>
 <div id="livePanel"><div class="lp">
   <div class="lpT">Diretta YouTube</div>
   <div class="lpL">Chiave dello stream</div>
@@ -614,20 +636,20 @@ html.nativeBg #calibHint,html.nativeBg #livePanel .lp{-webkit-backdrop-filter:no
     <div id="goalBox"><div id="goalTxt"></div><div class="row"><button id="goalOkBtn">✓ Giusto</button><button id="goalSkipBtn">Salta</button></div></div>
   </div>
   <div id="hud">
-    <div id="statusBar"></div>
+    <button id="statusBar" aria-haspopup="dialog" aria-label="Stato e modalità della ripresa: tocca per cambiare modalità"></button>
     <div id="modeTxt"></div>
     <button class="rb" id="prepBtn"><span class="rc"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></span><span class="rl">Menu</span></button>
     <button class="rb" id="liveBtn"><span class="rc">● LIVE</span><span class="rl" id="liveTime">spenta</span></button>
     <div id="recWrap"><button class="rb" id="rec"><span class="rc"><span id="recDot"></span></span><span class="rl" id="recTime">REC</span></button></div>
     <button class="rb" id="micBtn"><span class="rc" id="micIcon">🎤</span><span class="rl" id="micTxt">Mic</span></button>
-    <div id="seg"><button id="zOut" class="zb" title="Allarga">−</button><button id="zIn" class="zb" title="Stringi">+</button><button id="largaBtn">Larga</button><button id="manBtn">Manuale<small>muovi e zoomi tu</small></button><button id="assistBtn">Assistita<small>zoom automatico</small></button></div>
+    <div id="seg"><button id="zOut" class="zb" title="Allarga">−</button><button id="zIn" class="zb" title="Stringi">+</button><button id="largaBtn">Larga</button><button id="camBtn" aria-haspopup="dialog"><span><span class="cl">CAMERA</span><span id="camName">Manuale</span></span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 15l6-6 6 6"/></svg></button></div>
     <div id="ckBox">
       <div id="ckTitle" style="font-weight:800;color:#ffd400;cursor:pointer">Preparazione <span id="ckStep" style="color:#fff;font-weight:600"></span> <span id="ckArrow">▾</span></div>
       <div id="wzBody"></div>
       <div id="wzNav"><button id="wzBack">‹ Indietro</button><button id="wzSkip">Salta ›</button></div>
     </div>
     <div id="fieldBtns"><div id="fbHelp">Tocca gli <b>angoli del campo</b>: dove le linee di porta incontrano i bordi lunghi della vasca, in quest'ordine:<svg width="200" height="70" viewBox="0 0 200 70"><polygon points="40,10 160,10 190,60 10,60" fill="rgba(30,142,62,.35)" stroke="#7CFC9A" stroke-width="2"/><g font-size="13" font-weight="800" fill="#ffd400"><text x="2" y="58">1</text><text x="190" y="58">2</text><text x="164" y="14">3</text><text x="28" y="14">4</text></g><text x="100" y="40" font-size="11" fill="#fff" text-anchor="middle">lato vicino a te in basso</text></svg></div><button id="fbDone">✓<br>Fatto</button><button id="fbRedo">↺ Rifai</button><button id="fbCalib">Tocca i 4 angoli</button><button id="fbScan">Giro automatico col gimbal</button><button id="fbBack">‹ Indietro</button></div>
-    <div id="startHint">Per iniziare: scegli <b>Manuale</b> o <b>Assistita</b>, poi tocca <b>REC</b> per registrare (e LIVE per la diretta).</div>
+    <div id="startHint">Per iniziare: scegli la <b>CAMERA</b> in basso a destra, poi tocca <b>REC</b> per registrare (e LIVE per la diretta).</div>
     <button id="goBtn">▶ Inizia</button>
     <button id="finBtn">■ Fine partita</button>
     <div id="penBox"><button id="penL">◀ Rigore</button><button id="penR">Rigore ▶</button></div>
@@ -655,7 +677,7 @@ try { PIN = localStorage.getItem('wpPin') || ''; } catch (e) {}
       set(v) { v = v == null ? '' : String(v); if (d.get.call(this) === v) return; d.set.call(this, v); }});
   });
 })();
-const PAGE_VER = '2026112408';
+const PAGE_VER = '2026112409';
 let LOCAL = false;
 try { LOCAL = new URLSearchParams(location.search).get('local') === '1' || sessionStorage.getItem('wpLocal') === '1'; if (LOCAL) sessionStorage.setItem('wpLocal', '1'); } catch (e) {}
 // 23/11: sull'iPhone che riprende la fotocamera vera sta sotto la pagina (anteprima nativa): niente immagini dal server.
@@ -919,24 +941,25 @@ function render() {
   if (S.atLimit && !renderEnd.limitShown) { toast('Bordo del campo: il gimbal non va oltre', 1500); renderEnd.limitShown = true; }
   if (!S.atLimit) renderEnd.limitShown = false;
   const bc = v => v >= 0 && v < 20 ? 'bad' : '';
-  // 23/11: Manuale/Assistita si leggono già sul pulsante evidenziato in basso: qui solo AUTO (non ha pulsante).
-  let sb = S.auto ? '<span class="chip" style="background:#1e8e3e">AUTO</span>' : '';
-  sb += '<span>' + (S.docked ? '<span class="ok">●</span>' : '<span class="bad">●</span>') + ' Gimbal</span>';
+  // 0.13.8: barra di stato = gimbal (con carica), campo, iPhone, poi CAMERA · modalità; si tocca per la modalità.
+  const cam = camOf(), modeName = (MODES.find(m => m.v === (S.shootMode || 'automatico')) || MODES[0]).name;
+  let sb = '<span>' + (S.docked ? '<span class="ok">●</span>' : '<span class="bad">●</span>') + ' Gimbal'
+    + (S.gimbalBattery >= 0 ? ' <b class="' + bc(S.gimbalBattery) + '">' + S.gimbalBattery + '%</b>' : '') + '</span>';
   sb += '<span>' + (S.corners && S.corners.length === 4 ? '<span class="ok">●</span>' : '<span class="warn">●</span>') + ' Campo</span>';
-  sb += '<span class="' + bc(S.battery) + '">iPhone ' + (S.battery >= 0 ? S.battery + '%' : '?') + '</span>';
-  if (S.gimbalBattery >= 0) sb += '<span class="' + bc(S.gimbalBattery) + '">Gimbal ' + S.gimbalBattery + '%</span>';
+  sb += '<span>iPhone <b class="' + bc(S.battery) + '">' + (S.battery >= 0 ? S.battery + '%' : '?') + '</b></span>';
   if (S.thermal !== 'normale' && S.thermal !== 'tiepido') sb += '<span class="bad">Caldo</span>';
+  sb += '<span class="sbm"><b style="color:' + cam.color + '">' + cam.name.toUpperCase() + '</b> · <b style="font-weight:700">' + modeName + '</b></span>'
+    + '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>';
   $('statusBar').innerHTML = sb;
   renderMenuNotes();
   renderButtons();
   renderGoal();
   renderNet();
   // La modalità è già nel riquadro in alto: qui solo il dettaglio (es. "palla persa"), senza ripeterla.
-  const md = (S.mode || '').replace(/^(MANUALE|ASSISTITA|AUTOMATICO)( · )?/, '');
+  const md = (S.mode || '').replace(/^(MANUALE|ASSISTITA|AUTOMATICO|AUTOMATICA)( · )?/, '');
   $('modeTxt').textContent = md; $('modeTxt').style.display = md ? '' : 'none';
-  $('autoBtn').style.background = S.auto ? '#1e8e3e' : '';
-  $('manBtn').style.background = !S.auto && !S.assisted ? 'var(--ios-orange)' : '';
-  $('assistBtn').style.background = S.assisted ? 'var(--ios-blue)' : '';
+  $('camName').textContent = cam.name; $('camBtn').style.background = cam.bg;
+  checkMatchStart();
   const micSvg = off => '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21M8.5 21h7"/>' + (off ? '<path d="M4 4l16 16"/>' : '') + '</svg>';
   const micKey = S.audio === false ? 'na' : S.muted ? 'off' : 'on';
   if ($('micIcon').dataset.k !== micKey) { $('micIcon').dataset.k = micKey; $('micIcon').innerHTML = micSvg(micKey !== 'on'); }
@@ -1059,31 +1082,33 @@ function drawOverlay() {
     x.strokeStyle = '#000'; x.lineWidth = 1.5;
     x.beginPath(); x.arc(cp[0] * w, cp[1] * h, 5, 0, 7); x.fill(); x.stroke();
   });
-  // 0.13.0: tutti i palloni visti in vasca, cerchio sottile (in allenamento si toccano per sceglierne uno).
-  if ((S.auto || S.assisted) && (S.balls || []).length > 1) {
-    x.strokeStyle = 'rgba(255,214,10,.9)'; x.lineWidth = 2;
-    S.balls.forEach(b => { x.beginPath(); x.arc(b[0] * w, b[1] * h, 14, 0, 7); x.stroke(); });
-  }
+  // 0.13.8: cerchi del pallone pensati per l'acqua: arancione = seguito, bianco = altri palloni,
+  // fucsia tratteggiato = perso (sull'ultima posizione); bordino scuro per i riflessi.
+  const ring = (px, py, r, col, lw, dash) => {
+    x.setLineDash(dash || []);
+    x.strokeStyle = 'rgba(0,0,0,.75)'; x.lineWidth = lw + 3; x.beginPath(); x.arc(px, py, r, 0, 7); x.stroke();
+    x.strokeStyle = col; x.lineWidth = lw; x.beginPath(); x.arc(px, py, r, 0, 7); x.stroke();
+    x.setLineDash([]);
+  };
+  const banner = t => {
+    x.font = 'bold 16px sans-serif'; const tw = x.measureText(t).width + 24;
+    x.fillStyle = 'rgba(0,0,0,.65)'; x.fillRect(w / 2 - tw / 2, 100, tw, 26);
+    x.fillStyle = '#ff5fae'; x.textAlign = 'center'; x.fillText(t, w / 2, 119); x.textAlign = 'start';
+  };
+  if ((S.auto || S.assisted) && (S.balls || []).length > 1)
+    S.balls.forEach(b => ring(b[0] * w, b[1] * h, 14, 'rgba(255,255,255,.95)', 2));
   if (S.ball) {
     lastBall = S.ball; lastBallT = Date.now();
     if (!S.auto && !S.assisted) return;
-    x.strokeStyle = '#ff9f1a'; x.lineWidth = 4;
-    x.beginPath(); x.arc(S.ball[0] * w, S.ball[1] * h, 18, 0, 7); x.stroke();
+    ring(S.ball[0] * w, S.ball[1] * h, 18, '#ff9f1a', 4);
   } else if (!S.auto && !S.assisted) {
     // In Manuale la palla non serve: niente scritte.
   } else if (lastBall) {
-    // Palla persa: cerchio tratteggiato grigio sull'ultima posizione nota.
-    const secs = Math.round((Date.now() - lastBallT) / 1000);
-    x.strokeStyle = 'rgba(200,200,200,.9)'; x.lineWidth = 3; x.setLineDash([6, 6]);
-    x.beginPath(); x.arc(lastBall[0] * w, lastBall[1] * h, 22, 0, 7); x.stroke();
-    x.setLineDash([]);
-    x.fillStyle = 'rgba(0,0,0,.6)'; x.fillRect(w / 2 - 115, 64, 230, 26);
-    x.fillStyle = '#ffb347'; x.font = 'bold 16px sans-serif'; x.textAlign = 'center';
-    x.fillText('PALLA PERSA da ' + secs + ' s', w / 2, 83); x.textAlign = 'start';
+    const secs = Math.max(1, Math.round((Date.now() - lastBallT) / 1000));
+    ring(lastBall[0] * w, lastBall[1] * h, 22, '#ff2d95', 4, [8, 6]);
+    banner('Palla persa da ' + secs + (secs === 1 ? ' secondo' : ' secondi'));
   } else {
-    x.fillStyle = 'rgba(0,0,0,.6)'; x.fillRect(w / 2 - 115, 64, 230, 26);
-    x.fillStyle = '#ffb347'; x.font = 'bold 16px sans-serif'; x.textAlign = 'center';
-    x.fillText('PALLA NON TROVATA', w / 2, 83); x.textAlign = 'start';
+    banner('Palla non trovata');
   }
 }
 
@@ -2007,8 +2032,7 @@ function checkEnd() {
 // 23/11: stato in breve accanto al titolo di ogni sezione del menu.
 function renderMenuNotes() {
   const set = (id, t) => { const e = $(id); if (e && e.textContent !== t) e.textContent = t; };
-  set('nAuto', (S.auto ? 'automatica (prova)' : S.assisted ? 'Assistita' : 'Manuale')
-    + (S.shootMode && S.shootMode !== 'automatico' ? ' · ' + S.shootMode : ''));
+  set('nAuto', camOf().name + ' · ' + (MODES.find(m => m.v === (S.shootMode || 'automatico')) || MODES[0]).name);
   set('nPrep', (S.corners || []).length === 4 ? 'campo calibrato ✓' : 'campo da calibrare');
   const b = S.sb || {};
   set('nTeams', b.home && b.away ? (b.home.short || '') + ' – ' + (b.away.short || '') : '');
@@ -2111,26 +2135,98 @@ function setupCaps() {
 }
 
 $('micBtn').onclick = () => cmd({a: 'mute', on: !S.muted});
-$('autoBtn').onclick = () => {
-  $('prep').style.display = 'none';
-  if (S.auto && !S.assisted) { cmd({a: 'auto', on: false}); return; }
-  dlg({msg: '<b>Auto in prova</b><br>La ripresa completamente automatica non è ancora stata provata in partita. Accenderla lo stesso?',
-    buttons: [{t: 'Accendi Auto', cls: 'red', cb: () => { if (S.assisted) cmd({a: 'assisted', on: false}); cmd({a: 'auto', on: true}); }}, {t: 'Resta com\'è', cls: 'pri'}]});
+// 0.13.8: chi muove la camera e modalità della ripresa si scelgono con una rotella.
+const CAMS = [
+  {v: 'man', name: 'Manuale', desc: 'Muovi e zoomi tu: col gimbal, col dito sullo schermo o dal monitor regista.', when: 'Quando vuoi decidere tu ogni inquadratura.', color: '#ffffff', bg: ''},
+  {v: 'assist', name: 'Assistita', desc: 'Muovi tu la camera, lo zoom lo fa l\u2019iPhone seguendo il gioco. Se zoommi a mano, l\u2019automatico si ferma per qualche secondo.', when: 'Quando c\u2019è qualcuno al gimbal o al monitor.', color: '#64d2ff', bg: '#0a5ea8'},
+  {v: 'auto', name: 'Automatica', desc: 'Fa tutto l\u2019iPhone: dove puntare e quanto zoomare, con le regole della pallanuoto e la modalità scelta.', when: 'Quando nessuno segue la ripresa.', color: '#30d158', bg: '#1e8e3e'}];
+const MODES = [
+  {v: 'automatico', name: 'Adattivo', desc: 'Un solo pallone: lo segue. Più palloni o nessuno: inquadra i giocatori, alternando le squadre. Torna al pallone quando ne resta uno.', when: 'Va bene quasi sempre: si adatta da solo.'},
+  {v: 'partita', name: 'Partita', desc: 'Segue sempre il pallone in campo. Se ne compare un altro per poco, resta su quello che stava seguendo.', when: 'Durante la partita.'},
+  {v: 'riscaldamento', name: 'Riscaldamento', desc: 'Alterna le due squadre, 20 secondi ciascuna, con una panoramica lenta. Toccare un pallone non fa niente.', when: 'Prima della partita, con tanti palloni in acqua.'},
+  {v: 'allenamento', name: 'Allenamento', desc: 'Come il riscaldamento; tocchi un pallone sullo schermo e la camera lo segue. \u201cSmetti di seguire\u201d torna ai giocatori.', when: 'In allenamento.'}];
+function camOf() { return CAMS[S.auto ? 2 : S.assisted ? 1 : 0]; }
+function setCam(v) {
+  hintDone();
+  if (v === 'man') {
+    if (S.assisted) cmd({a: 'assisted', on: false});
+    if (S.auto || S.assisted) cmd({a: 'auto', on: false});
+    toast('Manuale: muovi e zoomi tu (due dita per lo zoom)', 2500);
+  } else if (v === 'assist') {
+    if (S.assisted) return;
+    cmd({a: 'assisted', on: true});
+    toast('Assistita: muovi tu il gimbal, lo zoom è automatico', 2500);
+  } else {
+    if (S.auto) return;
+    cmd({a: 'auto', on: true});
+    toast('Automatica: l\u2019iPhone muove e zooma da solo', 2500);
+  }
+}
+let pk = null;
+function openPick(kind) {
+  const list = kind === 'cam' ? CAMS : MODES;
+  const cur = kind === 'cam' ? CAMS.indexOf(camOf()) : Math.max(0, MODES.findIndex(m => m.v === (S.shootMode || 'automatico')));
+  pk = {kind, list, i: cur};
+  $('pkTitle').textContent = kind === 'cam' ? 'Chi muove la camera' : 'Modalità della ripresa';
+  $('pkList').innerHTML = list.map((m, i) => '<button data-i="' + i + '">' + m.name + '</button>').join('');
+  $('pick').style.display = 'flex';
+  $('pkList').scrollTop = cur * 56;
+  pickShow();
+}
+function pickShow() {
+  if (!pk) return;
+  const m = pk.list[pk.i];
+  [...$('pkList').children].forEach((b, i) => b.classList.toggle('on', i === pk.i));
+  $('pkName').textContent = m.name; $('pkDesc').textContent = m.desc; $('pkWhen').textContent = m.when;
+}
+$('pkList').addEventListener('scroll', () => {
+  if (!pk) return;
+  const i = Math.max(0, Math.min(pk.list.length - 1, Math.round($('pkList').scrollTop / 56)));
+  if (i !== pk.i) { pk.i = i; pickShow(); }
+});
+$('pkList').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b || !pk) return;
+  pk.i = +b.dataset.i; pickShow();
+  $('pkList').scrollTo({top: pk.i * 56, behavior: 'smooth'});
+});
+$('pkNo').onclick = () => { $('pick').style.display = 'none'; pk = null; };
+$('pkOk').onclick = () => {
+  if (!pk) return;
+  const m = pk.list[pk.i], kind = pk.kind;
+  $('pick').style.display = 'none'; pk = null;
+  if (kind === 'cam') setCam(m.v);
+  else { cmd({a: 'shootMode', m: m.v}); S.shootMode = m.v; renderShootMode(); toast('Modalità: ' + m.name, 2000); }
 };
-// Due modalità per ora: Manuale (il regista muove e zooma) e Assistita (il regista muove, zoom automatico).
-// Il suggerimento "Per iniziare" sparisce appena si sceglie la modalità (e non torna per tutta la partita).
+$('pick').addEventListener('click', e => { if (e.target === $('pick')) $('pkNo').onclick(); });
+$('camBtn').onclick = () => openPick('cam');
+$('statusBar').onclick = () => openPick('mode');
+// Il suggerimento "Per iniziare" sparisce appena si sceglie la camera (e non torna per tutta la partita).
 function hintDone() { try { sessionStorage.setItem('wpStarted', '1'); } catch (e) {} document.body.classList.remove('firstRun'); }
-['manBtn', 'assistBtn'].forEach(id => $(id).addEventListener('click', hintDone));
-$('assistBtn').onclick = () => {
-  if (S.assisted) return;
-  cmd({a: 'assisted', on: true});
-  toast('Assistita: muovi tu il gimbal, lo zoom è automatico', 2500);
-};
-$('manBtn').onclick = () => {
-  if (S.assisted) cmd({a: 'assisted', on: false});
-  if (S.auto || S.assisted) cmd({a: 'auto', on: false});
-  toast('Manuale: muovi e zoomi tu (due dita per lo zoom)', 2500);
-};
+// 0.13.8: avviso se la partita è cominciata e la ripresa è ancora in Riscaldamento o Allenamento.
+// Il tablet non manda il cronometro: vale il primo cambio di risultato o di tempo dal tablet,
+// oppure il cronometro del tabellone fatto partire qui.
+let msPrev = null, msSnooze = 0, msOpen = false;
+function checkMatchStart() {
+  const T = S.tablet || {}, sb = S.sb || {};
+  const sig = (T.linked && T.match ? T.match : '') + '|' + (sb.running ? 1 : 0);
+  const prev = msPrev; msPrev = sig;
+  const m = S.shootMode || 'automatico';
+  if (msOpen && (m === 'partita' || $('dlg').style.display !== 'flex')) {
+    if (m === 'partita' && $('dlg').style.display === 'flex') $('dlg').style.display = 'none';
+    msOpen = false;
+  }
+  if (prev === null || prev === sig) return;
+  if (!(S.auto || S.assisted) || (m !== 'riscaldamento' && m !== 'allenamento')) return;
+  if (/finita/.test(T.match || '') || Date.now() < msSnooze || $('dlg').style.display === 'flex' || $('pick').style.display === 'flex') return;
+  const [pTab, pRun] = prev.split('|'), [nTab, nRun] = sig.split('|');
+  if (!((pTab && nTab && pTab !== nTab) || (pRun === '0' && nRun === '1'))) return;
+  const name = (MODES.find(x => x.v === m) || MODES[0]).name;
+  msOpen = true;
+  dlg({msg: '<b>La partita è iniziata</b><br>' + (pTab !== nTab ? 'Il tablet sta segnando la partita' : 'Il cronometro è partito')
+    + ', ma la ripresa è in <b>' + name + '</b>. Passo a Partita, così la camera segue il pallone?',
+    buttons: [{t: 'Passa a Partita', cls: 'pri', cb: () => { msOpen = false; cmd({a: 'shootMode', m: 'partita'}); S.shootMode = 'partita'; renderShootMode(); }},
+      {t: 'Resta così', cb: () => { msOpen = false; msSnooze = Date.now() + 10 * 60 * 1000; }}]});
+}
 
 // Registrazione
 $('rec').onclick = () => {
@@ -2184,7 +2280,6 @@ function renderScore() {
   $('tabTxt').style.color = T.linked ? (T.ok ? '#7CFC9A' : '#ffd27a') : '';
   $('tabOff').style.display = T.linked ? '' : 'none';
   $('tabCode').placeholder = T.linked ? 'tablet collegato (incolla per cambiarlo)' : "link o codice dell'app statistiche";
-  $('azOn').checked = S.autoZoom;
   $('heatTxt').textContent = S.heatSaver ? 'attivo' : 'anteprima accesa';
   if (document.activeElement !== $('azzDir')) $('azzDir').value = S.azzDir || '';
   renderShootMode();
@@ -2285,7 +2380,6 @@ function renderShootMode() {
   const h = SM_HELP[m] || ''; if ($('smHelp').textContent !== h) $('smHelp').textContent = h;
   $('followStop').style.display = m === 'allenamento' && S.following ? '' : 'none';
 }
-$('azOn').onchange = e => cmd({a: 'autoZoom', on: e.target.checked});
 $('sbVis').onchange = e => cmd({a: 'sbVisible', on: e.target.checked});
 $('sbTitle').onchange = e => cmd({a: 'sbTitle', text: e.target.value});
 $('tabSave').onclick = () => { const v = $('tabCode').value.trim(); if (!v) return; cmd({a: 'tabletCode', code: v}); $('tabCode').value = ''; toast('Tablet collegato: aspetto i dati…', 3000); };
@@ -2310,7 +2404,7 @@ $('prepClose').onclick = () => { $('prep').style.display = 'none'; };
 // aggiorna 5 volte al secondo, iOS a volte non trasforma il tocco in "click". Un tocco breve e fermo ora
 // agisce subito al rilascio del dito. Esclusi campi di testo, menu a tendina e pulsanti "tieni premuto".
 // 23/11 notte: lo stesso tocco rapido vale anche per finestre, tabellone, calibrazione e pannello LIVE.
-['prepPanel', 'ckBox', 'fieldBtns', 'startBox', 'dlg', 'regBox', 'sbAsk', 'cdBox', 'loupe', 'livePanel', 'sbBar', 'goalBox', 'penBox', 'mapCancelBtn', 'mapWideBtn', 'mapOkBtn', 'portraitBanner'].forEach(id => { const P = $(id); if (!P) return; (function () {
+['prepPanel', 'ckBox', 'fieldBtns', 'startBox', 'dlg', 'regBox', 'sbAsk', 'cdBox', 'loupe', 'livePanel', 'sbBar', 'goalBox', 'penBox', 'mapCancelBtn', 'mapWideBtn', 'mapOkBtn', 'portraitBanner', 'pick', 'seg', 'statusBar'].forEach(id => { const P = $(id); if (!P) return; (function () {
   let sx = 0, sy = 0, t0 = 0, tgt = null;
   P.addEventListener('touchstart', e => { const t = e.touches[0]; sx = t.clientX; sy = t.clientY; t0 = Date.now(); tgt = e.target; }, {passive: true});
   P.addEventListener('touchend', e => {

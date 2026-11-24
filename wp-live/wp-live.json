@@ -1,6 +1,6 @@
 {
-  "latestVersion": "0.13.7",
-  "releaseNotes": "0.13.7: corretto il verso su/giù del gimbal nei calcoli delle misure del campo (controllo misure e raddrizzamento); contiene il cerchio verde, Le mie piscine e Indietro (0.13.6).",
+  "latestVersion": "0.13.8",
+  "releaseNotes": "0.13.8: modalità della ripresa nella barra di stato (toccala per cambiarla, Automatico ora si chiama Adattivo); un solo pulsante CAMERA con Manuale, Assistita e Automatica; carica di gimbal e iPhone nella barra; avviso se la partita parte in Riscaldamento o Allenamento; cerchi del pallone più visibili sull'acqua (fucsia quando è perso).",
   "params": {
     "gimbalSpeed": 0.3,
     "zoomRampRate": 1.5
