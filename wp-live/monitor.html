@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <!-- WP-LIVE-MONITOR-API:1 -->
-<!-- WP-LIVE-PAGE-STAMP:2026112415 -->
+<!-- WP-LIVE-PAGE-STAMP:2026112519 -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -37,7 +37,7 @@ body.geoEdit #seg,body.geoEdit #liveBtn,body.geoEdit #recWrap,body.geoEdit #micB
 body.phMatch:not(.penOn) #penBox{display:none}
 body.phMatch:not(.sbOn) #sbBar{display:none}
 /* 22/11: risultato dal tablet: niente +/−, GOL, Annulla e tempo a mano (si toccano solo per sbaglio). */
-body.sbTab #hMinus,body.sbTab #hPlus,body.sbTab #aPlus,body.sbTab #aMinus,body.sbTab #sbClock,body.sbTab #undoBtn,body.sbTab #pMinus,body.sbTab #pPlus,body.sbTab #pPrev,body.sbTab #pNext,body.sbTab #pNextT{display:none !important}
+body.sbTab #hMinus,body.sbTab #hPlus,body.sbTab #aPlus,body.sbTab #aMinus,body.sbTab #sbClock,body.sbTab #undoBtn,body.sbTab #pMinus,body.sbTab #pPlus,body.sbTab #pPrev,body.sbTab #pNext,body.sbTab #pNextT,body.sbTab #clkSet{display:none !important}
 #sbTabTxt{display:none;font-size:12px;font-weight:700;color:#7CFC9A;padding:0 4px}
 body.sbTab #sbTabTxt{display:block}
 body:not(.manual) #seg .zb{display:none !important}
@@ -55,12 +55,10 @@ body:not(.manual) #seg .zb{display:none !important}
 #cdBox{z-index:30;flex-direction:column;color:#fff}
 #cdNum{font-size:120px;font-weight:900;line-height:1}
 #cdBox button{margin-top:20px;min-height:52px;min-width:160px;border:0;border-radius:12px;font-size:17px;font-weight:800;background:#3a3f4b;color:#fff}
-#goBtn{position:absolute;left:max(16px,calc(var(--sl) + 12px));bottom:calc(14px + env(safe-area-inset-bottom));min-height:64px;padding:0 34px;border:0;border-radius:32px;background:#1e8e3e;color:#fff;font-size:22px;font-weight:900;box-shadow:0 4px 16px rgba(0,0,0,.5);display:none;z-index:6}
-/* "▶ Inizia" nascosto dal 19/11 su richiesta: si riattiva dopo le prove (body.phMatch.idle #goBtn{display:block}) */
 body.phMatch.idle #sbBar,body.phMatch.idle #undoBtn{display:none !important}
 #finBtn{position:absolute;right:calc(110px + max(12px,var(--sr)));top:10px;min-height:52px;padding:0 14px;border:0;border-radius:14px;background:#8a1c1c;color:#fff;font-size:15px;font-weight:800;display:none}
 body.running #finBtn{display:block}
-body.geoEdit #finBtn,body.geoEdit #goBtn{display:none !important}
+body.geoEdit #finBtn{display:none !important}
 body.phStart #seg,body.phStart #liveBtn,body.phStart #recWrap,body.phStart #micBtn,body.phStart #undoBtn,body.phStart #sbBar,body.phStart #penBox,body.phStart #ckBox{display:none !important}
 #wzBody .st{margin:6px 0;font-size:14px;line-height:1.35}
 #wzBody .okt{color:#7CFC9A}#wzBody .bad{color:#ff8a80}#wzBody .warn{color:#ffd54f}
@@ -522,7 +520,6 @@ html.nativeBg #calibHint,html.nativeBg #livePanel .lp{-webkit-backdrop-filter:no
         <button class="btn2" id="tabSave">Collega</button>
       </div>
       <div id="tabTxt" class="small" style="margin-top:4px"></div>
-      <button class="btn2" id="tabOff" style="display:none;margin-top:4px">Scollega il tablet</button>
       <div class="subT">Partita</div>
       <label>Nome della partita<input class="txt" id="sbTitle" maxlength="60" placeholder="es. Amichevole U16"></label>
       <label class="tgl"><span>Nomi lunghi<br><small>altrimenti solo sigle: CAS – OSP</small></span><input type="checkbox" id="sbFull"></label>
@@ -539,7 +536,9 @@ html.nativeBg #calibHint,html.nativeBg #livePanel .lp{-webkit-backdrop-filter:no
       <div class="subT">Squadre</div>
       <div class="teamBox" id="tb_home"></div>
       <div class="teamBox" id="tb_away"></div>
-      <button class="btn2" id="sbReset" style="width:100%;margin-top:10px">Azzera partita (tieni premuto)</button>
+      <div class="subT">Attenzione</div>
+      <button class="btn2" id="tabOff" style="display:none;width:100%;margin-top:4px">Scollega il tablet</button>
+      <button class="btn2" id="sbReset" style="width:100%;margin-top:8px">Azzera partita (tieni premuto)</button>
     </div>
     </details>
     <details class="sec" id="secCaps"><summary>Calottine e palla<span class="n" id="nCaps"></span></summary>
@@ -547,8 +546,6 @@ html.nativeBg #calibHint,html.nativeBg #livePanel .lp{-webkit-backdrop-filter:no
       <label>La tua squadra<select id="homeCap"></select></label>
       <label>Avversari<select id="awayCap"></select></label>
       <label style="margin-top:8px">Palla<select id="ballSel"></select></label>
-      <button class="btn2" id="learnBtn" style="width:100%;margin-top:6px">Insegna il colore della palla</button>
-      <div class="small" id="ballMsg" style="margin-top:4px"></div>
       <div class="small" id="ballWarn" style="margin-top:4px;color:#ffb300"></div>
     </div>
     </details>
@@ -556,7 +553,6 @@ html.nativeBg #calibHint,html.nativeBg #livePanel .lp{-webkit-backdrop-filter:no
     <div class="card">
       <label class="tgl"><span>Righe del campo in partita</span><input type="checkbox" id="linesOn"></label>
       <label class="tgl"><span>Pulsanti Rigore</span><input type="checkbox" id="penOn"></label>
-      <label class="tgl" id="h264Row"><span>Anteprima video fluida (prova)<br><small>il movimento non va a scatti; l'iPhone lavora un po' di più</small></span><input type="checkbox" id="h264On"></label>
       <div class="small" style="margin-top:6px">Risparmio calore sull'iPhone: <span id="heatTxt">…</span></div>
     </div>
     <div class="card" id="nativeCard" style="display:none">
@@ -567,8 +563,14 @@ html.nativeBg #calibHint,html.nativeBg #livePanel .lp{-webkit-backdrop-filter:no
     </details>
     <details class="sec" id="secInfo"><summary>Informazioni</summary>
     <div class="card" id="status">Collegamento…</div>
+    </details>
+    <details class="sec" id="secTools"><summary>Strumenti per le prove</summary>
     <div class="card">
-      <div class="tgl"><span>Registro della diretta<br><small>una riga ogni 3 secondi, si apre con Excel</small></span><button class="btn2" id="logBtn">Scarica</button></div>
+      <div class="small">Non servono in partita.</div>
+      <div class="tgl" style="margin-top:6px"><span>Registro della diretta<br><small>una riga ogni 3 secondi, si apre con Excel</small></span><button class="btn2" id="logBtn">Scarica</button></div>
+      <button class="btn2" id="learnBtn" style="width:100%;margin-top:8px">Insegna il colore della palla</button>
+      <div class="small" style="margin-top:4px">Serve solo nei primi secondi, prima che parta il riconoscimento automatico.</div>
+      <div class="small" id="ballMsg" style="margin-top:4px"></div>
     </div>
     </details>
   </div>
@@ -622,7 +624,6 @@ html.nativeBg #calibHint,html.nativeBg #livePanel .lp{-webkit-backdrop-filter:no
     <div><button id="regShare">Manda il link</button><button id="regDone" class="pri">Fatto ▶</button></div>
   </div>
 </div></div>
-<div id="cdBox"><div style="font-size:20px;font-weight:800" id="cdTxt">Si parte tra</div><div id="cdNum">5</div><button id="cdCancel">Annulla</button></div>
 <div id="fLoupe"><img id="fLoupeImg" alt=""><canvas id="fLoupeCv"></canvas><div id="fLoupeTxt"></div></div>
 <div id="portraitBanner">iPhone in verticale sul gimbal: premi 2 volte il pulsante Switch del gimbal per tornare in orizzontale</div>
 <div id="endBanner" title="Tocca per nascondere" style="display:none;cursor:pointer;position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:25;max-width:90vw;padding:18px 22px;border-radius:16px;color:#fff;font-size:18px;font-weight:800;text-align:center"></div>
@@ -650,7 +651,6 @@ html.nativeBg #calibHint,html.nativeBg #livePanel .lp{-webkit-backdrop-filter:no
     </div>
     <div id="fieldBtns"><div id="fbHelp">Tocca gli <b>angoli del campo</b>: dove le linee di porta incontrano i bordi lunghi della vasca, in quest'ordine:<svg width="200" height="70" viewBox="0 0 200 70"><polygon points="40,10 160,10 190,60 10,60" fill="rgba(30,142,62,.35)" stroke="#7CFC9A" stroke-width="2"/><g font-size="13" font-weight="800" fill="#ffd400"><text x="2" y="58">1</text><text x="190" y="58">2</text><text x="164" y="14">3</text><text x="28" y="14">4</text></g><text x="100" y="40" font-size="11" fill="#fff" text-anchor="middle">lato vicino a te in basso</text></svg></div><button id="fbDone">✓<br>Fatto</button><button id="fbRedo">↺ Rifai</button><button id="fbCalib">Tocca i 4 angoli</button><button id="fbBack">‹ Indietro</button></div>
     <div id="startHint">Per iniziare: scegli la <b>CAMERA</b> in basso a destra, poi tocca <b>REC</b> per registrare (e LIVE per la diretta).</div>
-    <button id="goBtn">▶ Inizia</button>
     <button id="finBtn">■ Fine partita</button>
     <div id="penBox"><button id="penL">◀ Rigore</button><button id="penR">Rigore ▶</button></div>
     <button id="undoBtn">↶ Annulla gol</button>
@@ -677,7 +677,7 @@ try { PIN = localStorage.getItem('wpPin') || ''; } catch (e) {}
       set(v) { v = v == null ? '' : String(v); if (d.get.call(this) === v) return; d.set.call(this, v); }});
   });
 })();
-const PAGE_VER = '2026112415';
+const PAGE_VER = '2026112519';
 let LOCAL = false;
 try { LOCAL = new URLSearchParams(location.search).get('local') === '1' || sessionStorage.getItem('wpLocal') === '1'; if (LOCAL) sessionStorage.setItem('wpLocal', '1'); } catch (e) {}
 // 23/11: sull'iPhone che riprende la fotocamera vera sta sotto la pagina (anteprima nativa): niente immagini dal server.
@@ -788,7 +788,8 @@ setInterval(() => { if (wsOK) { try { WS.send('{"a":"ping"}'); } catch (e) {} } 
 // come fa l'app Insta360. Se il browser non ce la fa, o il video si ferma, si torna da soli alle
 // immagini JPEG. Si spegne dal menu Avanzate.
 const H = {dec: null, on: false, seen: 0, timer: 0, fails: 0};
-function h264Pref() { try { return localStorage.getItem('wpH264') !== '0'; } catch (e) { return true; } }
+// 0.13.19: interruttore tolto; il video fluido parte sempre e se non va si torna da soli alle immagini.
+function h264Pref() { return true; }
 function h264Start() {
   // Solo con app 0.12.0 o successiva (le precedenti non sanno mandare il video).
   const v = String((S && S.version) || '0').split('.').map(Number), app12 = v[0] > 0 || (v[1] || 0) >= 12;
@@ -1975,33 +1976,6 @@ $('regShare').onclick = () => {
 // 0.13.10: si riprende dal passo a cui si era arrivati (prima ripartiva dal primo).
 $('backPrep').onclick = () => { $('prep').style.display = 'none'; goStep(wz); setPhase('prep'); };
 
-// Inizio: un solo pulsante, conto alla rovescia, poi registrazione (e diretta) in Auto.
-let cdTimer = null;
-$('goBtn').onclick = () => {
-  const hk = S.live && S.live.hasKey;
-  const b = [];
-  if (hk) b.push({t: 'Diretta + registrazione', cls: 'pri', cb: () => countdown(true)});
-  b.push({t: 'Solo registrazione', cls: hk ? '' : 'pri', cb: () => countdown(false)});
-  b.push({t: 'Annulla'});
-  dlg({msg: '<b>Si parte?</b><br>La ripresa va in Assistita: muovi tu, lo zoom è automatico.' + (hk ? '' : '<br><span class="small">Chiave YouTube non inserita: solo registrazione.</span>'), buttons: b});
-};
-function countdown(live) {
-  let n = 5;
-  $('cdTxt').textContent = live ? 'Diretta e registrazione tra' : 'Registrazione tra';
-  $('cdNum').textContent = n; $('cdBox').style.display = 'flex';
-  clearInterval(cdTimer);
-  cdTimer = setInterval(() => {
-    n--;
-    if (n > 0) { $('cdNum').textContent = n; return; }
-    clearInterval(cdTimer); $('cdBox').style.display = 'none';
-    // Per la prima partita si parte in Assistita (l'Auto completo è ancora in prova).
-    if (!S.assisted) cmd({a: 'assisted', on: true});
-    cmd({a: 'rec', on: true});
-    if (live) cmd({a: 'liveStart'});
-    matchStart = Date.now();
-  }, 1000);
-}
-$('cdCancel').onclick = () => { clearInterval(cdTimer); $('cdBox').style.display = 'none'; };
 
 // Fine partita: tieni premuto, poi riepilogo.
 let matchStart = 0, lastRecSec = 0, endFlow = false;
@@ -2037,7 +2011,7 @@ function renderPhase() {
   if (running && ph !== 'match') { setPhase('match'); return; }
   const b = document.body.classList;
   b.toggle('phStart', ph === 'start'); b.toggle('phPrep', ph === 'prep'); b.toggle('phMatch', ph === 'match');
-  b.toggle('running', running); b.toggle('idle', !running && $('cdBox').style.display !== 'flex');
+  b.toggle('running', running); b.toggle('idle', !running);
   // Suggerimento "come si inizia": fino alla scelta della modalità o alla prima registrazione di questa partita.
   if (running) { try { sessionStorage.setItem('wpStarted', '1'); } catch (e) {} }
   let started = false; try { started = sessionStorage.getItem('wpStarted') === '1'; } catch (e) {}
@@ -2066,12 +2040,6 @@ $('logBtn').onclick = () => {
   const a = document.createElement('a');
   a.href = '/registro.csv?pin=' + PIN + '&t=' + Date.now(); a.download = 'registro-diretta.csv';
   document.body.appendChild(a); a.click(); a.remove();
-};
-$('h264On').checked = h264Pref();
-$('h264On').onchange = e => {
-  try { localStorage.setItem('wpH264', e.target.checked ? '1' : '0'); } catch (x) {}
-  if (e.target.checked) { H.fails = 0; h264Start(); toast('Video fluido acceso', 1500); }
-  else { if (H.on) { h264Off(); try { WS.send('{"video":"jpeg"}'); } catch (x) {} } toast('Anteprima a immagini', 1500); }
 };
 function renderGeo() {
   renderPhase();
@@ -2377,7 +2345,7 @@ $('prepClose').onclick = () => { $('prep').style.display = 'none'; };
 // aggiorna 5 volte al secondo, iOS a volte non trasforma il tocco in "click". Un tocco breve e fermo ora
 // agisce subito al rilascio del dito. Esclusi campi di testo, menu a tendina e pulsanti "tieni premuto".
 // 23/11 notte: lo stesso tocco rapido vale anche per finestre, tabellone, calibrazione e pannello LIVE.
-['prepPanel', 'ckBox', 'fieldBtns', 'startBox', 'dlg', 'regBox', 'sbAsk', 'cdBox', 'loupe', 'livePanel', 'sbBar', 'goalBox', 'penBox', 'mapCancelBtn', 'mapWideBtn', 'mapOkBtn', 'portraitBanner', 'pick', 'seg', 'statusBar'].forEach(id => { const P = $(id); if (!P) return; (function () {
+['prepPanel', 'ckBox', 'fieldBtns', 'startBox', 'dlg', 'regBox', 'sbAsk', 'loupe', 'livePanel', 'sbBar', 'goalBox', 'penBox', 'mapCancelBtn', 'mapWideBtn', 'mapOkBtn', 'portraitBanner', 'pick', 'seg', 'statusBar'].forEach(id => { const P = $(id); if (!P) return; (function () {
   let sx = 0, sy = 0, t0 = 0, tgt = null;
   P.addEventListener('touchstart', e => { const t = e.touches[0]; sx = t.clientX; sy = t.clientY; t0 = Date.now(); tgt = e.target; }, {passive: true});
   P.addEventListener('touchend', e => {
@@ -2614,7 +2582,6 @@ function renderEnd() {
 }
 if (LOCAL) {
   $('nativeCard').style.display = '';
-  $('h264Row').style.display = 'none';
   $('logoutCard').style.display = 'none';
   $('setBtn').onclick = () => { try { window.webkit.messageHandlers.wp.postMessage('settings'); } catch (e) {} };
   $('nativeBtn').onclick = () => {
