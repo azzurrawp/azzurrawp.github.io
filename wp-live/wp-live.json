@@ -1,6 +1,6 @@
 {
-  "latestVersion": "0.13.12",
-  "releaseNotes": "0.13.12: il campo si calibra solo con registrazione e diretta ferme (pulsanti grigi e avviso durante la ripresa); contiene il menu ripulito della 0.13.10.",
+  "latestVersion": "0.13.17",
+  "releaseNotes": "0.13.17: nome della partita dal tablet su due righe; al gol riga evidenziata, striscia GOL con calottina e cognome (si spegne dal menu) e triangolino sull'ultima squadra che ha segnato; AUTO al posto di AUTOMATICA; in Manuale la modalità della ripresa non si sceglie.",
   "params": {
     "gimbalSpeed": 0.3,
     "zoomRampRate": 1.5
