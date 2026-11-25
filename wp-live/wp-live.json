@@ -1,6 +1,6 @@
 {
-  "latestVersion": "0.13.17",
-  "releaseNotes": "0.13.17: nome della partita dal tablet su due righe; al gol riga evidenziata, striscia GOL con calottina e cognome (si spegne dal menu) e triangolino sull'ultima squadra che ha segnato; AUTO al posto di AUTOMATICA; in Manuale la modalità della ripresa non si sceglie.",
+  "latestVersion": "0.13.18",
+  "releaseNotes": "0.13.18: nella scritta del gol il cognome del marcatore viene ripulito dall'iniziale del nome e da (C)/(VC), in qualunque ordine siano scritti.",
   "params": {
     "gimbalSpeed": 0.3,
     "zoomRampRate": 1.5
