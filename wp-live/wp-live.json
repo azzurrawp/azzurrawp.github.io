@@ -1,6 +1,6 @@
 {
-  "latestVersion": "0.13.26",
-  "releaseNotes": "0.13.26: per Gcore server di riserva: se il principale non risponde la diretta passa da sola a quello di riserva.",
+  "latestVersion": "0.13.27",
+  "releaseNotes": "0.13.27: indirizzi dei server Gcore (principale e riserva) già inseriti: basta incollare le chiavi.",
   "params": {
     "gimbalSpeed": 0.3,
     "zoomRampRate": 1.5
