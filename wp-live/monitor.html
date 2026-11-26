@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <!-- WP-LIVE-MONITOR-API:1 -->
-<!-- WP-LIVE-PAGE-STAMP:2026112602 -->
+<!-- WP-LIVE-PAGE-STAMP:2026112603 -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -482,6 +482,7 @@ html.nativeBg #calibHint,html.nativeBg #livePanel .lp{-webkit-backdrop-filter:no
       <button class="btn2" id="followStop" style="width:100%;margin-top:6px;display:none">Smetti di seguire il pallone</button>
       <label class="tgl"><span>La tua squadra attacca verso<br><small>1° e 2° tempo; poi si inverte da solo</small></span><select id="azzDir"><option value="">Non impostato</option><option value="sinistra">Sinistra</option><option value="destra">Destra</option></select></label>
       <label class="tgl"><span>Regole di ripresa nuove<br><small>6 metri, centroboa, rigore riconosciuto in Auto, contrasto sul lato lontano. Spento: come prima (0.13.21).</small></span><input type="checkbox" id="rulesOn"></label>
+      <label class="tgl"><span>Contro lo sfarfallio delle luci<br><small>Se l’immagine pulsa o ha righe scure. Con poca luce può diventare un po’ più granulosa.</small></span><input type="checkbox" id="flickOn"></label>
     </div>
     </details>
     <details class="sec" id="secCampo"><summary>Preparazione<span class="n" id="nPrep"></span></summary>
@@ -677,7 +678,7 @@ try { PIN = localStorage.getItem('wpPin') || ''; } catch (e) {}
       set(v) { v = v == null ? '' : String(v); if (d.get.call(this) === v) return; d.set.call(this, v); }});
   });
 })();
-const PAGE_VER = '2026112602';
+const PAGE_VER = '2026112603';
 let LOCAL = false;
 try { LOCAL = new URLSearchParams(location.search).get('local') === '1' || sessionStorage.getItem('wpLocal') === '1'; if (LOCAL) sessionStorage.setItem('wpLocal', '1'); } catch (e) {}
 // 23/11: sull'iPhone che riprende la fotocamera vera sta sotto la pagina (anteprima nativa): niente immagini dal server.
@@ -2034,6 +2035,10 @@ function renderPhase() {
   if (ph === 'prep') renderWizard();
   checkEnd();
 }
+$('flickOn').onchange = e => {
+  cmd({a: 'antiFlicker', on: e.target.checked});
+  toast(e.target.checked ? 'Contro lo sfarfallio: acceso' : 'Contro lo sfarfallio: spento', 2500);
+};
 $('rulesOn').onchange = e => {
   cmd({a: 'newRules', on: e.target.checked});
   toast(e.target.checked ? 'Regole di ripresa nuove' : 'Ripresa come prima (0.13.21)', 2500);
@@ -2103,7 +2108,7 @@ $('micBtn').onclick = () => cmd({a: 'mute', on: !S.muted});
 const CAMS = [
   {v: 'man', name: 'Manuale', desc: 'Muovi tu la camera e usi tu lo zoom: col gimbal, col dito sullo schermo o dal monitor regista.', when: 'Quando vuoi decidere tu ogni inquadratura.', color: '#ffffff', bg: ''},
   {v: 'assist', name: 'Assistita', desc: 'Muovi tu la camera, lo zoom lo fa l\u2019iPhone seguendo il gioco. Se usi lo zoom a mano, l\u2019automatico si ferma per qualche secondo.', when: 'Quando c\u2019è qualcuno al gimbal o al monitor.', color: '#64d2ff', bg: '#0a5ea8'},
-  {v: 'auto', name: 'Auto', desc: 'Fa tutto l\u2019iPhone: dove puntare e quanto zoomare, con le regole della pallanuoto e la modalità scelta.', when: 'Quando nessuno segue la ripresa.', color: '#30d158', bg: '#1e8e3e'}];
+  {v: 'auto', name: 'Auto', desc: 'Fa tutto l\u2019iPhone: dove puntare la camera e quanto stringere lo zoom, con le regole della pallanuoto e la modalità scelta.', when: 'Quando nessuno segue la ripresa.', color: '#30d158', bg: '#1e8e3e'}];
 const MODES = [
   {v: 'automatico', name: 'Adattivo', desc: 'Un solo pallone: lo segue. Più palloni o nessuno: inquadra i giocatori, alternando le squadre. Torna al pallone quando ne resta uno.', when: 'Va bene quasi sempre: si adatta da solo.'},
   {v: 'partita', name: 'Partita', desc: 'Segue sempre il pallone in campo. Se ne compare un altro per poco, resta su quello che stava seguendo.', when: 'Durante la partita.'},
@@ -2224,6 +2229,7 @@ function renderScore() {
   $('heatTxt').textContent = S.heatSaver ? 'attivo' : 'anteprima accesa';
   if (document.activeElement !== $('azzDir')) $('azzDir').value = S.azzDir || '';
   $('rulesOn').checked = S.newRules !== false;
+  $('flickOn').checked = !!S.antiFlicker;
   renderShootMode();
   $('sbClkOn').checked = b.clockOn;
   $('sbFull').checked = b.full;
