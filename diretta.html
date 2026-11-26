@@ -52,7 +52,7 @@ small{opacity:.55;font-size:12px}
 <script>
 // Configurazione cifrata: l'indirizzo del video si apre solo con il codice giusto (PBKDF2-SHA256 + AES-GCM).
 // Si genera con tools/diretta_cfg.py. Vuota = diretta non ancora configurata.
-const CFG = [{"s": "iUkM8jyZ2QvpluHpj22deQ==", "iv": "1nWfMxgH23ByJtuF", "d": "nI4l394ppdAa0E++iQu3KNhzUkdb4ZTxFSSoBqp5aOUKZnbjV9xk0YKprfguTTUKX6uDZRwPUgxGDb7VTswb+mmK0SKNPl7oJNH9fgqNDVJ7Mmg0Dqc0RwoATmIVG4pxBjeEGgbDmvvURwYDTYGwoj+ymIr6WwmSMkX0bqciGPNJlw=="}];
+const CFG = [{"s": "29i9y7Ck/L31hcbHp2roBA==", "iv": "bk6NP83NMeFIqcU8", "d": "Qb5m7iLXWX9NYNEYpe0sDzvq9MHK6KgPL6uRRguBUoDOWoQtWOIls9PUo7G6FZmeW/4CRhWAIpX9WM1goRO56QMN9TduXd7syEYYTm88lsqcFnt19fXA8/Lt9JHlqcP5Qkrh5xraLkowr9dU1Io44DljBZZesH82Sn87hTlpBkqrNkqJC0rMgWspLcOdNyBRminj+gMTHo5/RrA21c7u98fUxJ27q3R3WYxjwqAKO8PCqtQEWQC3aMUk/EOzq5K2nU/t"}];
 const $ = id => document.getElementById(id);
 const b64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
 async function openCfg(code) {
