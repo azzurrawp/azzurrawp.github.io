@@ -1,6 +1,6 @@
 {
-  "latestVersion": "0.13.19",
-  "releaseNotes": "0.13.19: pulizia delle funzioni. Sull'iPhone tre camere come in regia (Manuale, Assistita, Auto) e la registrazione si ferma tenendo premuto 2 secondi. Tolti il pulsante Inizia e l'interruttore del video fluido; con il tablet collegato si nasconde anche la correzione del tempo; Scollega tablet e Azzera partita in fondo; registro della diretta e colore della palla in Strumenti per le prove.",
+  "latestVersion": "0.13.20",
+  "releaseNotes": "0.13.20: in alto solo la modalità della ripresa (Riscaldamento, Partita, Allenamento, Adattivo); la camera si legge sul pulsante CAMERA. In Manuale in alto non compare la modalità.",
   "params": {
     "gimbalSpeed": 0.3,
     "zoomRampRate": 1.5
