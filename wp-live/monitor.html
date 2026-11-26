@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <!-- WP-LIVE-MONITOR-API:1 -->
-<!-- WP-LIVE-PAGE-STAMP:2026112601 -->
+<!-- WP-LIVE-PAGE-STAMP:2026112602 -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -481,6 +481,7 @@ html.nativeBg #calibHint,html.nativeBg #livePanel .lp{-webkit-backdrop-filter:no
       <label class="tgl" id="smRow"><span>Modalità della ripresa<br><small id="smHelp"></small></span><select id="shootMode"><option value="automatico">Adattivo</option><option value="partita">Partita</option><option value="riscaldamento">Riscaldamento</option><option value="allenamento">Allenamento</option></select></label>
       <button class="btn2" id="followStop" style="width:100%;margin-top:6px;display:none">Smetti di seguire il pallone</button>
       <label class="tgl"><span>La tua squadra attacca verso<br><small>1° e 2° tempo; poi si inverte da solo</small></span><select id="azzDir"><option value="">Non impostato</option><option value="sinistra">Sinistra</option><option value="destra">Destra</option></select></label>
+      <label class="tgl"><span>Regole di ripresa nuove<br><small>6 metri, centroboa, rigore riconosciuto in Auto, contrasto sul lato lontano. Spento: come prima (0.13.21).</small></span><input type="checkbox" id="rulesOn"></label>
     </div>
     </details>
     <details class="sec" id="secCampo"><summary>Preparazione<span class="n" id="nPrep"></span></summary>
@@ -552,7 +553,6 @@ html.nativeBg #calibHint,html.nativeBg #livePanel .lp{-webkit-backdrop-filter:no
     <details class="sec" id="secAdv"><summary>Altro</summary>
     <div class="card">
       <label class="tgl"><span>Righe del campo in partita</span><input type="checkbox" id="linesOn"></label>
-      <label class="tgl"><span>Pulsanti Rigore</span><input type="checkbox" id="penOn"></label>
       <div class="small" style="margin-top:6px">Risparmio calore sull'iPhone: <span id="heatTxt">…</span></div>
     </div>
     <div class="card" id="nativeCard" style="display:none">
@@ -677,7 +677,7 @@ try { PIN = localStorage.getItem('wpPin') || ''; } catch (e) {}
       set(v) { v = v == null ? '' : String(v); if (d.get.call(this) === v) return; d.set.call(this, v); }});
   });
 })();
-const PAGE_VER = '2026112601';
+const PAGE_VER = '2026112602';
 let LOCAL = false;
 try { LOCAL = new URLSearchParams(location.search).get('local') === '1' || sessionStorage.getItem('wpLocal') === '1'; if (LOCAL) sessionStorage.setItem('wpLocal', '1'); } catch (e) {}
 // 23/11: sull'iPhone che riprende la fotocamera vera sta sotto la pagina (anteprima nativa): niente immagini dal server.
@@ -1846,7 +1846,7 @@ function renderWizard() {
       const sp = S.netSpeed;
       h += line(S.netTesting ? 'warn' : sp < 0 ? 'warn' : sp >= 6 ? 'okt' : sp >= 3.5 ? 'warn' : 'bad', 'Velocità invio',
         S.netTesting ? 'prova in corso…' : sp < 0 ? 'da provare' : sp.toFixed(1).replace('.', ',') + ' Mbps' + (sp < 6 && sp >= 3.5 ? ' (usa 720p)' : sp < 3.5 ? ' (troppo poco)' : ''));
-    } else h += '<div class="st warn">Spazio, internet e velocità: serve l\'app 0.8.8 o successiva.</div>';
+    }
     const gc = geoCheck();
     if (gc && !gc.home) h += line(gc.ok ? 'okt' : 'warn', 'Misure della vasca', gc.ok ? 'giuste' : 'da ricontrollare (passo 3)');
     const T = S.tablet || {};
@@ -2017,8 +2017,8 @@ function renderPhase() {
   if (running) { try { sessionStorage.setItem('wpStarted', '1'); } catch (e) {} }
   let started = false; try { started = sessionStorage.getItem('wpStarted') === '1'; } catch (e) {}
   b.toggle('firstRun', !started);
-  let pen = false; try { pen = localStorage.getItem('wpPen') === '1'; } catch (e) {}
-  b.toggle('penOn', pen); $('penOn').checked = pen;
+  // 0.13.22: pulsanti Rigore solo in Assistita (in Auto il rigore lo riconosce l'iPhone; con le regole di prima anche in Auto).
+  b.toggle('penOn', !!S.assisted || (!!S.auto && S.newRules === false));
   b.toggle('sbOn', !!(S.sb && S.sb.visible));
   b.toggle('manual', !S.auto && !S.assisted);
   b.toggle('calLock', !!S.calibLocked);
@@ -2034,7 +2034,10 @@ function renderPhase() {
   if (ph === 'prep') renderWizard();
   checkEnd();
 }
-$('penOn').onchange = e => { try { localStorage.setItem('wpPen', e.target.checked ? '1' : '0'); } catch (x) {} renderPhase(); };
+$('rulesOn').onchange = e => {
+  cmd({a: 'newRules', on: e.target.checked});
+  toast(e.target.checked ? 'Regole di ripresa nuove' : 'Ripresa come prima (0.13.21)', 2500);
+};
 $('logBtn').onclick = () => {
   // Sull'iPhone che riprende (22/11): elenco dei registri con condivisione (File, OneDrive, WhatsApp…).
   if (LOCAL) { try { window.webkit.messageHandlers.wp.postMessage('logs'); return; } catch (e) {} }
@@ -2098,8 +2101,8 @@ function setupCaps() {
 $('micBtn').onclick = () => cmd({a: 'mute', on: !S.muted});
 // 0.13.8: chi muove la camera e modalità della ripresa si scelgono con una rotella.
 const CAMS = [
-  {v: 'man', name: 'Manuale', desc: 'Muovi e zoomi tu: col gimbal, col dito sullo schermo o dal monitor regista.', when: 'Quando vuoi decidere tu ogni inquadratura.', color: '#ffffff', bg: ''},
-  {v: 'assist', name: 'Assistita', desc: 'Muovi tu la camera, lo zoom lo fa l\u2019iPhone seguendo il gioco. Se zoomi a mano, l\u2019automatico si ferma per qualche secondo.', when: 'Quando c\u2019è qualcuno al gimbal o al monitor.', color: '#64d2ff', bg: '#0a5ea8'},
+  {v: 'man', name: 'Manuale', desc: 'Muovi tu la camera e usi tu lo zoom: col gimbal, col dito sullo schermo o dal monitor regista.', when: 'Quando vuoi decidere tu ogni inquadratura.', color: '#ffffff', bg: ''},
+  {v: 'assist', name: 'Assistita', desc: 'Muovi tu la camera, lo zoom lo fa l\u2019iPhone seguendo il gioco. Se usi lo zoom a mano, l\u2019automatico si ferma per qualche secondo.', when: 'Quando c\u2019è qualcuno al gimbal o al monitor.', color: '#64d2ff', bg: '#0a5ea8'},
   {v: 'auto', name: 'Auto', desc: 'Fa tutto l\u2019iPhone: dove puntare e quanto zoomare, con le regole della pallanuoto e la modalità scelta.', when: 'Quando nessuno segue la ripresa.', color: '#30d158', bg: '#1e8e3e'}];
 const MODES = [
   {v: 'automatico', name: 'Adattivo', desc: 'Un solo pallone: lo segue. Più palloni o nessuno: inquadra i giocatori, alternando le squadre. Torna al pallone quando ne resta uno.', when: 'Va bene quasi sempre: si adatta da solo.'},
@@ -2112,7 +2115,7 @@ function setCam(v) {
   if (v === 'man') {
     if (S.assisted) cmd({a: 'assisted', on: false});
     if (S.auto || S.assisted) cmd({a: 'auto', on: false});
-    toast('Manuale: muovi e zoomi tu (due dita per lo zoom)', 2500);
+    toast('Manuale: muovi tu la camera e usi tu lo zoom (due dita)', 2500);
   } else if (v === 'assist') {
     if (S.assisted) return;
     cmd({a: 'assisted', on: true});
@@ -2120,7 +2123,7 @@ function setCam(v) {
   } else {
     if (S.auto) return;
     cmd({a: 'auto', on: true});
-    toast('Auto: l\u2019iPhone muove e zooma da solo', 2500);
+    toast('Auto: l\u2019iPhone muove la camera e usa lo zoom da solo', 2500);
   }
 }
 let pk = null;
@@ -2220,6 +2223,7 @@ function renderScore() {
   $('tabCode').placeholder = T.linked ? 'tablet collegato (incolla per cambiarlo)' : "link o codice dell'app statistiche";
   $('heatTxt').textContent = S.heatSaver ? 'attivo' : 'anteprima accesa';
   if (document.activeElement !== $('azzDir')) $('azzDir').value = S.azzDir || '';
+  $('rulesOn').checked = S.newRules !== false;
   renderShootMode();
   $('sbClkOn').checked = b.clockOn;
   $('sbFull').checked = b.full;

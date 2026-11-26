@@ -1,6 +1,6 @@
 {
-  "latestVersion": "0.13.21",
-  "releaseNotes": "0.13.21: correzioni dei testi (camera, Auto, piccoli refusi).",
+  "latestVersion": "0.13.22",
+  "releaseNotes": "0.13.22: regole di ripresa nuove ai 6 metri, centroboa, rigore riconosciuto in Auto, contrasto sul lato lontano; interruttore nel menu Ripresa per tornare come prima.",
   "params": {
     "gimbalSpeed": 0.3,
     "zoomRampRate": 1.5
