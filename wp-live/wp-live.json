@@ -1,6 +1,6 @@
 {
-  "latestVersion": "0.13.27",
-  "releaseNotes": "0.13.27: indirizzi dei server Gcore (principale e riserva) già inseriti: basta incollare le chiavi.",
+  "latestVersion": "0.13.28",
+  "releaseNotes": "0.13.28: nel menu il tasto Manda il link ai genitori (WhatsApp): diretta privata o canale YouTube.",
   "params": {
     "gimbalSpeed": 0.3,
     "zoomRampRate": 1.5

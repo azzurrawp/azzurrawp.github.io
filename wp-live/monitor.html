@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <!-- WP-LIVE-MONITOR-API:1 -->
-<!-- WP-LIVE-PAGE-STAMP:2026112607 -->
+<!-- WP-LIVE-PAGE-STAMP:2026112608 -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -460,6 +460,8 @@ html.nativeBg #calibHint,html.nativeBg #livePanel .lp{-webkit-backdrop-filter:no
       <button class="btn2" id="prepClose">Chiudi</button>
     </div>
     <button class="btn2" id="addReg" style="width:100%;min-height:52px;background:var(--ios-blue);font-weight:700">Collega un regista (QR e link)</button>
+    <button class="btn2" id="shareLink" style="width:100%;min-height:52px;margin-top:8px;background:#1f8f4e;font-weight:700">Manda il link ai genitori (WhatsApp)</button>
+    <div class="small" id="shareTxt" style="margin-top:4px"></div>
     <div class="card" id="logoutCard">
       <button class="btn2" id="logoutBtn" style="width:100%;background:#5a2330">Scollega questo monitor (tieni premuto)</button>
       <div class="small" style="margin-top:6px">L'iPhone continua a riprendere. Per ricollegarti: QR code o password.</div>
@@ -688,7 +690,7 @@ try { PIN = localStorage.getItem('wpPin') || ''; } catch (e) {}
       set(v) { v = v == null ? '' : String(v); if (d.get.call(this) === v) return; d.set.call(this, v); }});
   });
 })();
-const PAGE_VER = '2026112607';
+const PAGE_VER = '2026112608';
 let LOCAL = false;
 try { LOCAL = new URLSearchParams(location.search).get('local') === '1' || sessionStorage.getItem('wpLocal') === '1'; if (LOCAL) sessionStorage.setItem('wpLocal', '1'); } catch (e) {}
 // 23/11: sull'iPhone che riprende la fotocamera vera sta sotto la pagina (anteprima nativa): niente immagini dal server.
@@ -932,6 +934,7 @@ async function statusLoop() {
 function fmt(s) { const m = Math.floor(s / 60), x = s % 60; return m + ':' + String(x).padStart(2, '0'); }
 
 function render() {
+  if ($('shareTxt')) $('shareTxt').textContent = shareInfo();
   const g = S.docked ? '<span class="ok">Gimbal collegato</span>' : '<span class="bad">' + (S.gimbal || 'Gimbal scollegato') + '</span>';
   const bat = S.battery >= 0 ? (S.battery + '%' + (S.charging ? ' in carica' : '')) : '?';
   const batCls = S.battery >= 0 && S.battery < 20 && !S.charging ? 'bad' : '';
@@ -1611,6 +1614,46 @@ function dlg(o) {
   b.style.display = 'flex';
   if (o.input) setTimeout(() => inp.focus(), 60);
 }
+// 0.13.28: link della diretta per i genitori su WhatsApp. Diretta privata (Mux o Gcore): pagina dei genitori
+// con il codice; YouTube: link fisso del canale (/live porta sempre alla diretta in corso).
+function shareDest() { const L = S.live || {}; return ['mux', 'gcore'].includes(L.dest) ? 'priv' : 'yt'; }
+function shareInfo() {
+  const L = S.live || {};
+  if (shareDest() === 'priv') return L.shareCode ? 'Manda la pagina dei genitori (diretta privata), con il codice già dentro.' : 'Diretta privata: la prima volta ti chiedo il codice dei genitori.';
+  return L.ytChannel ? 'Manda il link del canale YouTube (porta sempre alla diretta in corso).' : 'YouTube: la prima volta ti chiedo il link del canale.';
+}
+function shareSend() {
+  const L = S.live || {}, priv = shareDest() === 'priv';
+  let msg;
+  if (priv) {
+    const link = 'https://azzurrawp.github.io/diretta.html#k=' + encodeURIComponent(L.shareCode);
+    msg = 'Partita in diretta 📺\n\nLa partita si vede qui:\n' + link + '\n\nIl link vale per tutte le partite: salvatelo. Se la pagina chiede un codice, è ' + L.shareCode +
+      '\n\nSulla TV: da iPhone tasto AirPlay; da Android Chromecast con Chrome, Smart View (Samsung) o Screen Share (LG).\n\nIl link è solo per il nostro gruppo: per favore non giratelo.';
+  } else {
+    const ch = L.ytChannel.replace(/\/+$/, '').replace(/\/(live|streams|videos|featured)$/, '');
+    msg = 'Partita in diretta 📺\n\nLa partita si vede su YouTube:\n' + ch + '/live';
+  }
+  const w = window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
+  if (!w) location.href = 'https://wa.me/?text=' + encodeURIComponent(msg);
+}
+function shareAsk(then) {
+  const L = S.live || {}, priv = shareDest() === 'priv';
+  dlg({msg: priv ? 'Codice dei genitori (lo trovi su OneDrive, in "Codice diretta genitori"). Resta salvato solo sull’iPhone che riprende.'
+                 : 'Link del canale YouTube (per esempio https://www.youtube.com/@nomecanale).',
+       input: true, def: priv ? (L.shareCode || '') : (L.ytChannel || ''), ph: priv ? 'codice' : 'https://www.youtube.com/@…',
+       buttons: [{t: 'Annulla'}, {t: 'Salva', cls: 'pri', cb: v => {
+         v = (v || '').trim(); if (!v) return;
+         if (!priv && !/^https?:\/\/(www\.|m\.)?youtube\.com\//i.test(v)) { toast('Serve un link che inizia con https://www.youtube.com/', 3500); return; }
+         if (priv) { S.live.shareCode = v.toUpperCase(); cmd({a: 'shareCfg', code: v}); } else { S.live.ytChannel = v; cmd({a: 'shareCfg', yt: v}); }
+         if (then) then();
+       }}]});
+}
+$('shareLink').onclick = () => {
+  const L = S.live || {}, priv = shareDest() === 'priv', ok = priv ? !!L.shareCode : !!L.ytChannel;
+  if (!ok) { shareAsk(shareSend); return; }
+  dlg({msg: priv ? 'Mando su WhatsApp il link della diretta privata (pagina dei genitori). Scegli tu il gruppo.' : 'Mando su WhatsApp il link del canale YouTube. Scegli tu il gruppo.',
+       buttons: [{t: 'Annulla'}, {t: priv ? 'Cambia codice' : 'Cambia canale', cb: () => shareAsk()}, {t: 'Apri WhatsApp', cls: 'pri', cb: shareSend}]});
+};
 function openCard(id) {
   $('prep').style.display = 'flex';
   const d = $(id) && $(id).closest('details'); if (d) d.open = true;
