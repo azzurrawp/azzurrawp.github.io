@@ -52,7 +52,7 @@ small{opacity:.55;font-size:12px}
 <script>
 // Configurazione cifrata: l'indirizzo del video si apre solo con il codice giusto (PBKDF2-SHA256 + AES-GCM).
 // Si genera con tools/diretta_cfg.py. Vuota = diretta non ancora configurata.
-const CFG = [{"s": "pYfG1tNXO5HhSUtU6k4/nQ==", "iv": "D9AfYFNtSR2PA4lD", "d": "oycjpFnGF0+w7c4PX3w3BgamtlizVWu3sD3qiEh7huDjYYfNMEy3Qz2WpZZ0cuXljngOPh+r9oQC6c6lqwxkkSdOO57E505EFJwwDUc9z/0Q1t1vqK5s/VXXjs9CgICcTPQCf1KiCE0ZGLWdRl4eEVorwcY8aEBPoZg1bxDA1TuXiRnak1s="}];
+const CFG = [{"s": "iUkM8jyZ2QvpluHpj22deQ==", "iv": "1nWfMxgH23ByJtuF", "d": "nI4l394ppdAa0E++iQu3KNhzUkdb4ZTxFSSoBqp5aOUKZnbjV9xk0YKprfguTTUKX6uDZRwPUgxGDb7VTswb+mmK0SKNPl7oJNH9fgqNDVJ7Mmg0Dqc0RwoATmIVG4pxBjeEGgbDmvvURwYDTYGwoj+ymIr6WwmSMkX0bqciGPNJlw=="}];
 const $ = id => document.getElementById(id);
 const b64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
 async function openCfg(code) {
@@ -66,9 +66,9 @@ async function openCfg(code) {
   }
   return null;
 }
-let hls = null, src = '';
+let hls = null, src = '', srcs = [];
 function badge(on, text) { $('badge').classList.toggle('off', !on); $('badgeTxt').textContent = on ? 'IN DIRETTA' : 'NON IN DIRETTA'; $('msg').textContent = text || ''; }
-async function isLive() {
+async function isLive(src) {
   // Cloudflare Stream: /lifecycle dice se la diretta è in onda; altrimenti si guarda se il manifest è una playlist vera.
   const life = src.includes('/manifest/') ? src.replace(/\/manifest\/.*$/, '/lifecycle') : '';
   if (life) { try { const r = await fetch(life + '?t=' + Date.now(), {cache: 'no-store'}); if (r.ok) { const j = await r.json(); return !!j.live; } } catch (e) {} }
@@ -109,8 +109,13 @@ function play() {
   else { const s = document.createElement('script'); s.src = 'https://cdn.jsdelivr.net/npm/hls.js@1/dist/hls.min.js'; s.onload = start; document.head.appendChild(s); }
 }
 let playing = false;
+// Più servizi (Mux, Gcore): si guarda quale è in onda e si mostra quello; se si passa dall'uno all'altro la pagina segue.
 async function loop() {
-  const on = await isLive();
+  let live = '';
+  for (const s of srcs) { if (await isLive(s)) { live = s; break; } }
+  const on = !!live;
+  if (on && playing && live !== src) { playing = false; if (hls) { hls.destroy(); hls = null; } }
+  if (on) src = live;
   if (on && !playing) { playing = true; badge(true, ''); play(); }
   else if (on) badge(true, '');
   else { if (playing) { playing = false; $('v').removeAttribute('src'); if (hls) { hls.destroy(); hls = null; } } badge(false, 'La partita non è ancora iniziata: la pagina si collega da sola.'); }
@@ -122,8 +127,8 @@ async function enter(code) {
   if (!CFG.length) { $('err').textContent = 'La diretta non è ancora attiva.'; return; }
   $('err').textContent = 'Controllo il codice…';
   const cfg = await openCfg(code);
-  if (!cfg || !cfg.hls) { $('err').textContent = 'Codice non valido.'; return; }
-  src = cfg.hls;
+  if (!cfg || !(cfg.hls || (cfg.sources && cfg.sources.length))) { $('err').textContent = 'Codice non valido.'; return; }
+  srcs = cfg.sources ? cfg.sources.map(x => x.hls) : [cfg.hls];
   history.replaceState(null, '', '#k=' + encodeURIComponent(code));
   $('gate').style.display = 'none'; $('player').style.display = 'block'; tvHelp();
   loop();
