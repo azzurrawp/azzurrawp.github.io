@@ -1,6 +1,6 @@
 {
-  "latestVersion": "0.13.25",
-  "releaseNotes": "0.13.25: diretta privata per i genitori su Mux o Gcore (ognuna con la sua chiave), stima del credito Mux del mese con avviso.",
+  "latestVersion": "0.13.26",
+  "releaseNotes": "0.13.26: per Gcore server di riserva: se il principale non risponde la diretta passa da sola a quello di riserva.",
   "params": {
     "gimbalSpeed": 0.3,
     "zoomRampRate": 1.5

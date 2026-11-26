@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <!-- WP-LIVE-MONITOR-API:1 -->
-<!-- WP-LIVE-PAGE-STAMP:2026112605 -->
+<!-- WP-LIVE-PAGE-STAMP:2026112606 -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -606,6 +606,12 @@ html.nativeBg #calibHint,html.nativeBg #livePanel .lp{-webkit-backdrop-filter:no
   <div class="lpL">Chiave dello stream</div>
   <div id="lpKeyState" class="lpS"></div>
   <div class="lpRow"><input id="lpKey" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="incolla qui la chiave"><button id="lpPaste" class="lpB">Incolla</button></div>
+  <details id="lpBk" class="lpAdv"><summary>Server di riserva (consigliato)</summary>
+    <div class="lpS">Su Gcore, nella diretta "WP Live": "Backup Server" e "Backup Stream Key". Se il server principale non risponde, l'app passa da sola a questo.</div>
+    <div class="lpL">Indirizzo di riserva</div><input id="lpUrl3" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="incolla qui l'indirizzo (rtmp://…)">
+    <div class="lpL">Chiave di riserva</div><div id="lpKey2State" class="lpS"></div>
+    <div class="lpRow"><input id="lpKey2" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="incolla qui la chiave di riserva"><button id="lpPaste2" class="lpB">Incolla</button></div>
+  </details>
   <div class="lpL">Qualità</div>
   <div class="lpSeg"><button data-q="720p">720p</button><button data-q="1080p">1080p</button></div>
   <div id="lpQHint" class="lpS"></div>
@@ -682,7 +688,7 @@ try { PIN = localStorage.getItem('wpPin') || ''; } catch (e) {}
       set(v) { v = v == null ? '' : String(v); if (d.get.call(this) === v) return; d.set.call(this, v); }});
   });
 })();
-const PAGE_VER = '2026112605';
+const PAGE_VER = '2026112606';
 let LOCAL = false;
 try { LOCAL = new URLSearchParams(location.search).get('local') === '1' || sessionStorage.getItem('wpLocal') === '1'; if (LOCAL) sessionStorage.setItem('wpLocal', '1'); } catch (e) {}
 // 23/11: sull'iPhone che riprende la fotocamera vera sta sotto la pagina (anteprima nativa): niente immagini dal server.
@@ -1410,12 +1416,13 @@ function openLivePanel() {
   lpQ = L.quality || '720p';
   lpD = ['mux', 'gcore'].includes(L.dest) ? L.dest : 'youtube';
   $('lpKey').value = '';
-  $('lpUrl').value = lpDestUrl(); $('lpUrl2').value = lpDestUrl();
+  $('lpUrl').value = lpDestUrl(); $('lpUrl2').value = lpDestUrl(); lpFillBackup();
   $('livePanel').style.display = 'flex';
   renderLivePanel();
 }
-function openLivePanelKeep() { $('livePanel').style.display = 'flex'; $('lpKey').value = ''; $('lpUrl2').value = lpDestUrl(); renderLivePanel(); }
-function closeLivePanel() { $('livePanel').style.display = 'none'; $('lpKey').value = ''; }
+function openLivePanelKeep() { $('livePanel').style.display = 'flex'; $('lpKey').value = ''; $('lpUrl2').value = lpDestUrl(); lpFillBackup(); renderLivePanel(); }
+function closeLivePanel() { $('livePanel').style.display = 'none'; $('lpKey').value = ''; $('lpKey2').value = ''; }
+function lpFillBackup() { const L = S.live || {}; $('lpKey2').value = ''; $('lpUrl3').value = L.gcoreUrl2 || ''; }
 function renderLivePanel() {
   if ($('livePanel').style.display !== 'flex') return;
   const L = S.live || {}, sp = S.netSpeed, typed = $('lpKey').value.trim().length > 0;
@@ -1424,6 +1431,9 @@ function renderLivePanel() {
   const cf = lpD !== 'youtube', hk = lpHasKey();
   $('lpTitle').textContent = lpD === 'mux' ? 'Diretta privata (Mux)' : lpD === 'gcore' ? 'Diretta privata (Gcore)' : 'Diretta YouTube';
   $('lpUrlBox').style.display = lpD === 'gcore' ? '' : 'none';
+  $('lpBk').style.display = lpD === 'gcore' ? '' : 'none';
+  const typed2 = $('lpKey2').value.trim().length > 0;
+  $('lpKey2State').textContent = typed2 ? 'Chiave di riserva pronta: verrà salvata all\'avvio.' : L.gcoreHasKey2 ? '✓ Chiave di riserva già inserita.' : 'Non ancora inserita (la diretta parte lo stesso, senza riserva).';
   const mu = muxUsdTxt();
   $('lpCredit').textContent = lpD === 'mux' ? mu.txt + (mu.u >= mu.c ? ' · finito: usa Gcore' : mu.u >= mu.c * 0.8 ? ' · quasi finito: usa Gcore' : '') : '';
   $('lpCredit').style.color = lpD === 'mux' && mu.u >= mu.c * 0.8 ? 'var(--ios-yellow)' : '';
@@ -1445,6 +1455,11 @@ document.querySelectorAll('#lpDest button').forEach(b => b.onclick = () => {
 });
 document.querySelectorAll('#livePanel .lpSeg button[data-q]').forEach(b => b.onclick = () => { lpQ = b.dataset.q; renderLivePanel(); });
 $('lpKey').oninput = renderLivePanel;
+$('lpKey2').oninput = renderLivePanel;
+$('lpPaste2').onclick = async () => {
+  try { const t = (await navigator.clipboard.readText()).trim(); if (t) { $('lpKey2').value = t; renderLivePanel(); return; } } catch (e) {}
+  $('lpKey2').focus(); toast('Tieni premuto nel campo e scegli Incolla', 3000);
+};
 $('lpPaste').onclick = async () => {
   try { const t = (await navigator.clipboard.readText()).trim(); if (t) { $('lpKey').value = t; renderLivePanel(); return; } } catch (e) {}
   $('lpKey').focus(); toast('Tieni premuto nel campo e scegli Incolla', 3000);
@@ -1463,7 +1478,9 @@ $('lpGo').onclick = () => {
     return;
   }
   delete $('lpGo').dataset.ok;
-  cmd({a: 'liveConfig', dest: lpD, url: url !== lpDestUrl() ? url : '', key: key, quality: lpQ});
+  const c = {a: 'liveConfig', dest: lpD, url: url !== lpDestUrl() ? url : '', key: key, quality: lpQ};
+  if (lpD === 'gcore') { const u3 = $('lpUrl3').value.trim(); if (u3 && u3 !== (L.gcoreUrl2 || '')) c.url2 = u3; const k2 = $('lpKey2').value.trim(); if (k2) c.key2 = k2; }
+  cmd(c);
   closeLivePanel();
   const go = rec => {
     if (rec) cmd({a: 'rec', on: true});
