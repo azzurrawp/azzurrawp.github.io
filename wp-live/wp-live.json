@@ -1,6 +1,6 @@
 {
-  "latestVersion": "0.13.24",
-  "releaseNotes": "0.13.24: all'avvio della diretta si sceglie YouTube oppure la diretta privata per i genitori (Cloudflare), ognuna con la sua chiave.",
+  "latestVersion": "0.13.25",
+  "releaseNotes": "0.13.25: diretta privata per i genitori su Mux o Gcore (ognuna con la sua chiave), stima del credito Mux del mese con avviso.",
   "params": {
     "gimbalSpeed": 0.3,
     "zoomRampRate": 1.5
