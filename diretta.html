@@ -20,7 +20,8 @@ input{width:100%;margin-top:14px;padding:13px 14px;border-radius:14px;border:0;b
 button{width:100%;margin-top:12px;min-height:50px;border:0;border-radius:999px;background:var(--blue);color:#fff;font-size:17px;font-weight:600}
 .err{color:#FF9F0A;font-size:14px;min-height:20px;margin-top:8px}
 #player{display:none;width:100%;max-width:1280px}
-video{width:100%;aspect-ratio:16/9;background:#111;border-radius:14px;display:block}
+video,mux-player{width:100%;aspect-ratio:16/9;background:#111;border-radius:14px;display:block;overflow:hidden}
+mux-player{--accent-color:#0A84FF}
 .bar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:10px 4px 0;font-size:15px}
 .live{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:999px;background:var(--red);font-weight:700;font-size:13px}
 .off{background:rgba(255,255,255,.18)}
@@ -52,7 +53,7 @@ small{opacity:.55;font-size:12px}
 <script>
 // Configurazione cifrata: l'indirizzo del video si apre solo con il codice giusto (PBKDF2-SHA256 + AES-GCM).
 // Si genera con tools/diretta_cfg.py. Vuota = diretta non ancora configurata.
-const CFG = [{"s": "29i9y7Ck/L31hcbHp2roBA==", "iv": "bk6NP83NMeFIqcU8", "d": "Qb5m7iLXWX9NYNEYpe0sDzvq9MHK6KgPL6uRRguBUoDOWoQtWOIls9PUo7G6FZmeW/4CRhWAIpX9WM1goRO56QMN9TduXd7syEYYTm88lsqcFnt19fXA8/Lt9JHlqcP5Qkrh5xraLkowr9dU1Io44DljBZZesH82Sn87hTlpBkqrNkqJC0rMgWspLcOdNyBRminj+gMTHo5/RrA21c7u98fUxJ27q3R3WYxjwqAKO8PCqtQEWQC3aMUk/EOzq5K2nU/t"}];
+const CFG = [{"s": "RHi+dNOfFd/rULk1S3SlMA==", "iv": "wX7XP99cy0AEt9DU", "d": "CHOKVepdHD+7GpQtGJhOvSt3hWFdcJsZS2wP2FjbZ62eC8R7lmNB4ndyZq6SPlX9VapzgZemhzZKrO9oMvYnZDhGAfhvKTpVgE/cEkQkxIIMR7RdBLZUs9CP8LQ+701yKJWDB2nVtZTwnEzzUgdItJt+RZCGorN/gSuzjTh73xb6kznyq3GquBhOauGfAFgQJg/g4UWbJTPDVnTho7URxCftKcvu1dHuH+2GT7+bWY4EuHFiqMe4lQZe6eNxhfQweA=="}];
 const $ = id => document.getElementById(id);
 const b64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
 async function openCfg(code) {
@@ -101,7 +102,31 @@ window.__onGCastApiAvailable = ok => {
   });
 };
 if (!isApple) { const s = document.createElement('script'); s.src = 'https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1'; document.head.appendChild(s); }
-function play() {
+// Mux: lettore Mux (si adatta meglio alla rete del genitore e manda a Mux le statistiche di visione). Gcore: lettore del browser.
+const muxId = u => (u.match(/stream\.mux\.com\/([A-Za-z0-9]+)\.m3u8/) || [])[1] || '';
+let mp = null;
+function stopPlayers() {
+  const v = $('v'); v.pause(); v.removeAttribute('src'); v.load();
+  if (hls) { hls.destroy(); hls = null; }
+  if (mp) { mp.remove(); mp = null; }
+}
+function playMux(id) {
+  const v = $('v'); v.style.display = 'none';
+  const add = () => {
+    mp = document.createElement('mux-player');
+    mp.setAttribute('playback-id', id); mp.setAttribute('stream-type', 'live');
+    mp.setAttribute('metadata-video-title', 'Diretta'); mp.setAttribute('autoplay', 'muted');
+    mp.setAttribute('default-hidden-captions', ''); mp.setAttribute('playsinline', '');
+    v.after(mp);
+  };
+  if (customElements.get('mux-player')) add();
+  else {
+    const s = document.createElement('script'); s.src = 'https://cdn.jsdelivr.net/npm/@mux/mux-player@3';
+    s.onload = add; s.onerror = () => { v.style.display = ''; playHls(); }; document.head.appendChild(s);
+  }
+}
+function play() { const id = muxId(src); if (id) playMux(id); else { $('v').style.display = ''; playHls(); } }
+function playHls() {
   const v = $('v');
   if (v.canPlayType('application/vnd.apple.mpegurl')) { v.src = src; v.play().catch(() => {}); return; }
   const start = () => { if (hls) hls.destroy(); hls = new Hls({liveSyncDurationCount: 3}); hls.loadSource(src); hls.attachMedia(v); hls.on(Hls.Events.MANIFEST_PARSED, () => v.play().catch(() => {})); };
@@ -114,11 +139,11 @@ async function loop() {
   let live = '';
   for (const s of srcs) { if (await isLive(s)) { live = s; break; } }
   const on = !!live;
-  if (on && playing && live !== src) { playing = false; if (hls) { hls.destroy(); hls = null; } }
+  if (on && playing && live !== src) { playing = false; stopPlayers(); }
   if (on) src = live;
   if (on && !playing) { playing = true; badge(true, ''); play(); }
   else if (on) badge(true, '');
-  else { if (playing) { playing = false; $('v').removeAttribute('src'); if (hls) { hls.destroy(); hls = null; } } badge(false, 'La partita non è ancora iniziata: la pagina si collega da sola.'); }
+  else { if (playing) { playing = false; stopPlayers(); $('v').style.display = ''; } badge(false, 'La partita non è ancora iniziata: la pagina si collega da sola.'); }
   setTimeout(loop, on ? 30000 : 15000);
 }
 async function enter(code) {
