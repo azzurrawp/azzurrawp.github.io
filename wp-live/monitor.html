@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <!-- WP-LIVE-MONITOR-API:1 -->
-<!-- WP-LIVE-PAGE-STAMP:2026112600 -->
+<!-- WP-LIVE-PAGE-STAMP:2026112601 -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -477,7 +477,7 @@ html.nativeBg #calibHint,html.nativeBg #livePanel .lp{-webkit-backdrop-filter:no
     </details>
     <details class="sec" id="secAuto"><summary>Ripresa<span class="n" id="nAuto"></span></summary>
     <div class="card" id="autoCard">
-      <div class="small">Chi muove la camera (Manuale, Assistita, Auto) si sceglie col pulsante <b>CAMERA</b> in basso a destra; la modalità anche toccando la barra in alto. Assistita e Automatica vogliono il campo calibrato.</div>
+      <div class="small">Chi muove la camera (Manuale, Assistita, Auto) si sceglie col pulsante <b>CAMERA</b> in basso a destra; la modalità anche toccando la barra in alto. Assistita e Auto richiedono il campo calibrato.</div>
       <label class="tgl" id="smRow"><span>Modalità della ripresa<br><small id="smHelp"></small></span><select id="shootMode"><option value="automatico">Adattivo</option><option value="partita">Partita</option><option value="riscaldamento">Riscaldamento</option><option value="allenamento">Allenamento</option></select></label>
       <button class="btn2" id="followStop" style="width:100%;margin-top:6px;display:none">Smetti di seguire il pallone</button>
       <label class="tgl"><span>La tua squadra attacca verso<br><small>1° e 2° tempo; poi si inverte da solo</small></span><select id="azzDir"><option value="">Non impostato</option><option value="sinistra">Sinistra</option><option value="destra">Destra</option></select></label>
@@ -557,7 +557,7 @@ html.nativeBg #calibHint,html.nativeBg #livePanel .lp{-webkit-backdrop-filter:no
     </div>
     <div class="card" id="nativeCard" style="display:none">
       <button class="btn2" id="setBtn" style="width:100%;background:var(--ios-blue)">⚙ Impostazioni dell'iPhone</button>
-      <button class="btn2" id="nativeBtn" style="width:100%;margin-top:8px">Schermata di riserva (solo fotocamera)</button>
+      <button class="btn2" id="nativeBtn" style="width:100%;margin-top:8px">Schermata di riserva (solo camera)</button>
       <div class="small" style="margin-top:6px">Solo se questa pagina non risponde: lì restano registrazione, diretta e Fine partita. Per tornare qui: pulsante "Regia".</div>
     </div>
     </details>
@@ -677,7 +677,7 @@ try { PIN = localStorage.getItem('wpPin') || ''; } catch (e) {}
       set(v) { v = v == null ? '' : String(v); if (d.get.call(this) === v) return; d.set.call(this, v); }});
   });
 })();
-const PAGE_VER = '2026112600';
+const PAGE_VER = '2026112601';
 let LOCAL = false;
 try { LOCAL = new URLSearchParams(location.search).get('local') === '1' || sessionStorage.getItem('wpLocal') === '1'; if (LOCAL) sessionStorage.setItem('wpLocal', '1'); } catch (e) {}
 // 23/11: sull'iPhone che riprende la fotocamera vera sta sotto la pagina (anteprima nativa): niente immagini dal server.
@@ -1697,7 +1697,7 @@ $('mapOkBtn').onclick = () => { cmd({a: 'mapConfirm'}); };
 $('mapWideBtn').onclick = () => { cmd({a: 'mapWide'}); toast('Torno largo: tocca di nuovo l\'angolo', 2000); };
 $('mapCancelBtn').onclick = () => { cmd({a: 'mapCancel'}); redoQueue = []; redoFlow = false; redoIdx = -1; mapping = false; mapSeen = false; $('viewBox').classList.remove('calib', 'mapping'); document.body.classList.remove('mapping'); };
 function hManual() {
-  dlg({msg: 'Altezza della telecamera dal pavimento, in metri (es. 1.43)', input: true, ph: '1.43', buttons: [{t: 'Salva', cls: 'pri', cb: v => {
+  dlg({msg: 'Altezza della camera dal pavimento, in metri (es. 1.43)', input: true, ph: '1.43', buttons: [{t: 'Salva', cls: 'pri', cb: v => {
     const h = parseFloat((v || '').replace(',', '.'));
     if (!(h > 0.5 && h < 9)) { toast('Scrivi l\'altezza in metri, es. 1.43'); return; }
     cmd({a: 'height', v: h}); OK.h = true; saveWz(); goStep(2);
@@ -1808,7 +1808,7 @@ function renderWizard() {
     if (!busy) {
       if (OK.h && hDone()) h += '<div class="st okt">✓ ' + esc((S.geo || '').split(' · ')[0]) + '</div>' + B('next', 'Avanti ▶', true) + B('lidar', 'Rimisura col LiDAR') + B('hman', 'Scrivila a mano');
       else if (hDone()) h += '<div class="st">Altezza salvata: <b>' + esc((S.geo || '').split(' · ')[0].replace('Altezza ', '')) + '</b>. È ancora giusta?</div>' + B('hok', 'Sì, va bene', true) + B('lidar', 'Rimisura col LiDAR') + B('hman', 'Scrivila a mano');
-      else h += '<div class="st">Serve l\'altezza della telecamera dal pavimento.</div>' + B('lidar', 'Misura col LiDAR', true) + B('hman', 'Scrivila a mano');
+      else h += '<div class="st">Serve l\'altezza della camera dal pavimento.</div>' + B('lidar', 'Misura col LiDAR', true) + B('hman', 'Scrivila a mano');
     }
   } else if (wz === 2) {
     const fl = fieldLine();
@@ -1824,7 +1824,7 @@ function renderWizard() {
     const caps = S.caps || [];
     const nA = caps.filter(c => c[2] === 1).length, nO = caps.filter(c => c[2] === 0).length;
     const opt = sel => (S.capColors || []).map(c => '<option' + (c === sel ? ' selected' : '') + '>' + esc(c) + '</option>').join('');
-    h += '<div class="st"><b>Che calottine hanno stasera?</b></div>' +
+    h += '<div class="st"><b>Che calottine hanno oggi?</b></div>' +
       '<div class="st">La tua squadra: <select id="wzHome" style="width:auto">' + opt(S.home) + '</select></div>' +
       '<div class="st">Avversari: <select id="wzAway" style="width:auto">' + opt(S.away) + '</select></div>' +
       '<div class="st">Palla: <b>' + esc(S.ballColor === 'imparato' ? 'colore insegnato sullo schermo' : (S.ballColor || 'modello') === 'modello' ? 'gialla del campionato (Modello pallanuoto)' : S.ballColor) + '</b></div>';
@@ -1846,7 +1846,7 @@ function renderWizard() {
       const sp = S.netSpeed;
       h += line(S.netTesting ? 'warn' : sp < 0 ? 'warn' : sp >= 6 ? 'okt' : sp >= 3.5 ? 'warn' : 'bad', 'Velocità invio',
         S.netTesting ? 'prova in corso…' : sp < 0 ? 'da provare' : sp.toFixed(1).replace('.', ',') + ' Mbps' + (sp < 6 && sp >= 3.5 ? ' (usa 720p)' : sp < 3.5 ? ' (troppo poco)' : ''));
-    } else h += '<div class="st warn">Spazio, internet e velocità: servono l\'app 0.8.8.</div>';
+    } else h += '<div class="st warn">Spazio, internet e velocità: serve l\'app 0.8.8 o successiva.</div>';
     const gc = geoCheck();
     if (gc && !gc.home) h += line(gc.ok ? 'okt' : 'warn', 'Misure della vasca', gc.ok ? 'giuste' : 'da ricontrollare (passo 3)');
     const T = S.tablet || {};
@@ -2099,7 +2099,7 @@ $('micBtn').onclick = () => cmd({a: 'mute', on: !S.muted});
 // 0.13.8: chi muove la camera e modalità della ripresa si scelgono con una rotella.
 const CAMS = [
   {v: 'man', name: 'Manuale', desc: 'Muovi e zoomi tu: col gimbal, col dito sullo schermo o dal monitor regista.', when: 'Quando vuoi decidere tu ogni inquadratura.', color: '#ffffff', bg: ''},
-  {v: 'assist', name: 'Assistita', desc: 'Muovi tu la camera, lo zoom lo fa l\u2019iPhone seguendo il gioco. Se zoommi a mano, l\u2019automatico si ferma per qualche secondo.', when: 'Quando c\u2019è qualcuno al gimbal o al monitor.', color: '#64d2ff', bg: '#0a5ea8'},
+  {v: 'assist', name: 'Assistita', desc: 'Muovi tu la camera, lo zoom lo fa l\u2019iPhone seguendo il gioco. Se zoomi a mano, l\u2019automatico si ferma per qualche secondo.', when: 'Quando c\u2019è qualcuno al gimbal o al monitor.', color: '#64d2ff', bg: '#0a5ea8'},
   {v: 'auto', name: 'Auto', desc: 'Fa tutto l\u2019iPhone: dove puntare e quanto zoomare, con le regole della pallanuoto e la modalità scelta.', when: 'Quando nessuno segue la ripresa.', color: '#30d158', bg: '#1e8e3e'}];
 const MODES = [
   {v: 'automatico', name: 'Adattivo', desc: 'Un solo pallone: lo segue. Più palloni o nessuno: inquadra i giocatori, alternando le squadre. Torna al pallone quando ne resta uno.', when: 'Va bene quasi sempre: si adatta da solo.'},
