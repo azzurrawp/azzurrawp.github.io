@@ -31,6 +31,12 @@ small{opacity:.55;font-size:12px}
 .tv{display:none;align-items:center;gap:8px;margin:10px 4px 0;font-size:15px}
 .tv google-cast-launcher{width:34px;height:34px;--connected-color:#0A84FF;--disconnected-color:#fff;cursor:pointer}
 .tvhelp{opacity:.6;font-size:13px;margin:8px 4px 0}
+#unmute{display:none;width:auto;min-height:44px;margin:10px 4px 0;padding:0 18px;font-size:16px}
+/* Pagina aperta dal browser della TV (Samsung, LG): testi più grandi, video a tutta larghezza. */
+body.ontv #player{max-width:none;width:min(96vw,136vh)}
+body.ontv .bar,body.ontv .tvhelp{font-size:22px}
+body.ontv .live{font-size:18px}
+body.ontv button:focus,body.ontv input:focus{outline:4px solid #FFD60A;outline-offset:3px}
 </style>
 </head>
 <body>
@@ -46,6 +52,7 @@ small{opacity:.55;font-size:12px}
     <video id="v" controls playsinline muted autoplay x-webkit-airplay="allow"></video>
     <div class="bar"><span class="live off" id="badge"><span class="dot"></span><span id="badgeTxt">NON IN DIRETTA</span></span><span id="msg"></span></div>
     <div class="tv" id="tvRow"><google-cast-launcher></google-cast-launcher><span id="tvTxt">Guarda sulla TV (Chromecast)</span></div>
+    <button id="unmute">🔊 Attiva l'audio</button>
     <div class="tvhelp" id="tvHelp"></div>
     <div class="bar"><small>Il video è riservato ai genitori: per favore non condividere il link fuori dal gruppo.</small></div>
   </div>
@@ -77,9 +84,13 @@ async function isLive(src) {
 }
 // TV: AirPlay da iPhone/iPad (pulsante nel lettore di Safari), Chromecast da Chrome (Android, PC).
 const isApple = /iPhone|iPad|Macintosh/.test(navigator.userAgent) && 'WebKitPlaybackTargetAvailabilityEvent' in window;
+// Browser di una smart TV (Samsung Tizen, LG webOS e simili): lettore leggero, niente Chromecast.
+const isTV = /SMART-TV|SmartTV|Tizen|Web0S|webOS|NetCast|HbbTV|VIDAA|BRAVIA/i.test(navigator.userAgent);
+if (isTV) document.body.classList.add('ontv');
 function tvHelp() {
-  $('tvHelp').textContent = isApple ? 'Per la TV: metti il video a schermo intero e tocca il simbolo AirPlay (Apple TV o TV compatibili).'
-    : 'Per la TV con Chromecast o Google TV usa Chrome; con altre TV usa "Duplica schermo" del telefono.';
+  $('tvHelp').textContent = isTV ? 'Usa le frecce e OK del telecomando; per lo schermo intero scegli il simbolo con i quattro angoli.'
+    : isApple ? 'Per la TV: schermo intero e tocca il simbolo AirPlay (Apple TV e molte TV Samsung e LG recenti).'
+    : 'Per la TV: con Chromecast o Google TV usa Chrome; con Samsung usa Smart View, con LG Screen Share. Oppure apri questa pagina dal browser della TV.';
 }
 function castMedia() {
   const s = cast.framework.CastContext.getInstance().getCurrentSession();
@@ -101,12 +112,12 @@ window.__onGCastApiAvailable = ok => {
     if (st === 'CONNECTED') castMedia(); else $('tvTxt').textContent = 'Guarda sulla TV (Chromecast)';
   });
 };
-if (!isApple) { const s = document.createElement('script'); s.src = 'https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1'; document.head.appendChild(s); }
+if (!isApple && !isTV) { const s = document.createElement('script'); s.src = 'https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1'; document.head.appendChild(s); }
 // Mux: lettore Mux (si adatta meglio alla rete del genitore e manda a Mux le statistiche di visione). Gcore: lettore del browser.
 const muxId = u => (u.match(/stream\.mux\.com\/([A-Za-z0-9]+)\.m3u8/) || [])[1] || '';
 let mp = null;
 function stopPlayers() {
-  const v = $('v'); v.pause(); v.removeAttribute('src'); v.load();
+  const v = $('v'); $('unmute').style.display = 'none'; v.pause(); v.removeAttribute('src'); v.load();
   if (hls) { hls.destroy(); hls = null; }
   if (mp) { mp.remove(); mp = null; }
 }
@@ -122,17 +133,21 @@ function playMux(id) {
   if (customElements.get('mux-player')) add();
   else {
     const s = document.createElement('script'); s.src = 'https://cdn.jsdelivr.net/npm/@mux/mux-player@3';
-    s.onload = add; s.onerror = () => { v.style.display = ''; playHls(); }; document.head.appendChild(s);
+    s.onload = () => { if (customElements.get('mux-player')) add(); else { v.style.display = ''; playHls(); } }; s.onerror = () => { v.style.display = ''; playHls(); }; document.head.appendChild(s);
   }
 }
-function play() { const id = muxId(src); if (id) playMux(id); else { $('v').style.display = ''; playHls(); } }
+function play() { const id = muxId(src); if (id && !isTV && window.customElements) playMux(id); else { $('v').style.display = ''; playHls(); } }
 function playHls() {
-  const v = $('v');
+  const v = $('v'); showUnmute();
   if (v.canPlayType('application/vnd.apple.mpegurl')) { v.src = src; v.play().catch(() => {}); return; }
   const start = () => { if (hls) hls.destroy(); hls = new Hls({liveSyncDurationCount: 3}); hls.loadSource(src); hls.attachMedia(v); hls.on(Hls.Events.MANIFEST_PARSED, () => v.play().catch(() => {})); };
   if (window.Hls) start();
   else { const s = document.createElement('script'); s.src = 'https://cdn.jsdelivr.net/npm/hls.js@1/dist/hls.min.js'; s.onload = start; document.head.appendChild(s); }
 }
+// Il video parte muto (i browser bloccano l'audio automatico): un tasto grande per attivarlo.
+function showUnmute() { const v = $('v'); $('unmute').style.display = v.muted ? 'inline-block' : 'none'; }
+$('unmute').onclick = () => { const v = $('v'); v.muted = false; v.play().catch(() => {}); showUnmute(); };
+$('v').addEventListener('volumechange', showUnmute);
 let playing = false;
 // Più servizi (Mux, Gcore): si guarda quale è in onda e si mostra quello; se si passa dall'uno all'altro la pagina segue.
 async function loop() {
