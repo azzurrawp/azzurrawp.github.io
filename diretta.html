@@ -27,6 +27,9 @@ video{width:100%;aspect-ratio:16/9;background:#111;border-radius:14px;display:bl
 .dot{width:8px;height:8px;border-radius:50%;background:#fff}
 #msg{opacity:.8}
 small{opacity:.55;font-size:12px}
+.tv{display:none;align-items:center;gap:8px;margin:10px 4px 0;font-size:15px}
+.tv google-cast-launcher{width:34px;height:34px;--connected-color:#0A84FF;--disconnected-color:#fff;cursor:pointer}
+.tvhelp{opacity:.6;font-size:13px;margin:8px 4px 0}
 </style>
 </head>
 <body>
@@ -39,15 +42,17 @@ small{opacity:.55;font-size:12px}
     <div class="err" id="err"></div>
   </div>
   <div id="player">
-    <video id="v" controls playsinline muted autoplay></video>
+    <video id="v" controls playsinline muted autoplay x-webkit-airplay="allow"></video>
     <div class="bar"><span class="live off" id="badge"><span class="dot"></span><span id="badgeTxt">NON IN DIRETTA</span></span><span id="msg"></span></div>
+    <div class="tv" id="tvRow"><google-cast-launcher></google-cast-launcher><span id="tvTxt">Guarda sulla TV (Chromecast)</span></div>
+    <div class="tvhelp" id="tvHelp"></div>
     <div class="bar"><small>Il video è riservato ai genitori: per favore non condividere il link fuori dal gruppo.</small></div>
   </div>
 </div>
 <script>
 // Configurazione cifrata: l'indirizzo del video si apre solo con il codice giusto (PBKDF2-SHA256 + AES-GCM).
 // Si genera con tools/diretta_cfg.py. Vuota = diretta non ancora configurata.
-const CFG = [];
+const CFG = [{"s": "pYfG1tNXO5HhSUtU6k4/nQ==", "iv": "D9AfYFNtSR2PA4lD", "d": "oycjpFnGF0+w7c4PX3w3BgamtlizVWu3sD3qiEh7huDjYYfNMEy3Qz2WpZZ0cuXljngOPh+r9oQC6c6lqwxkkSdOO57E505EFJwwDUc9z/0Q1t1vqK5s/VXXjs9CgICcTPQCf1KiCE0ZGLWdRl4eEVorwcY8aEBPoZg1bxDA1TuXiRnak1s="}];
 const $ = id => document.getElementById(id);
 const b64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
 async function openCfg(code) {
@@ -64,8 +69,38 @@ async function openCfg(code) {
 let hls = null, src = '';
 function badge(on, text) { $('badge').classList.toggle('off', !on); $('badgeTxt').textContent = on ? 'IN DIRETTA' : 'NON IN DIRETTA'; $('msg').textContent = text || ''; }
 async function isLive() {
-  try { const r = await fetch(src + (src.includes('?') ? '&' : '?') + 't=' + Date.now(), {cache: 'no-store'}); return r.ok; } catch (e) { return false; }
+  // Cloudflare Stream: /lifecycle dice se la diretta è in onda; altrimenti si guarda se il manifest è una playlist vera.
+  const life = src.includes('/manifest/') ? src.replace(/\/manifest\/.*$/, '/lifecycle') : '';
+  if (life) { try { const r = await fetch(life + '?t=' + Date.now(), {cache: 'no-store'}); if (r.ok) { const j = await r.json(); return !!j.live; } } catch (e) {} }
+  try { const r = await fetch(src + (src.includes('?') ? '&' : '?') + 't=' + Date.now(), {cache: 'no-store'}); return r.status === 200 && (await r.text()).includes('#EXT'); } catch (e) { return false; }
 }
+// TV: AirPlay da iPhone/iPad (pulsante nel lettore di Safari), Chromecast da Chrome (Android, PC).
+const isApple = /iPhone|iPad|Macintosh/.test(navigator.userAgent) && 'WebKitPlaybackTargetAvailabilityEvent' in window;
+function tvHelp() {
+  $('tvHelp').textContent = isApple ? 'Per la TV: metti il video a schermo intero e tocca il simbolo AirPlay (Apple TV o TV compatibili).'
+    : 'Per la TV con Chromecast o Google TV usa Chrome; con altre TV usa "Duplica schermo" del telefono.';
+}
+function castMedia() {
+  const s = cast.framework.CastContext.getInstance().getCurrentSession();
+  if (!s || !src) return;
+  const mi = new chrome.cast.media.MediaInfo(src, 'application/x-mpegurl');
+  mi.streamType = chrome.cast.media.StreamType.LIVE;
+  mi.hlsSegmentFormat = chrome.cast.media.HlsSegmentFormat.TS;
+  mi.metadata = new chrome.cast.media.GenericMediaMetadata(); mi.metadata.title = 'Azzurra U16 · Diretta';
+  const rq = new chrome.cast.media.LoadRequest(mi); rq.autoplay = true;
+  s.loadMedia(rq).then(() => { $('tvTxt').textContent = 'In onda sulla TV'; }, () => { $('tvTxt').textContent = 'La TV non riesce ad aprire il video'; });
+}
+window.__onGCastApiAvailable = ok => {
+  if (!ok) return;
+  const ctx = cast.framework.CastContext.getInstance();
+  ctx.setOptions({receiverApplicationId: chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID, autoJoinPolicy: chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED});
+  ctx.addEventListener(cast.framework.CastContextEventType.CAST_STATE_CHANGED, e => {
+    const st = e.castState;
+    $('tvRow').style.display = st === 'NO_DEVICES_AVAILABLE' ? 'none' : 'flex';
+    if (st === 'CONNECTED') castMedia(); else $('tvTxt').textContent = 'Guarda sulla TV (Chromecast)';
+  });
+};
+if (!isApple) { const s = document.createElement('script'); s.src = 'https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1'; document.head.appendChild(s); }
 function play() {
   const v = $('v');
   if (v.canPlayType('application/vnd.apple.mpegurl')) { v.src = src; v.play().catch(() => {}); return; }
@@ -90,7 +125,7 @@ async function enter(code) {
   if (!cfg || !cfg.hls) { $('err').textContent = 'Codice non valido.'; return; }
   src = cfg.hls;
   history.replaceState(null, '', '#k=' + encodeURIComponent(code));
-  $('gate').style.display = 'none'; $('player').style.display = 'block';
+  $('gate').style.display = 'none'; $('player').style.display = 'block'; tvHelp();
   loop();
 }
 $('go').onclick = () => enter($('code').value);
