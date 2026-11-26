@@ -1,6 +1,6 @@
 {
-  "latestVersion": "0.13.23",
-  "releaseNotes": "0.13.23: inquadrature ai 6 metri e al centroboa meno strette, messa a fuoco più stabile, zoom automatico senza teleobiettivo, opzione contro lo sfarfallio delle luci, diretta a 8 Mbit/s.",
+  "latestVersion": "0.13.24",
+  "releaseNotes": "0.13.24: all'avvio della diretta si sceglie YouTube oppure la diretta privata per i genitori (Cloudflare), ognuna con la sua chiave.",
   "params": {
     "gimbalSpeed": 0.3,
     "zoomRampRate": 1.5

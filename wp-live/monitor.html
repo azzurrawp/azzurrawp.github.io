@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <!-- WP-LIVE-MONITOR-API:1 -->
-<!-- WP-LIVE-PAGE-STAMP:2026112603 -->
+<!-- WP-LIVE-PAGE-STAMP:2026112604 -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -598,7 +598,9 @@ html.nativeBg #calibHint,html.nativeBg #livePanel .lp{-webkit-backdrop-filter:no
 <div id="dlg"><div><div id="dlgMsg"></div><input id="dlgIn"><div id="dlgBtns"></div></div></div>
 <div id="pick"><div class="pk" role="dialog"><div class="pkHead"><b id="pkTitle"></b><span>scorri o tocca</span></div><div class="pkRow"><div class="pkWheel"><div class="pkBand"></div><div id="pkList"></div></div><div class="pkInfo"><b id="pkName"></b><div id="pkDesc"></div><div id="pkWhen"></div></div></div><div class="pkBtns"><button id="pkNo">Annulla</button><button id="pkOk" class="pri">Usa questa</button></div></div></div>
 <div id="livePanel"><div class="lp">
-  <div class="lpT">Diretta YouTube</div>
+  <div class="lpT" id="lpTitle">Diretta YouTube</div>
+  <div class="lpL">Dove trasmettere</div>
+  <div class="lpSeg" id="lpDest"><button data-d="youtube">YouTube</button><button data-d="cloudflare">Privata (Cloudflare)</button></div>
   <div class="lpL">Chiave dello stream</div>
   <div id="lpKeyState" class="lpS"></div>
   <div class="lpRow"><input id="lpKey" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="incolla qui la chiave"><button id="lpPaste" class="lpB">Incolla</button></div>
@@ -610,7 +612,7 @@ html.nativeBg #calibHint,html.nativeBg #livePanel .lp{-webkit-backdrop-filter:no
   <details class="lpAdv"><summary>Avanzate</summary><div class="lpL">Indirizzo dello stream</div><input id="lpUrl" autocomplete="off" autocapitalize="off" spellcheck="false"></details>
   <button id="lpGo" class="lpGo">Avvia diretta</button>
   <button id="lpNo" class="lpNo">Annulla</button>
-  <div class="lpS" style="margin-top:8px;text-align:center">Su YouTube Studio la diretta deve essere aperta.</div>
+  <div class="lpS" id="lpFoot" style="margin-top:8px;text-align:center"></div>
 </div></div>
 <div id="regBox"><div>
   <div style="font-size:19px;font-weight:800">Regista</div>
@@ -678,7 +680,7 @@ try { PIN = localStorage.getItem('wpPin') || ''; } catch (e) {}
       set(v) { v = v == null ? '' : String(v); if (d.get.call(this) === v) return; d.set.call(this, v); }});
   });
 })();
-const PAGE_VER = '2026112603';
+const PAGE_VER = '2026112604';
 let LOCAL = false;
 try { LOCAL = new URLSearchParams(location.search).get('local') === '1' || sessionStorage.getItem('wpLocal') === '1'; if (LOCAL) sessionStorage.setItem('wpLocal', '1'); } catch (e) {}
 // 23/11: sull'iPhone che riprende la fotocamera vera sta sotto la pagina (anteprima nativa): niente immagini dal server.
@@ -1395,12 +1397,16 @@ $('liveBtn').onclick = () => {
   openLivePanel();
 };
 // Pannello LIVE: chiave, qualità, prova velocità e avvio nello stesso posto.
-let lpQ = '', lpWasTesting = false, lpNetAt = 0;
+let lpQ = '', lpWasTesting = false, lpNetAt = 0, lpD = 'youtube';
+// 0.13.24: due destinazioni, ognuna con indirizzo e chiave propri (salvati solo sull'iPhone).
+function lpDestUrl() { const L = S.live || {}; return lpD === 'cloudflare' ? (L.cfUrl || 'rtmps://live.cloudflare.com:443/live/') : (L.url || 'rtmp://a.rtmp.youtube.com/live2'); }
+function lpHasKey() { const L = S.live || {}; return lpD === 'cloudflare' ? !!L.cfHasKey : !!L.hasKey; }
 function openLivePanel() {
   const L = S.live || {};
   lpQ = L.quality || '720p';
+  lpD = L.dest === 'cloudflare' ? 'cloudflare' : 'youtube';
   $('lpKey').value = '';
-  $('lpUrl').value = L.url || 'rtmp://a.rtmp.youtube.com/live2';
+  $('lpUrl').value = lpDestUrl();
   $('livePanel').style.display = 'flex';
   renderLivePanel();
 }
@@ -1410,16 +1416,24 @@ function renderLivePanel() {
   const L = S.live || {}, sp = S.netSpeed, typed = $('lpKey').value.trim().length > 0;
   if (lpWasTesting && !S.netTesting) lpNetAt = Date.now();
   lpWasTesting = !!S.netTesting;
-  $('lpKeyState').textContent = typed ? 'Chiave nuova pronta: verrà salvata all\'avvio.' : (L.hasKey ? '✓ Chiave già inserita (incollane una nuova solo se è cambiata).' : 'Manca la chiave: incollala qui (te la manda chi gestisce il canale).');
-  $('lpKeyState').style.color = typed || L.hasKey ? '' : 'var(--ios-yellow)';
-  document.querySelectorAll('#livePanel .lpSeg button').forEach(b => b.classList.toggle('on', b.dataset.q === lpQ));
+  const cf = lpD === 'cloudflare', hk = lpHasKey();
+  $('lpTitle').textContent = cf ? 'Diretta privata' : 'Diretta YouTube';
+  document.querySelectorAll('#lpDest button').forEach(b => b.classList.toggle('on', b.dataset.d === lpD));
+  $('lpKeyState').textContent = typed ? 'Chiave nuova pronta: verrà salvata all\'avvio.' : (hk ? '✓ Chiave già inserita (incollane una nuova solo se è cambiata).' : cf ? 'Manca la chiave: la trovi su Cloudflare, nella diretta "WP Live".' : 'Manca la chiave: incollala qui (te la manda chi gestisce il canale).');
+  $('lpKeyState').style.color = typed || hk ? '' : 'var(--ios-yellow)';
+  $('lpFoot').textContent = cf ? 'I genitori guardano su azzurrawp.github.io/diretta.html con il loro codice.' : 'Su YouTube Studio la diretta deve essere aperta (o con avvio automatico).';
+  document.querySelectorAll('#livePanel .lpSeg button[data-q]').forEach(b => b.classList.toggle('on', b.dataset.q === lpQ));
   const ok = typeof sp === 'number' && sp >= 0;
   $('lpNetTxt').textContent = S.netTesting ? 'prova in corso…' : ok ? 'invio ' + sp.toFixed(1).replace('.', ',') + ' Mbps' + (sp < 3.5 ? ' · troppo poco' : sp < 6 ? ' · ok per 720p' : ' · ok per 1080p') : 'non ancora provata';
   $('lpQHint').textContent = ok && !S.netTesting ? (sp >= 6 ? 'Consigliata: 1080p (la rete regge).' : 'Consigliata: 720p.') : 'Con l\'hotspot conviene 720p.';
   $('lpNetWarn').textContent = S.netTesting ? '' : (!ok || !lpNetAt ? 'Consiglio: fai la prova della velocità prima di partire.' : Date.now() - lpNetAt > 600000 ? 'L\'ultima prova è di più di 10 minuti fa: rifalla se hai cambiato posto o rete.' : '');
-  $('lpGo').disabled = !(typed || L.hasKey);
+  $('lpGo').disabled = !(typed || hk);
 }
-document.querySelectorAll('#livePanel .lpSeg button').forEach(b => b.onclick = () => { lpQ = b.dataset.q; renderLivePanel(); });
+document.querySelectorAll('#lpDest button').forEach(b => b.onclick = () => {
+  if (lpD === b.dataset.d) return;
+  lpD = b.dataset.d; $('lpKey').value = ''; $('lpUrl').value = lpDestUrl(); renderLivePanel();
+});
+document.querySelectorAll('#livePanel .lpSeg button[data-q]').forEach(b => b.onclick = () => { lpQ = b.dataset.q; renderLivePanel(); });
 $('lpKey').oninput = renderLivePanel;
 $('lpPaste').onclick = async () => {
   try { const t = (await navigator.clipboard.readText()).trim(); if (t) { $('lpKey').value = t; renderLivePanel(); return; } } catch (e) {}
@@ -1430,7 +1444,7 @@ $('lpNo').onclick = closeLivePanel;
 $('livePanel').onclick = e => { if (e.target === $('livePanel')) closeLivePanel(); };
 $('lpGo').onclick = () => {
   const L = S.live || {}, key = $('lpKey').value.trim(), url = $('lpUrl').value.trim();
-  if (key || lpQ !== L.quality || (url && url !== L.url)) cmd({a: 'liveConfig', url: url, key: key, quality: lpQ});
+  cmd({a: 'liveConfig', dest: lpD, url: url !== lpDestUrl() ? url : '', key: key, quality: lpQ});
   closeLivePanel();
   const go = rec => {
     if (rec) cmd({a: 'rec', on: true});
@@ -1853,10 +1867,11 @@ function renderWizard() {
     const T = S.tablet || {};
     h += line(!T.linked ? 'warn' : T.ok ? 'okt' : 'warn', 'Tablet (risultato)', !T.linked ? 'non collegato: punteggio a mano' : T.ok ? 'collegato' : 'collegato, in attesa dei dati');
     if (T.linked && T.match) h += line('okt', 'Partita del tablet', esc(T.match));
-    const hk = S.live && S.live.hasKey, kt = (S.live && S.live.keyTail) || '';
-    h += line(hk ? 'okt' : 'warn', 'Chiave YouTube', hk ? (kt ? 'inserita · finisce con …' + esc(kt) : 'inserita') : 'manca (solo registrazione)');
+    const LV = S.live || {}, cfd = LV.dest === 'cloudflare';
+    const hk = cfd ? LV.cfHasKey : LV.hasKey, kt = (cfd ? LV.cfKeyTail : LV.keyTail) || '';
+    h += line(hk ? 'okt' : 'warn', cfd ? 'Chiave diretta privata' : 'Chiave YouTube', hk ? (kt ? 'inserita · finisce con …' + esc(kt) : 'inserita') : 'manca (solo registrazione)');
     if (newApp) h += B('net', S.netTesting ? 'Prova in corso…' : 'Prova la velocità');
-    if (!hk) h += B('key', 'Inserisci la chiave YouTube');
+    if (!hk) h += B('key', cfd ? 'Inserisci la chiave della diretta privata' : 'Inserisci la chiave YouTube');
     h += B('done', 'Preparazione finita ▶', true);
   }
   const ae = document.activeElement;
