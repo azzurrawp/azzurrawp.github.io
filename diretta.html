@@ -60,7 +60,7 @@ body.ontv button:focus,body.ontv input:focus{outline:4px solid #FFD60A;outline-o
 <script>
 // Configurazione cifrata: l'indirizzo del video si apre solo con il codice giusto (PBKDF2-SHA256 + AES-GCM).
 // Si genera con tools/diretta_cfg.py. Vuota = diretta non ancora configurata.
-const CFG = [{"s": "RHi+dNOfFd/rULk1S3SlMA==", "iv": "wX7XP99cy0AEt9DU", "d": "CHOKVepdHD+7GpQtGJhOvSt3hWFdcJsZS2wP2FjbZ62eC8R7lmNB4ndyZq6SPlX9VapzgZemhzZKrO9oMvYnZDhGAfhvKTpVgE/cEkQkxIIMR7RdBLZUs9CP8LQ+701yKJWDB2nVtZTwnEzzUgdItJt+RZCGorN/gSuzjTh73xb6kznyq3GquBhOauGfAFgQJg/g4UWbJTPDVnTho7URxCftKcvu1dHuH+2GT7+bWY4EuHFiqMe4lQZe6eNxhfQweA=="}];
+const CFG = [{"s": "rkW6M18v+SFZf/gva3+f3w==", "iv": "AwbYOX61m+ImzUtM", "d": "RbU2Ddf63PkqXj3MLd6jXfKUrNYMG/2bCbiGlP0fhYAdquQB3dQPUW237b4HqPE3Rmh+63UaA3dJ7c5A1Q2Mb0F3jScfQkMX15GtVgMSz8iMvPl0VWo38k2o9za9bYya3f7i6xqA8Z8KRfkndw/dmijFPf/W9wQGsF9JeCWBO/ehy5NrK+U1IzcLPLm1ibydkqCSFFbIXPBKF/nTw6oIasjFFdMAC8QDmqshgqjxpfUAKGvdVg6SjKSDLOlhUumBk5tY0wx8bjTrpP3rdTDH9ZAz37HFMUfNip/OEnfrysk+APW7Fdr8J7Ae4m7P3qx2FF33DGm0eUmYd8Mslfy0Yf5pltpg0itRVSfTbZ+h5NLkbn1cjI+HpXF7wObPMLeusI3ZkSsFUOjPvoKivalktTCi2ZqyDTZQ9M90a9tvoWLehpLKyMUMBA=="}];
 const $ = id => document.getElementById(id);
 const b64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
 async function openCfg(code) {
