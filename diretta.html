@@ -119,6 +119,7 @@ let mp = null;
 function stopPlayers() {
   const v = $('v'); $('unmute').style.display = 'none'; v.pause(); v.removeAttribute('src'); v.load();
   clearTimeout(llDog);
+  if (ivp) { try { ivp.delete(); } catch (e) {} ivp = null; }
   if (hls) { hls.destroy(); hls = null; }
   if (mp) { mp.remove(); mp = null; }
 }
@@ -137,7 +138,23 @@ function playMux(id) {
     s.onload = () => { if (customElements.get('mux-player')) add(); else { v.style.display = ''; playHls(); } }; s.onerror = () => { v.style.display = ''; playHls(); }; document.head.appendChild(s);
   }
 }
-function play() { const id = muxId(src); if (id && !isTV && window.customElements) playMux(id); else { $('v').style.display = ''; playHls(); } }
+// Amazon IVS: lettore di Amazon (bassa latenza 2-5 s); se non si carica o dà errore, lettore normale.
+const isIvs = u => /\.live-video\.net\//.test(u);
+let ivp = null;
+function playIvs() {
+  const v = $('v'); v.style.display = ''; showUnmute();
+  const fail = () => { if (ivp) { try { ivp.delete(); } catch (e) {} ivp = null; } if (playing) playHls(); };
+  const start = () => {
+    const P = window.IVSPlayer;
+    if (!P || !P.isPlayerSupported) return fail();
+    ivp = P.create(); ivp.attachHTMLVideoElement(v);
+    ivp.addEventListener(P.PlayerEventType.ERROR, fail);
+    ivp.setAutoplay(true); ivp.setMuted(true); ivp.load(src); ivp.play();
+  };
+  if (window.IVSPlayer) start();
+  else { const s = document.createElement('script'); s.src = 'https://player.live-video.net/1.59.0/amazon-ivs-player.min.js'; s.onload = start; s.onerror = fail; document.head.appendChild(s); }
+}
+function play() { const id = muxId(src); if (id && !isTV && window.customElements) playMux(id); else if (isIvs(src) && !isTV) playIvs(); else { $('v').style.display = ''; playHls(); } }
 // Gcore: sul telefono e sul PC il link a bassa latenza (LL-HLS, 3-5 s); TV e Chromecast restano sul link classico.
 // Se il bassa latenza dà errore o resta fermo, si torna da soli al classico per il resto della visione.
 let llOff = false, llDog = null;
