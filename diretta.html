@@ -118,6 +118,7 @@ const muxId = u => (u.match(/stream\.mux\.com\/([A-Za-z0-9]+)\.m3u8/) || [])[1] 
 let mp = null;
 function stopPlayers() {
   const v = $('v'); $('unmute').style.display = 'none'; v.pause(); v.removeAttribute('src'); v.load();
+  clearTimeout(llDog);
   if (hls) { hls.destroy(); hls = null; }
   if (mp) { mp.remove(); mp = null; }
 }
@@ -137,10 +138,25 @@ function playMux(id) {
   }
 }
 function play() { const id = muxId(src); if (id && !isTV && window.customElements) playMux(id); else { $('v').style.display = ''; playHls(); } }
+// Gcore: sul telefono e sul PC il link a bassa latenza (LL-HLS, 3-5 s); TV e Chromecast restano sul link classico.
+// Se il bassa latenza dà errore o resta fermo, si torna da soli al classico per il resto della visione.
+let llOff = false, llDog = null;
+const llUrl = u => (u.match(/^(https:\/\/[^/]+\.gvideo\.io)\/mpegts\/([0-9_]+)\/master_mpegts\.m3u8$/) || []).length ? u.replace(/\/mpegts\/([0-9_]+)\/master_mpegts\.m3u8$/, '/cmaf/$1/master.m3u8') : '';
 function playHls() {
   const v = $('v'); showUnmute();
-  if (v.canPlayType('application/vnd.apple.mpegurl')) { v.src = src; v.play().catch(() => {}); return; }
-  const start = () => { if (hls) hls.destroy(); hls = new Hls({liveSyncDurationCount: 3}); hls.loadSource(src); hls.attachMedia(v); hls.on(Hls.Events.MANIFEST_PARSED, () => v.play().catch(() => {})); };
+  const ll = (!isTV && !llOff && llUrl(src)) || '';
+  const u = ll || src;
+  clearTimeout(llDog);
+  const back = () => { if (!ll || llOff || !playing) return; llOff = true; clearTimeout(llDog); v.removeEventListener('error', back); if (hls) { hls.destroy(); hls = null; } v.removeAttribute('src'); v.load(); playHls(); };
+  if (ll) { v.addEventListener('error', back, {once: true}); llDog = setTimeout(() => { if (v.readyState < 2) back(); }, 15000); }
+  if (v.canPlayType('application/vnd.apple.mpegurl')) { v.src = u; v.play().catch(() => {}); return; }
+  const start = () => {
+    if (hls) hls.destroy();
+    hls = new Hls(ll ? {lowLatencyMode: true} : {liveSyncDurationCount: 3});
+    hls.loadSource(u); hls.attachMedia(v);
+    hls.on(Hls.Events.MANIFEST_PARSED, () => v.play().catch(() => {}));
+    if (ll) hls.on(Hls.Events.ERROR, (e, d) => { if (d.fatal) back(); });
+  };
   if (window.Hls) start();
   else { const s = document.createElement('script'); s.src = 'https://cdn.jsdelivr.net/npm/hls.js@1/dist/hls.min.js'; s.onload = start; document.head.appendChild(s); }
 }
