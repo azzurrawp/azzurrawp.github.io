@@ -408,7 +408,7 @@ function syncDistinte(ask){if(!window.crypto||!crypto.subtle)return Promise.reso
     if(DB.encv===o.data&&DB.mv===MV&&!ask)return;
     return decrypt(o,DB.pin).then(function(d){
       DB.rdone=DB.rdone||{};(d.resets||[]).forEach(function(x){var m=byId(x.id),k=x.id+'@'+x.at;if(!m||DB.rdone[k])return;DB.rdone[k]=1;
-        if((m.upd||0)<x.at&&m.log.length){F.concat(['x']).forEach(function(f){m[f]=z()});m.og=0;m.ogu=0;m.log=[];delete m.corr;delete m.go;m.per=1;m.done=false;m.upd=Date.now();if(S&&S.id==m.id)all()}});
+        if((m.upd||0)<x.at&&(m.log.length||(m.go&&m.go.length))){F.concat(['x']).forEach(function(f){m[f]=z()});m.og=0;m.ogu=0;m.log=[];delete m.corr;delete m.go;m.per=1;m.done=false;m.upd=Date.now();if(S&&S.id==m.id){all();totals();goUI()}}});
       var r=merge(d.matches||[]);DB.encv=o.data;DB.mv=MV;persist();renderHome();try{if(S)all()}catch(e){}fetchStats();publish(false);
       if(r[0]||ask)toast('Distinte aggiornate: '+r[0]+' nuove, '+r[1]+' controllate')},
       function(){DB.pin='';persist();toast('Codice squadra errato');if(ask)setTimeout(function(){syncDistinte(true)},800)})
@@ -909,7 +909,7 @@ function renderHome(){document.getElementById('hnew').style.display=DB.gh||!DB.m
     done_=all_.filter(function(m){return m.done}).reverse(),later=open_.filter(function(m){return m!==next});
   var card=function(m,hero){var lv=isLive(m)&&!DB.gh,cls=lv?'run live':m.done?'done':(m.log.length?'run':''),st=lv?'🔴 IN DIRETTA · '+m.per+'T<b>'+resH(m)+'</b>':m.done?'Conclusa<b>'+resH(m)+'</b>':(m.log.length?'In corso · '+m.per+'T<b>'+resH(m)+'</b>':(hero&&!(m.remote&&!DB.gh)?'Tocca per registrare':'Da giocare'));
     return '<div class="card '+cls+(hero?' hero':'')+'" data-id="'+esc(m.id)+'"><div class="when"><b>'+esc(m.gio||'Partita')+'</b>'+esc(fdate(m))+(m.time?' · '+esc(m.time):'')+'<span class="where">'+where(m)+'</span></div>'+
-      '<div class="match">'+titleH(m)+(m.foto===1&&!VIEW?' <span title="Foto di squadra fatta">📸</span>':'')+'<small>'+esc(m.place||'')+(m.log.length&&DB.gh&&!m.remote?(pending(m)?' · ☁ da pubblicare':' · ☁ pubblicata ✓'):'')+'</small></div><div class="st">'+st+'</div>'+(DB.gh&&!m.done?(m.log.length?'<button class="del" data-rst="'+esc(m.id)+'" title="Azzera">↺</button>':'')+'<button class="del" data-del="'+esc(m.id)+'">🗑</button>':'')+'</div>'};
+      '<div class="match">'+titleH(m)+(m.foto===1&&!VIEW?' <span title="Foto di squadra fatta">📸</span>':'')+'<small>'+esc(m.place||'')+(m.log.length&&DB.gh&&!m.remote?(pending(m)?' · ☁ da pubblicare':' · ☁ pubblicata ✓'):'')+'</small></div><div class="st">'+st+'</div>'+(DB.gh&&!m.done?((m.log.length||(m.go&&m.go.length))?'<button class="del" data-rst="'+esc(m.id)+'" title="Azzera">↺</button>':'')+'<button class="del" data-del="'+esc(m.id)+'">🗑</button>':'')+'</div>'};
   var sec=function(t,n){return '<div class="lsec">'+t+(n>1?' <span>'+n+'</span>':'')+'</div>'};
   listEl.innerHTML=(next?sec(next.log.length?'Partita in corso':'Prossima partita',0)+card(next,true):'')+(done_.length?sec('Partite concluse',done_.length)+done_.map(function(m){return card(m)}).join(''):'')+(later.length?sec('Prossime partite',later.length)+later.map(function(m){return card(m)}).join(''):'')}
 listEl.addEventListener('click',function(e){var rs=e.target.closest('[data-rst]');if(rs){if(resetMatch(byId(rs.dataset.rst)))renderHome();return}
@@ -1525,7 +1525,7 @@ function csv(){var r=['Calotta;Nome;Gol;Gol UP;Assist;Assist UP;Falli gravi;Fall
 var ov=document.getElementById('ov'),txt=document.getElementById('txt');
 function setMode(md){smode=md;txt.value=summary();document.getElementById('sb1').style.background=md=='b'?'#0b3d91':'#90a4ae';document.getElementById('sb2').style.background=md=='f'?'#0b3d91':'#90a4ae'}
 document.getElementById('sb1').addEventListener('click',function(){setMode('b')});document.getElementById('sb2').addEventListener('click',function(){setMode('f')});
-document.getElementById('sum').addEventListener('click',function(){if(PEND){toast('Prima tocca il marcatore (oppure Annulla assist)');return}setMode(smode);document.getElementById('end').style.display=(S.done||(S.remote&&!DB.gh))?'none':'';document.getElementById('rst').style.display=(!DB.gh&&(!PH||S.remote))||S.done||!S.log.length?'none':'';document.getElementById('send').style.display=DB.gh?'':'none';document.getElementById('refb').style.display=S.ref?'':'none';upBtns();ov.style.display='flex'});
+document.getElementById('sum').addEventListener('click',function(){if(PEND){toast('Prima tocca il marcatore (oppure Annulla assist)');return}setMode(smode);document.getElementById('end').style.display=(S.done||(S.remote&&!DB.gh))?'none':'';document.getElementById('rst').style.display=(!DB.gh&&(!PH||S.remote))||S.done||!(S.log.length||(S.go&&S.go.length))?'none':'';document.getElementById('send').style.display=DB.gh?'':'none';document.getElementById('refb').style.display=S.ref?'':'none';upBtns();ov.style.display='flex'});
 document.getElementById('close').addEventListener('click',function(){ov.style.display='none'});
 document.getElementById('copy').addEventListener('click',function(){
   function fb2(){txt.removeAttribute('readonly');txt.select();try{document.execCommand('copy');toast('Copiato')}catch(e){toast('Seleziona e copia a mano')}txt.setAttribute('readonly','')}
@@ -1567,7 +1567,7 @@ fetchStats();livePoll();viewAuto();
 window.addEventListener('online',function(){syncDistinte(false);livePoll()});
 document.addEventListener('visibilitychange',function(){if(document.visibilityState=='visible')livePoll()});
 // aggiornamenti: controlla a ogni riapertura; la nuova versione si carica da sola quando si è nell'elenco partite (mai durante la registrazione)
-var APPV=114,swReg=null,swReload=false;document.getElementById('appv').textContent='Versione '+APPV;document.getElementById('appv').dataset.b=document.getElementById('appv').textContent;fitH.h=0;fitH();
+var APPV=115,swReg=null,swReload=false;document.getElementById('appv').textContent='Versione '+APPV;document.getElementById('appv').dataset.b=document.getElementById('appv').textContent;fitH.h=0;fitH();
 if('serviceWorker' in navigator&&!VIEW){var hadCtrl=!!navigator.serviceWorker.controller;
   navigator.serviceWorker.register('sw.js').then(function(r){swReg=r}).catch(function(){});
   document.addEventListener('visibilitychange',function(){if(!document.hidden&&swReg)swReg.update().catch(function(){})});
