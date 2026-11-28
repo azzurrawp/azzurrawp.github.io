@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <!-- WP-LIVE-MONITOR-API:1 -->
-<!-- WP-LIVE-PAGE-STAMP:2026112608 -->
+<!-- WP-LIVE-PAGE-STAMP:2026112801 -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -602,7 +602,7 @@ html.nativeBg #calibHint,html.nativeBg #livePanel .lp{-webkit-backdrop-filter:no
 <div id="livePanel"><div class="lp">
   <div class="lpT" id="lpTitle">Diretta YouTube</div>
   <div class="lpL">Dove trasmettere</div>
-  <div class="lpSeg" id="lpDest"><button data-d="youtube">YouTube</button><button data-d="mux">Privata Mux</button><button data-d="gcore">Privata Gcore</button></div>
+  <div class="lpSeg" id="lpDest"><button data-d="youtube">YouTube</button><button data-d="mux">Mux</button><button data-d="gcore">Gcore</button><button data-d="ivs">Amazon</button></div>
   <div id="lpCredit" class="lpS" style="margin-top:6px"></div>
   <div id="lpUrlBox"><div class="lpL">Indirizzo del server</div><input id="lpUrl2" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="incolla qui l'indirizzo (rtmp://…)"></div>
   <div class="lpL">Chiave dello stream</div>
@@ -1095,7 +1095,9 @@ function drawOverlay() {
   if (!calibPts && pts.length === 4 && showField) drawLines(x, pts, w, h);
   if (calibPts) return;
   // Calottine riconosciute: azzurri = Azzurra, gialli = avversari, rossi = portieri.
-  (S.caps || []).forEach(cp => {
+  // 0.13.32: in partita in Manuale non si disegnano (il riconoscimento continua per il registro e per tornare in Auto).
+  const manMatch = curPhase() === 'match' && !S.auto && !S.assisted;
+  if (!manMatch) (S.caps || []).forEach(cp => {
     x.fillStyle = cp[2] === 2 ? 'rgba(255,60,60,.95)' : cp[2] === 1 ? 'rgba(60,170,255,.95)' : 'rgba(255,215,0,.95)';
     x.strokeStyle = '#000'; x.lineWidth = 1.5;
     x.beginPath(); x.arc(cp[0] * w, cp[1] * h, 5, 0, 7); x.fill(); x.stroke();
@@ -1410,14 +1412,14 @@ $('liveBtn').onclick = () => {
 // Pannello LIVE: chiave, qualità, prova velocità e avvio nello stesso posto.
 let lpQ = '', lpWasTesting = false, lpNetAt = 0, lpD = 'youtube';
 // 0.13.24: due destinazioni, ognuna con indirizzo e chiave propri (salvati solo sull'iPhone).
-function lpDestUrl() { const L = S.live || {}; return lpD === 'mux' ? (L.muxUrl || 'rtmps://global-live.mux.com:443/app') : lpD === 'gcore' ? (L.gcoreUrl || '') : (L.url || 'rtmp://a.rtmp.youtube.com/live2'); }
-function lpHasKey() { const L = S.live || {}; return lpD === 'mux' ? !!L.muxHasKey : lpD === 'gcore' ? !!L.gcoreHasKey : !!L.hasKey; }
-function lpUrlInput() { return lpD === 'gcore' ? $('lpUrl2') : $('lpUrl'); }
+function lpDestUrl() { const L = S.live || {}; return lpD === 'mux' ? (L.muxUrl || 'rtmps://global-live.mux.com:443/app') : lpD === 'gcore' ? (L.gcoreUrl || '') : lpD === 'ivs' ? (L.ivsUrl || '') : (L.url || 'rtmp://a.rtmp.youtube.com/live2'); }
+function lpHasKey() { const L = S.live || {}; return lpD === 'mux' ? !!L.muxHasKey : lpD === 'gcore' ? !!L.gcoreHasKey : lpD === 'ivs' ? !!L.ivsHasKey : !!L.hasKey; }
+function lpUrlInput() { return lpD === 'gcore' || lpD === 'ivs' ? $('lpUrl2') : $('lpUrl'); }
 function muxUsdTxt() { const L = S.live || {}; const u = +L.muxUsd || 0, c = +L.muxCredit || 20; return {u, c, txt: 'Credito Mux questo mese: circa ' + u.toFixed(2).replace('.', ',') + ' $ di ' + c + ' $ (stima)'}; }
 function openLivePanel() {
   const L = S.live || {};
   lpQ = L.quality || '720p';
-  lpD = ['mux', 'gcore'].includes(L.dest) ? L.dest : 'youtube';
+  lpD = ['mux', 'gcore', 'ivs'].includes(L.dest) ? L.dest : 'youtube';
   $('lpKey').value = '';
   $('lpUrl').value = lpDestUrl(); $('lpUrl2').value = lpDestUrl(); lpFillBackup();
   $('livePanel').style.display = 'flex';
@@ -1432,8 +1434,8 @@ function renderLivePanel() {
   if (lpWasTesting && !S.netTesting) lpNetAt = Date.now();
   lpWasTesting = !!S.netTesting;
   const cf = lpD !== 'youtube', hk = lpHasKey();
-  $('lpTitle').textContent = lpD === 'mux' ? 'Diretta privata (Mux)' : lpD === 'gcore' ? 'Diretta privata (Gcore)' : 'Diretta YouTube';
-  $('lpUrlBox').style.display = lpD === 'gcore' ? '' : 'none';
+  $('lpTitle').textContent = lpD === 'mux' ? 'Diretta Mux' : lpD === 'gcore' ? 'Diretta Gcore' : lpD === 'ivs' ? 'Diretta Amazon' : 'Diretta YouTube';
+  $('lpUrlBox').style.display = lpD === 'gcore' || lpD === 'ivs' ? '' : 'none';
   $('lpBk').style.display = lpD === 'gcore' ? '' : 'none';
   const typed2 = $('lpKey2').value.trim().length > 0;
   $('lpKey2State').textContent = typed2 ? 'Chiave di riserva pronta: verrà salvata all\'avvio.' : L.gcoreHasKey2 ? '✓ Chiave di riserva già inserita.' : 'Non ancora inserita (la diretta parte lo stesso, senza riserva).';
@@ -1441,15 +1443,15 @@ function renderLivePanel() {
   $('lpCredit').textContent = lpD === 'mux' ? mu.txt + (mu.u >= mu.c ? ' · finito: usa Gcore' : mu.u >= mu.c * 0.8 ? ' · quasi finito: usa Gcore' : '') : '';
   $('lpCredit').style.color = lpD === 'mux' && mu.u >= mu.c * 0.8 ? 'var(--ios-yellow)' : '';
   document.querySelectorAll('#lpDest button').forEach(b => b.classList.toggle('on', b.dataset.d === lpD));
-  $('lpKeyState').textContent = typed ? 'Chiave nuova pronta: verrà salvata all\'avvio.' : (hk ? '✓ Chiave già inserita (incollane una nuova solo se è cambiata).' : cf ? 'Manca la chiave: la trovi su ' + (lpD === 'mux' ? 'Mux' : 'Gcore') + ', nella diretta "WP Live".' : 'Manca la chiave: incollala qui (te la manda chi gestisce il canale).');
+  $('lpKeyState').textContent = typed ? 'Chiave nuova pronta: verrà salvata all\'avvio.' : (hk ? '✓ Chiave già inserita (incollane una nuova solo se è cambiata).' : cf ? 'Manca la chiave: la trovi su ' + (lpD === 'mux' ? 'Mux' : lpD === 'ivs' ? 'Amazon IVS' : 'Gcore') + ', nella diretta "WP Live".' : 'Manca la chiave: incollala qui (te la manda chi gestisce il canale).');
   $('lpKeyState').style.color = typed || hk ? '' : 'var(--ios-yellow)';
-  $('lpFoot').textContent = cf ? 'I genitori guardano su azzurrawp.github.io/diretta.html con il loro codice (stesso link per Mux e Gcore).' : 'Su YouTube Studio la diretta deve essere aperta (o con avvio automatico).';
+  $('lpFoot').textContent = cf ? 'I genitori guardano su azzurrawp.github.io/diretta.html con il loro codice (stesso link per Mux, Gcore e Amazon).' : 'Su YouTube Studio la diretta deve essere aperta (o con avvio automatico).';
   document.querySelectorAll('#livePanel .lpSeg button[data-q]').forEach(b => b.classList.toggle('on', b.dataset.q === lpQ));
   const ok = typeof sp === 'number' && sp >= 0;
   $('lpNetTxt').textContent = S.netTesting ? 'prova in corso…' : ok ? 'invio ' + sp.toFixed(1).replace('.', ',') + ' Mbps' + (sp < 3.5 ? ' · troppo poco' : sp < 6 ? ' · ok per 720p' : ' · ok per 1080p') : 'non ancora provata';
   $('lpQHint').textContent = ok && !S.netTesting ? (sp >= 6 ? 'Consigliata: 1080p (la rete regge).' : 'Consigliata: 720p.') : 'Con l\'hotspot conviene 720p.';
   $('lpNetWarn').textContent = S.netTesting ? '' : (!ok || !lpNetAt ? 'Consiglio: fai la prova della velocità prima di partire.' : Date.now() - lpNetAt > 600000 ? 'L\'ultima prova è di più di 10 minuti fa: rifalla se hai cambiato posto o rete.' : '');
-  $('lpGo').disabled = !(typed || hk) || (lpD === 'gcore' && !$('lpUrl2').value.trim());
+  $('lpGo').disabled = !(typed || hk) || ((lpD === 'gcore' || lpD === 'ivs') && !$('lpUrl2').value.trim());
 }
 $('lpUrl2').oninput = renderLivePanel;
 document.querySelectorAll('#lpDest button').forEach(b => b.onclick = () => {
@@ -1616,10 +1618,10 @@ function dlg(o) {
 }
 // 0.13.28: link della diretta per i genitori su WhatsApp. Diretta privata (Mux o Gcore): pagina dei genitori
 // con il codice; YouTube: link fisso del canale (/live porta sempre alla diretta in corso).
-function shareDest() { const L = S.live || {}; return ['mux', 'gcore'].includes(L.dest) ? 'priv' : 'yt'; }
+function shareDest() { const L = S.live || {}; return ['mux', 'gcore', 'ivs'].includes(L.dest) ? 'priv' : 'yt'; }
 function shareInfo() {
   const L = S.live || {};
-  if (shareDest() === 'priv') return L.shareCode ? 'Manda la pagina dei genitori (diretta privata), con il codice già dentro.' : 'Diretta privata: la prima volta ti chiedo il codice dei genitori.';
+  if (shareDest() === 'priv') return L.shareCode ? 'Manda la pagina dei genitori, con il codice già dentro.' : 'Pagina dei genitori: la prima volta ti chiedo il codice dei genitori.';
   return L.ytChannel ? 'Manda il link del canale YouTube (porta sempre alla diretta in corso).' : 'YouTube: la prima volta ti chiedo il link del canale.';
 }
 function shareSend() {
@@ -1651,7 +1653,7 @@ function shareAsk(then) {
 $('shareLink').onclick = () => {
   const L = S.live || {}, priv = shareDest() === 'priv', ok = priv ? !!L.shareCode : !!L.ytChannel;
   if (!ok) { shareAsk(shareSend); return; }
-  dlg({msg: priv ? 'Mando su WhatsApp il link della diretta privata (pagina dei genitori). Scegli tu il gruppo.' : 'Mando su WhatsApp il link del canale YouTube. Scegli tu il gruppo.',
+  dlg({msg: priv ? 'Mando su WhatsApp il link della pagina dei genitori. Scegli tu il gruppo.' : 'Mando su WhatsApp il link del canale YouTube. Scegli tu il gruppo.',
        buttons: [{t: 'Annulla'}, {t: priv ? 'Cambia codice' : 'Cambia canale', cb: () => shareAsk()}, {t: 'Apri WhatsApp', cls: 'pri', cb: shareSend}]});
 };
 function openCard(id) {
@@ -1946,12 +1948,12 @@ function renderWizard() {
     const T = S.tablet || {};
     h += line(!T.linked ? 'warn' : T.ok ? 'okt' : 'warn', 'Tablet (risultato)', !T.linked ? 'non collegato: punteggio a mano' : T.ok ? 'collegato' : 'collegato, in attesa dei dati');
     if (T.linked && T.match) h += line('okt', 'Partita del tablet', esc(T.match));
-    const LV = S.live || {}, cfd = LV.dest === 'mux' || LV.dest === 'gcore';
-    const hk = LV.dest === 'mux' ? LV.muxHasKey : LV.dest === 'gcore' ? LV.gcoreHasKey : LV.hasKey;
-    const kt = (LV.dest === 'mux' ? LV.muxKeyTail : LV.dest === 'gcore' ? LV.gcoreKeyTail : LV.keyTail) || '';
-    h += line(hk ? 'okt' : 'warn', cfd ? 'Chiave diretta privata ' + (LV.dest === 'mux' ? 'Mux' : 'Gcore') : 'Chiave YouTube', hk ? (kt ? 'inserita · finisce con …' + esc(kt) : 'inserita') : 'manca (solo registrazione)');
+    const LV = S.live || {}, cfd = LV.dest === 'mux' || LV.dest === 'gcore' || LV.dest === 'ivs';
+    const hk = LV.dest === 'mux' ? LV.muxHasKey : LV.dest === 'gcore' ? LV.gcoreHasKey : LV.dest === 'ivs' ? LV.ivsHasKey : LV.hasKey;
+    const kt = (LV.dest === 'mux' ? LV.muxKeyTail : LV.dest === 'gcore' ? LV.gcoreKeyTail : LV.dest === 'ivs' ? LV.ivsKeyTail : LV.keyTail) || '';
+    h += line(hk ? 'okt' : 'warn', cfd ? 'Chiave ' + (LV.dest === 'mux' ? 'Mux' : LV.dest === 'ivs' ? 'Amazon' : 'Gcore') : 'Chiave YouTube', hk ? (kt ? 'inserita · finisce con …' + esc(kt) : 'inserita') : 'manca (solo registrazione)');
     if (newApp) h += B('net', S.netTesting ? 'Prova in corso…' : 'Prova la velocità');
-    if (!hk) h += B('key', cfd ? 'Inserisci la chiave della diretta privata' : 'Inserisci la chiave YouTube');
+    if (!hk) h += B('key', cfd ? 'Inserisci la chiave ' + (LV.dest === 'mux' ? 'Mux' : LV.dest === 'ivs' ? 'Amazon' : 'Gcore') : 'Inserisci la chiave YouTube');
     h += B('done', 'Preparazione finita ▶', true);
   }
   const ae = document.activeElement;
